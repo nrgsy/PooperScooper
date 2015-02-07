@@ -3,15 +3,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+
 import javax.imageio.ImageIO;
 
-public class ImageHandler {
+
+public class ImageManipulator {
+
 	
-	
-	
-	
-	
-	public static void main(String[] args) throws IOException {
+public static void main(String[] args) throws IOException {
 		
 
 		
@@ -27,11 +26,7 @@ public class ImageHandler {
 		    
 		    BufferedImage bi = (BufferedImage) image;
 		    File f = new File("output.png");
-		    ImageIO.write(bi, "png", f);
-		    
-		    
-		    
-		    
+		    ImageIO.write(bi, "png", f);	    
 		}
 		catch (IOException e) {
 			System.out.println("fuckin up kp");
@@ -40,6 +35,5 @@ public class ImageHandler {
 		
 		
 	}
-	
 	
 }
