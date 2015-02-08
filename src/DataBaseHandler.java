@@ -12,6 +12,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 
+//TODO hard code collection names, remove the requirement for them to parameters for fn's below
+
 public class DataBaseHandler {
 
 	public static void insertAuthorizationInfo(
@@ -85,13 +87,22 @@ public class DataBaseHandler {
 
 		return new AuthorizationInfo(customerSecret, customerKey, authorizationSecret, authorizationKey, isIncubated);		
 	}
+	
+	public static long getCollectionSize(String dbName, String collectionName) throws UnknownHostException {
+		
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+		return dbCollection.count();
+		
+	}
 
 	
 	public static AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
 
 		
-		
 //TODO account for times Accessed and last AccessDate
+		//no images twice in a day
 		
 		
 		System.out.println("scooping ass image");
@@ -122,20 +133,29 @@ public class DataBaseHandler {
 
 	public static void main(String[] args) throws Exception {
 
-		AssImage i = getRandomishAssImage("test", "images");
-		System.out.println(i.getCaption());
-		System.out.println(i.getLink());
-		System.out.println(i.getLastAccessDate());
-		System.out.println(i.getTimesAccessed());
+		insertAuthorizationInfo("test", "info", new AuthorizationInfo("csecret", "ckey", "asecret", "akey", true));
+		insertImage("test", "images", new AssImage("www.assWebsite.com", "this is a caption", 0, new Date(0)));
 		
-		System.out.println();
+		//insertSchewergsDB
 		
-		AuthorizationInfo info = getAuthorizationInfo("test", "info", 0);
-		System.out.println(info.getAuthorizationKey());
-		System.out.println(info.getAuthorizationSecret());
-		System.out.println(info.getCustomerKey());
-		System.out.println(info.getCustomerSecret());
-		System.out.println(info.isIncubated());
+		
+		
+		
+		
+//		AssImage i = getRandomishAssImage("test", "images");
+//		System.out.println(i.getCaption());
+//		System.out.println(i.getLink());
+//		System.out.println(i.getLastAccessDate());
+//		System.out.println(i.getTimesAccessed());
+//		
+//		System.out.println();
+//		
+//		AuthorizationInfo info = getAuthorizationInfo("test", "info", 0);
+//		System.out.println(info.getAuthorizationKey());
+//		System.out.println(info.getAuthorizationSecret());
+//		System.out.println(info.getCustomerKey());
+//		System.out.println(info.getCustomerSecret());
+//		System.out.println(info.isIncubated());
 
 
 
