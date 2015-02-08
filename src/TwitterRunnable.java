@@ -1,8 +1,8 @@
 import java.io.File;
-import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Map;
 
-import twitter4j.Status;
+import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -12,20 +12,15 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterRunnable implements Runnable {
 	private Twitter bird = null;
-	private boolean isIncubated;
-	
-	private final String DATABASE_NAME = "";
-	private final String COLLECTION_NAME = "";
 
-	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, boolean Incubated){
+	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey(OAuthConsumerKey)
-		.setOAuthConsumerSecret(OAuthConsumerSecret)
-		.setOAuthAccessToken(OAuthAccessToken)
-		.setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
+		  .setOAuthConsumerKey(OAuthConsumerKey)
+		  .setOAuthConsumerSecret(OAuthConsumerSecret)
+		  .setOAuthAccessToken(OAuthAccessToken)
+		  .setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
 		TwitterFactory tf = new TwitterFactory(cb.build());
-		isIncubated = Incubated;
 		bird = tf.getInstance();
 	}
 	
@@ -34,10 +29,10 @@ public class TwitterRunnable implements Runnable {
 	public TwitterRunnable(){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
-		.setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
-		.setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
-		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
+		  .setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
+		  .setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
+		  .setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
+		  .setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
 	}
@@ -58,40 +53,56 @@ public class TwitterRunnable implements Runnable {
 	
 	
 	//handles downloading image, updating db, and deleting image after upload
-	public void uploadPic() throws Exception{
+	public void uploadPic(){
 		ImageManipulator imgman = new ImageManipulator();
 		Twitter blah = null;
-		AssImage assContent = DataBaseHandler.getRandomishAssImage(DATABASE_NAME, COLLECTION_NAME);
-		
-		//creates temp image and puts file location in loe
-		File loe = new File(imgman.getImageFile(assContent.getLink()));
-		TwitterRunnable lol = new TwitterRunnable();
-		lol.uploadPicTwitter(loe,assContent.getCaption(),blah);
-		loe.delete();
-		
-		//update db
-		assContent.setLastAccessDate(new Date());
-		assContent.setTimesAccessed(assContent.getTimesAccessed()+1);
+		File loe = null;
+		try {
+			AssImage assContent = DataBaseHandler.getRandomishAssImage(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);
+
+			//creates temp image and puts file location in loe
+			loe = new File(imgman.getImageFile(assContent.getLink()));
+			TwitterRunnable lol = new TwitterRunnable();
+			lol.uploadPicTwitter(loe,assContent.getCaption(),blah);
+			loe.delete();
+
+			//update db
+			assContent.setLastAccessDate(new Date());
+			assContent.setTimesAccessed(assContent.getTimesAccessed()+1);
+		}
+		catch (Exception e) {
+			System.out.println("Temp download of pic failed "+loe);
+			e.printStackTrace();
+		}
 	}
 	
 	
-	public void updateFollowers(int index){
 		
+	public void prettyRateLimit(){
+		try {
+			for(Map.Entry<String, RateLimitStatus> element : bird.getRateLimitStatus().entrySet()){
+				System.out.println(element+"\n");
+			}
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
 	}
 	
-	public void followAndFavorite(){
-		
-	}
 	
-	
-	
+	@Override
 	public void run(){
 		try {
-			uploadPic();
+			uploadPic();	
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("TwitterRunnable b trippin");
 			e.printStackTrace();
 		}
 		
+	}
+	
+	
+	public static void main(String[]args){
+		new TwitterRunnable().prettyRateLimit();
 	}
 }
