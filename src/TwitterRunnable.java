@@ -1,8 +1,10 @@
 import java.io.File;
-import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import twitter4j.Status;
+import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -79,19 +81,30 @@ public class TwitterRunnable implements Runnable {
 		
 	}
 	
-	public void followAndFavorite(){
-		
+	public Map<String, RateLimitStatus> followAndFavorite() throws TwitterException{
+		bird.showUser(548850667).getStatus();
+		return bird.getRateLimitStatus();
 	}
 	
 	
 	
 	public void run(){
 		try {
-			uploadPic();
+			//uploadPic();
+			for(int i =0; i<(followAndFavorite().size(); i++){
+			System.out.println(Arrays.toString((followAndFavorite()).entrySet().toArray()));
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static void main(String[]args){
+		
+
+		
+		new Thread(new TwitterRunnable()).start();
 	}
 }

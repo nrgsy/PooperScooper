@@ -46,11 +46,11 @@ public class AuthorizationInfo {
 		return authorizationKey;
 	}
 
-	public boolean isIncubated() {
+	public synchronized boolean isIncubated() {
 		return isIncubated;
 	}
 
-	public void setIncubated(boolean isIncubated) {
+	public synchronized void setIncubated(boolean isIncubated) {
 		this.isIncubated = isIncubated;
 		
 		
