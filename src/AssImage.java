@@ -25,7 +25,7 @@ public class AssImage {
 		this.lastAccessDate = lastAccessDate;
 	}
 
-	public String getLink() {
+	public synchronized String getLink() {
 		return link;
 	}
 
@@ -33,7 +33,7 @@ public class AssImage {
 		this.link = link;
 	}
 
-	public String getCaption() {
+	public synchronized String getCaption() {
 		return caption;
 	}
 
@@ -49,13 +49,14 @@ public class AssImage {
 		this.timesAccessed = timesAccessed;
 	}
 
-	public Date getLastAccessDate() {
+	public synchronized Date getLastAccessDate() {
 		return lastAccessDate;
 	}
 
 	public synchronized void setLastAccessDate(Date lastAccessDate) {
 		this.lastAccessDate = lastAccessDate;
 		//db.collection.update(this)
+
 	
 	
 	

@@ -44,6 +44,8 @@ public class ImageManipulator {
 	}
 
 
+	
+	//Converts weird-ass png to plain-ass jpg
 	private BufferedImage convertCMYK2RGB(BufferedImage image) throws IOException{
 		//Create a new RGB image
 		BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(),
@@ -55,6 +57,8 @@ public class ImageManipulator {
 	}
 
 
+	
+	//Gets image link, saves image, returns image location
 	public String getImageFile(String imgsrc) throws FuckinUpKPException{
 
 		Image image = null;
@@ -68,8 +72,12 @@ public class ImageManipulator {
 				if(!imgsrc.endsWith(".jpg")||!imgsrc.endsWith(".jpeg")){
 					bi = convertCMYK2RGB(bi);
 				}
+				
+				//makes random temp name so that concurrent functions are likely to not use same image
 				Random rand = new Random();
 			    int randomNum = rand.nextInt(5001);
+			    
+			    //makes file name and saves it, returns file location
 				File f = new File("pics/"+randomNum+".jpg");
 				ImageIO.write(bi, "jpg", f);
 				imgsrc = "pics/"+randomNum+".jpg";

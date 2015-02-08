@@ -1,4 +1,7 @@
 import java.io.File;
+import java.net.UnknownHostException;
+import java.util.Date;
+
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -10,6 +13,9 @@ import twitter4j.conf.ConfigurationBuilder;
 public class TwitterRunnable implements Runnable {
 	private Twitter bird = null;
 	private boolean isIncubated;
+	
+	private final String DATABASE_NAME = "";
+	private final String COLLECTION_NAME = "";
 
 	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, boolean Incubated){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -23,6 +29,8 @@ public class TwitterRunnable implements Runnable {
 		bird = tf.getInstance();
 	}
 	
+	
+	// temp testing constructor
 	public TwitterRunnable(){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
@@ -35,8 +43,8 @@ public class TwitterRunnable implements Runnable {
 	}
 	
 	
-	//TODO DAL get image link and turn into file, get caption, use placeholder Twitter object
-	public void uploadPic(File file, String message,Twitter twitter) throws Exception  {
+	//handles actual uploading to twitter
+	public void uploadPicTwitter(File file, String message,Twitter twitter) throws Exception  {
 		twitter = bird;
 	    try{
 	        StatusUpdate status = new StatusUpdate(message);
@@ -47,6 +55,25 @@ public class TwitterRunnable implements Runnable {
 	        throw e;
 	    }
 	}
+	
+	
+	//handles downloading image, updating db, and deleting image after upload
+	public void uploadPic() throws Exception{
+		ImageManipulator imgman = new ImageManipulator();
+		Twitter blah = null;
+		AssImage assContent = DataBaseHandler.getRandomishAssImage(DATABASE_NAME, COLLECTION_NAME);
+		
+		//creates temp image and puts file location in loe
+		File loe = new File(imgman.getImageFile(assContent.getLink()));
+		TwitterRunnable lol = new TwitterRunnable();
+		lol.uploadPicTwitter(loe,assContent.getCaption(),blah);
+		loe.delete();
+		
+		//update db
+		assContent.setLastAccessDate(new Date());
+		assContent.setTimesAccessed(assContent.getTimesAccessed()+1);
+	}
+	
 	
 	public void updateFollowers(int index){
 		
@@ -60,19 +87,11 @@ public class TwitterRunnable implements Runnable {
 	
 	public void run(){
 		try {
-			Twitter blah = null;
-			File loe = new File(/*GET from db using DAL*/);
-			TwitterRunnable lol = new TwitterRunnable();
-			lol.uploadPic(loe,/*GET from db using DAL*/,blah);
+			uploadPic();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
-	
-	public static void main(String[]args){
-		new Thread(new TwitterRunnable()).start();
-	}
-	
 }
