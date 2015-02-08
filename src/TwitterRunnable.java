@@ -1,6 +1,4 @@
-
 import java.io.File;
-
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;

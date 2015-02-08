@@ -19,7 +19,7 @@ public class AssImage {
 		return link;
 	}
 
-	public void setLink(String link) {
+	public synchronized void setLink(String link) {
 		this.link = link;
 	}
 
@@ -27,7 +27,7 @@ public class AssImage {
 		return caption;
 	}
 
-	public void setCaption(String caption) {
+	public synchronized void setCaption(String caption) {
 		this.caption = caption;
 	}
 
@@ -35,7 +35,7 @@ public class AssImage {
 		return timesAccessed;
 	}
 
-	public void setTimesAccessed(int timesAccessed) {
+	public synchronized void setTimesAccessed(int timesAccessed) {
 		this.timesAccessed = timesAccessed;
 	}
 
@@ -43,7 +43,7 @@ public class AssImage {
 		return lastAccessDate;
 	}
 
-	public void setLastAccessDate(String lastAccessDate) {
+	public synchronized void setLastAccessDate(String lastAccessDate) {
 		this.lastAccessDate = lastAccessDate;
 	}
 	
