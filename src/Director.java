@@ -4,20 +4,6 @@ import java.util.Timer;
 
 public class Director {
 
-<<<<<<< HEAD
-//		while(true){
-////			RedditScraper scoop = new RedditScraper();
-////			scoop.contentSnatch();
-//
-//			for(int id : /*MongoDB authinfo total collections*/){
-//				new Thread(new TwitterRunnable(id.OAuthConsumerKey,
-//						id.OAuthConsumerSecret,
-//						id.OAuthAccessToken,
-//						id.OAuthAccessTokenSecret,
-//						id.isIncubated)).start();
-//			}
-//		}
-=======
 	public static void main(String[]args) throws UnknownHostException, Exception{
 		long scrapetime = 86400000;
 
@@ -57,6 +43,5 @@ public class Director {
 			public void run() {
 				new Thread(new RedditScraper()).start();
 			}},0L, scrapetime);
->>>>>>> 5b0292d18bc0fea6f08c7b082145bf8ab00d5ef9
 	}
 }
