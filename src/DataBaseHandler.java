@@ -1,8 +1,6 @@
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import org.bson.types.BasicBSONList;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -16,52 +14,66 @@ import com.mongodb.MongoClient;
 
 public class DataBaseHandler {
 
-	public static void insertAuthorizationInfo(
+	public static synchronized void insertSchwergsyAccount(
 			String dbName,
 			String collectionName,
-			AuthorizationInfo info) throws UnknownHostException {
+			SchwergsyAccount account) throws UnknownHostException {
 
-		System.out.println("inserting Authorization info");
+		System.out.println("inserting a new Schwergsy Account");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
 		DBCollection dbCollection = db.getCollection(collectionName);
 
+		AuthorizationInfo authInfo = account.getAuthorizationInfo();
+
+		BasicDBList authInfoList = new BasicDBList();
+		authInfoList.add(new BasicDBObject("customerSecret", authInfo.getCustomerSecret()));
+		authInfoList.add(new BasicDBObject("customerKey", authInfo.getCustomerKey()));
+		authInfoList.add(new BasicDBObject("authorizationSecret", authInfo.getAuthorizationSecret()));
+		authInfoList.add(new BasicDBObject("authorizationKey", authInfo.getAuthorizationKey()));
+		authInfoList.add(new BasicDBObject("isIncubated", authInfo.isIncubated()));
+
 		BasicDBObject basicBitch = new BasicDBObject()
-		.append("customerSecret", info.getCustomerSecret())
-		.append("customerKey", info.getCustomerKey())
-		.append("authorizationSecret", info.getAuthorizationSecret())
-		.append("authorizationKey", info.getAuthorizationKey())
-		.append("isIncubated", info.isIncubated());
+		.append("accountID", account.getAccountID())
+		.append("name", account.getName())
+		.append("followers", account.getFollowers())
+		.append("following", account.getFollowing())
+		.append("toFollow", account.getToFollow())
+		.append("whiteList", account.getWhiteList())
+		.append("bigAccounts", account.getBigAccounts())
+		.append("authorizationInfo", authInfoList);
 
 		dbCollection.insert(basicBitch);
 	}
 
-	public static void insertImage(
+	public static synchronized void insertImage(
 			String dbName,
 			String collectionName,
 			AssImage image) throws UnknownHostException {
+
+		//check whether the image is already in the database (compare by link)
 
 		System.out.println("inserting image");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
 		DBCollection dbCollection = db.getCollection(collectionName);
 
-		BasicDBList list = new BasicDBList();
-		list.add(new BasicDBObject("link", image.getLink()));
-		list.add(new BasicDBObject("caption", image.getCaption()));
+		BasicDBList contents = new BasicDBList();
+		contents.add(new BasicDBObject("link", image.getLink()));
+		contents.add(new BasicDBObject("caption", image.getCaption()));
 
-		BasicDBList list2 = new BasicDBList();
-		list2.add(new BasicDBObject("timesAccessed", image.getTimesAccessed()));
-		list2.add(new BasicDBObject("lastAccessDate", image.getLastAccessDate()));
+		BasicDBList accessData = new BasicDBList();
+		accessData.add(new BasicDBObject("timesAccessed", image.getTimesAccessed()));
+		accessData.add(new BasicDBObject("lastAccessDate", image.getLastAccessDate()));
 
-		BasicDBObject basicBitch = new BasicDBObject().append("contents", list).append("accessData", list2);
+		BasicDBObject basicBitch = new BasicDBObject().append("contents", contents).append("accessData", accessData);
 
 		dbCollection.insert(basicBitch);
 	}
 
-	public static AuthorizationInfo getAuthorizationInfo(String dbName, String collectionName, int index) throws Exception {
+	public static synchronized AuthorizationInfo getAuthorizationInfo(String dbName, String collectionName, int index) throws Exception {
 
-		System.out.println("scooping info at index " + index);
+		System.out.println("scooping authInfo at index " + index);
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
 		DBCollection dbCollection = db.getCollection(collectionName);
@@ -77,34 +89,38 @@ public class DataBaseHandler {
 			}
 		}
 
-		DBObject info = dbCursor.next();	
+		DBObject schwergsAccount = dbCursor.next();	
 
-		String customerSecret = (String) info.get("customerSecret");
-		String customerKey = (String) info.get("customerKey");
-		String authorizationSecret = (String) info.get("authorizationSecret");
-		String authorizationKey = (String) info.get("authorizationKey");
-		boolean isIncubated = (boolean) info.get("isIncubated");
+		BasicDBList authInfoList = (BasicDBList) schwergsAccount.get("authorizationInfo");		
+
+		String customerSecret = (String) ((BasicDBObject) authInfoList.get("0")).get("customerSecret");
+		String customerKey = (String) ((BasicDBObject) authInfoList.get("1")).get("customerKey");
+		String authorizationSecret = (String) ((BasicDBObject) authInfoList.get("2")).get("authorizationSecret");
+		String authorizationKey = (String) ((BasicDBObject) authInfoList.get("3")).get("authorizationKey");
+		boolean isIncubated = (boolean) ((BasicDBObject) authInfoList.get("4")).get("isIncubated");
 
 		return new AuthorizationInfo(customerSecret, customerKey, authorizationSecret, authorizationKey, isIncubated);		
 	}
-	
-	public static long getCollectionSize(String dbName, String collectionName) throws UnknownHostException {
-		
+
+	public static synchronized long getCollectionSize(String dbName, String collectionName) throws UnknownHostException {
+
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
 		DBCollection dbCollection = db.getCollection(collectionName);
 		return dbCollection.count();
-		
+
 	}
 
-	
-	public static AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
+	public static synchronized long getListSize(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
+		return getList(dbName, collectionName, index, listName).size();
+	}
 
-		
-//TODO account for times Accessed and last AccessDate
-		//no images twice in a day
-		
-		
+	public static synchronized AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
+
+		//TODO account for times Accessed and last AccessDate
+		//Guarantee no images can be returned twice in a day (or week?)
+
+
 		System.out.println("scooping ass image");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
@@ -120,8 +136,9 @@ public class DataBaseHandler {
 
 		DBObject ass = dbCursor.next();
 
-		BasicBSONList contents = (BasicBSONList) ass.get("contents");
-		BasicBSONList accessData = (BasicBSONList) ass.get("accessData");
+		//TODO check that this shouldn't actaully be a BasicBSONList instead
+		BasicDBList contents = (BasicDBList) ass.get("contents");
+		BasicDBList accessData = (BasicDBList) ass.get("accessData");
 
 		String link = (String) ((BasicDBObject) contents.get("0")).get("link");
 		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
@@ -131,31 +148,181 @@ public class DataBaseHandler {
 		return new AssImage(link, caption, timesAccessed, lastAccessDate);		
 	}
 
+	public static synchronized SchwergsyAccount getSchwergsyAccount(String dbName, String collectionName, int index) throws UnknownHostException, FuckinUpKPException {
+
+		//		System.out.println("scooping Schwergs account at index " + index);
+		//		MongoClient mongoClient = new MongoClient();
+		//		DB db = mongoClient.getDB(dbName);
+		//		DBCollection dbCollection = db.getCollection(collectionName);
+		//
+		//		DBCursor dbCursor = dbCollection.find();
+		//
+		//		for (int i = 0; i < index; i++) {			
+		//			if (dbCursor.hasNext())
+		//				dbCursor.next();
+		//			else {			
+		//				System.out.println("that ass passed in an invalid index for this authorization info");
+		//				throw new FuckinUpKPException();
+		//			}
+		//		}
+		//
+		//		DBObject schwergsAccount = dbCursor.next();
+		//
+		//		//TODO check that this shouldn't actaully be a BasicBSONList instead
+		//		BasicDBList contents = (BasicDBList) ass.get("contents");
+		//		BasicDBList accessData = (BasicDBList) ass.get("accessData");
+		//
+		//		String link = (String) ((BasicDBObject) contents.get("0")).get("link");
+		//		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
+		//		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
+		//		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
+		//
+		//		return new AssImage(link, caption, timesAccessed, lastAccessDate);	
+
+		return null;
+
+
+	}
+
+	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+
+		DBCursor dbCursor = dbCollection.find();
+
+		for (int i = 0; i < index; i++) {			
+			if (dbCursor.hasNext())
+				dbCursor.next();
+			else {			
+				System.out.println("that ass passed in an invalid index");
+				throw new FuckinUpKPException();
+			}
+		}
+
+		DBObject schwergsyAccount = dbCursor.next();	
+
+		BasicDBList list = (BasicDBList) schwergsyAccount.get(listName);
+
+		return list;
+	}
+
+	public static synchronized void addToList(String dbName, String collectionName, int index, String listName, String userID) throws UnknownHostException, FuckinUpKPException {
+
+		BasicDBList list = getList(dbName, collectionName, index, listName);	
+		list.add(userID);
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+
+		DBCursor dbCursor = dbCollection.find();
+
+		for (int i = 0; i < index; i++) {			
+			if (dbCursor.hasNext())
+				dbCursor.next();
+			else {			
+				System.out.println("that ass passed in an invalid index");
+				throw new FuckinUpKPException();
+			}
+		}
+
+		DBObject schwergsyAccount = dbCursor.next();
+
+		System.out.println(schwergsyAccount);
+
+		BasicDBObject newDocument = new BasicDBObject();
+		newDocument.put(listName, list);
+
+		BasicDBObject searchQuery = new BasicDBObject().append("_id", schwergsyAccount.get("_id"));
+
+		dbCollection.update(searchQuery, newDocument);
+
+		System.out.println(schwergsyAccount);
+
+
+		//dbCollection.update(q, o)
+		//
+		//
+		//
+		//		BasicDBObject query = new BasicDBObject("_id", id);
+		//		query.append(new BasicDBObject("stats.employee", "rob"));
+		//
+		//		BasicDBObject update = new BasicDBObject("$set",
+		//				new BasicDBObject("stats.$.stat2", value));
+		//
+		//		dbCollection.update(query,update);
+
+
+	}
+
+
+
+
 	public static void main(String[] args) throws Exception {
 
-		insertAuthorizationInfo("test", "info", new AuthorizationInfo("csecret", "ckey", "asecret", "akey", true));
-		insertImage("test", "images", new AssImage("www.assWebsite.com", "this is a caption", 0, new Date(0)));
-		
-		//insertSchewergsDB
-		
-		
-		
-		
-		
-//		AssImage i = getRandomishAssImage("test", "images");
-//		System.out.println(i.getCaption());
-//		System.out.println(i.getLink());
-//		System.out.println(i.getLastAccessDate());
-//		System.out.println(i.getTimesAccessed());
-//		
-//		System.out.println();
-//		
-//		AuthorizationInfo info = getAuthorizationInfo("test", "info", 0);
-//		System.out.println(info.getAuthorizationKey());
-//		System.out.println(info.getAuthorizationSecret());
-//		System.out.println(info.getCustomerKey());
-//		System.out.println(info.getCustomerSecret());
-//		System.out.println(info.isIncubated());
+
+
+		//		BasicDBList bdbl1 = new BasicDBList();
+		//		BasicDBList bdbl2 = new BasicDBList();
+		//		BasicDBList bdbl3 = new BasicDBList();
+		//		BasicDBList bdbl4 = new BasicDBList();
+		//		BasicDBList bdbl5 = new BasicDBList();
+		//
+		//		bdbl1.add("followerabc");
+		//		bdbl1.add("followerdef");
+		//		bdbl2.add("following1");
+		//		bdbl2.add("following2");
+		//		bdbl3.add("toFollow1");
+		//		bdbl3.add("toFollow2");
+		//		bdbl4.add("whitelist1");
+		//		bdbl4.add("whitelist2");
+		//		bdbl5.add("bigAccount1");
+		//		bdbl5.add("bigAccount2");
+		//
+		//
+		//		insertSchwergsyAccount("test",
+		//				"schwergsAccounts",
+		//				new SchwergsyAccount(
+		//						"abc",
+		//						"this is an account name",
+		//						new AuthorizationInfo("customerSHHH",
+		//								"cuskey",
+		//								"authSHH",
+		//								"authkey",
+		//								true),
+		//								bdbl1,
+		//								bdbl2,
+		//								bdbl3,
+		//								bdbl4,
+		//								bdbl5)
+		//				);
+
+
+
+
+		System.out.println(getList("test", "schwergsAccounts", 0, "followers"));
+
+		addToList("test", "schwergsAccounts", 0, "followers", "newFollower");
+
+		System.out.println(getList("test", "schwergsAccounts", 0, "followers"));
+		System.out.println(getListSize("test", "schwergsAccounts", 0, "followers"));
+
+
+
+		//insertImage("test", "assImages", new AssImage("www.assWebsite.com", "this is a caption", 0, new Date(0)));
+
+
+		//		AssImage i = getRandomishAssImage("test", "images");
+		//		System.out.println(i.getCaption());
+		//		System.out.println(i.getLink());
+		//		System.out.println(i.getLastAccessDate());
+		//		System.out.println(i.getTimesAccessed());
+		//		
+		//		System.out.println();
+		//		
+
 
 
 

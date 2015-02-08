@@ -19,8 +19,11 @@ public class AuthorizationInfo {
 	
 	private boolean isIncubated;
 	
-	public AuthorizationInfo(String customerSecret, String customerKey,
-			String authorizationSecret, String authorizationKey,
+	public AuthorizationInfo(
+			String customerSecret,
+			String customerKey,
+			String authorizationSecret,
+			String authorizationKey,
 			boolean isIncubated) {
 		super();
 		this.customerSecret = customerSecret;
@@ -46,15 +49,15 @@ public class AuthorizationInfo {
 		return authorizationKey;
 	}
 
-	public boolean isIncubated() {
+	public synchronized boolean isIncubated() {
 		return isIncubated;
 	}
 
-	public void setIncubated(boolean isIncubated) {
+	public synchronized void setIncubated(boolean isIncubated) {
 		this.isIncubated = isIncubated;
+	
 		
-		
-		//db.collection.update(this)
+//TODO update in the actual database
 		
 		
 		

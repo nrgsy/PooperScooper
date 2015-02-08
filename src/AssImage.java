@@ -46,6 +46,9 @@ public class AssImage {
 	}
 
 	public synchronized void setTimesAccessed(int timesAccessed) {
+		
+		//set it in the database
+		
 		this.timesAccessed = timesAccessed;
 	}
 
