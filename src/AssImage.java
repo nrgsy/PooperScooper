@@ -53,11 +53,7 @@ public class AssImage {
 		return lastAccessDate;
 	}
 
-<<<<<<< HEAD
-	public void setLastAccessDate(Date lastAccessDate) {
-=======
-	public synchronized void setLastAccessDate(String lastAccessDate) {
->>>>>>> 715f8b43eeec04f9317eb7e3eb9cf66e7b43d24f
+	public synchronized void setLastAccessDate(Date lastAccessDate) {
 		this.lastAccessDate = lastAccessDate;
 		
 		
