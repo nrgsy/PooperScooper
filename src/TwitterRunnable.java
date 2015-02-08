@@ -48,6 +48,14 @@ public class TwitterRunnable implements Runnable {
 	    }
 	}
 	
+	public void updateFollowers(int index){
+		
+	}
+	
+	public void followAndFavorite(){
+		
+	}
+	
 	
 	
 	public void run(){

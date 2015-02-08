@@ -17,7 +17,18 @@ public class RedditScraper {
 		String url = "http://www.reddit.com/r/blackpeopletwitter";
 		
 		//Loop through reddit and gathers title + image link
+		
+		
+		
+		
+		
 		//TODO set limits on content gathering
+		
+		
+		
+		
+		
+		
 		for(int j = 0; j<10; j++){
 			Document document = null;
 			
