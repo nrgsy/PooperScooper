@@ -55,8 +55,6 @@ public class AssImage {
 
 	public synchronized void setLastAccessDate(Date lastAccessDate) {
 		this.lastAccessDate = lastAccessDate;
-		
-		
 		//db.collection.update(this)
 	
 	
