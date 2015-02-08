@@ -1,5 +1,8 @@
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,26 +13,19 @@ import org.jsoup.select.Elements;
 public class RedditScraper {
 	
 	
-	public void contentSnatch() throws FuckinUpKPException{
+	public void contentSnatch(boolean init) throws FuckinUpKPException{
 		ArrayList<String> captions = new ArrayList<String>();
 		ArrayList<String> imglinks = new ArrayList<String>(); 
 		
 		String url = "http://www.reddit.com/r/blackpeopletwitter";
 		
+		int pages = 1;
+		
+		if(init){
+			pages = 35;
+		}
 		//Loop through reddit and gathers title + image link
-		////////////////////////////////////////////////
-		//                                            //
-		//                                            //
-		//                                            //
-		//                                            //
-		//   TODO set limits on content gathering     //
-		//                                            //
-		//                                            //
-		//                                            //
-		//                                            //
-		//                                            //
-		////////////////////////////////////////////////
-		for(int j = 0; j<10; j++){
+		for(int j = 0; j<pages; j++){
 			Document document = null;
 			
 			try {
@@ -66,9 +62,23 @@ public class RedditScraper {
 				captions.remove(i);
 			}
 			else{
-				//TODO call DAL and store into DB
+				try {
+					DataBaseHandler.insertImage(GlobalStuff.DATABASE_NAME, 
+												GlobalStuff.COLLECTION_NAME, 
+												new AssImage(imglinks.get(i),
+															 captions.get(i),
+															 0,
+															 new Date()));
+				} catch (UnknownHostException e) {
+					System.out.println("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));
+					e.printStackTrace();
+				}
 			}
 		}
+	}
+	
+	public void contentSnatch() throws FuckinUpKPException{
+		contentSnatch(false);
 	}
 	
 	

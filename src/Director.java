@@ -2,9 +2,6 @@ import java.net.UnknownHostException;
 
 
 public class Director {
-	
-	private final static String DATABASE_NAME = "";
-	private final static String COLLECTION_NAME = "";
 
 	public static void main(String[]args) throws UnknownHostException, Exception{
 		
@@ -13,8 +10,8 @@ public class Director {
 //			RedditScraper scoop = new RedditScraper();
 //			scoop.contentSnatch();
 
-			for(int id =0;id< DataBaseHandler.getCollectionSize(DATABASE_NAME, COLLECTION_NAME);id++){
-				AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(DATABASE_NAME, COLLECTION_NAME, id);
+			for(int id =0;id< DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);id++){
+				AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME, id);
 				new Thread(new TwitterRunnable(info.getCustomerKey(),
 						info.getCustomerSecret(),
 						info.getAuthorizationKey(),
