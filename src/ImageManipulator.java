@@ -18,7 +18,7 @@ public class ImageManipulator {
 	int inc = 0;
 
 
-	public boolean isValid(String URI){
+	public boolean isValid(String URI) throws FuckinUpKPException{
 		Image image = null;
 		
 		try{
@@ -37,6 +37,7 @@ public class ImageManipulator {
 		}
 		catch(IOException e) {
 			System.out.println("fuckin up kp");
+			throw new FuckinUpKPException();
 		}
 		finally{
 			img.delete();
@@ -57,7 +58,7 @@ public class ImageManipulator {
 	}
 
 
-	public String getImageFile(String imgsrc){
+	public String getImageFile(String imgsrc) throws FuckinUpKPException{
 
 		Image image = null;
 
@@ -79,11 +80,9 @@ public class ImageManipulator {
 				//The receiver must delete the file after posting to Twitter
 			}
 			catch (IOException e) {
-				System.out.println("fuckin up kp");
+				System.out.println("Error: Did not get image file with string"+imgsrc);
+				throw new FuckinUpKPException();
 			}
-		System.out.println("Error: Did not get image file with string"+imgsrc);
-		return "error";
-
 	}
 
 }

@@ -11,7 +11,7 @@ import org.jsoup.select.Elements;
 public class RedditScraper {
 	
 	
-	public void contentSnatch(){
+	public void contentSnatch() throws FuckinUpKPException{
 		ArrayList<String> captions = new ArrayList<String>();
 		ArrayList<String> imglinks = new ArrayList<String>(); 
 		
@@ -28,6 +28,7 @@ public class RedditScraper {
 			catch (IOException e) {
 				System.out.println("can't get to reddit.com");
 				e.printStackTrace();
+				throw new FuckinUpKPException();
 			}
 			
 			//Must end with jpg or png
@@ -61,7 +62,7 @@ public class RedditScraper {
 	}
 	
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws FuckinUpKPException{
 		RedditScraper hello = new RedditScraper();
 		hello.contentSnatch();
 	}

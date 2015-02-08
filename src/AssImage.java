@@ -1,4 +1,14 @@
-import com.mongodb.BasicDBObject;
+import java.util.Date;
+
+
+
+
+
+
+
+//TODO make sure setters actually update attribute in database
+//call mondb's update function
+
 
 
 public class AssImage {
@@ -6,9 +16,9 @@ public class AssImage {
 	private String link;
 	private String caption;
 	private int timesAccessed;
-	private String lastAccessDate;
+	private Date lastAccessDate;
 	
-	public AssImage(String link, String caption, int timesAccessed, String lastAccessDate) {
+	public AssImage(String link, String caption, int timesAccessed, Date lastAccessDate) {
 		this.link = link;
 		this.caption = caption;
 		this.timesAccessed = timesAccessed;
@@ -39,12 +49,19 @@ public class AssImage {
 		this.timesAccessed = timesAccessed;
 	}
 
-	public String getLastAccessDate() {
+	public Date getLastAccessDate() {
 		return lastAccessDate;
 	}
 
-	public void setLastAccessDate(String lastAccessDate) {
+	public void setLastAccessDate(Date lastAccessDate) {
 		this.lastAccessDate = lastAccessDate;
+		
+		
+		//db.collection.update(this)
+	
+	
+	
+	
 	}
 	
 	
