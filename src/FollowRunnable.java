@@ -54,24 +54,24 @@ public class FollowRunnable implements Runnable{
 	}
 	
 	
-//	public void followAndFavoriteUsers() throws TwitterException{
-//		if(/*DAL.sizeTo_follow != 0*/){
-//			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
-//			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
-//			/*DAL addWhitelist(String.valueOf(to_follow))*/
-//			/*DAL addFollowing(String.valueOf(to_follow))*/
-//		}
-//	}
-//	
-//	//done in bulk, number unfollowed is respective to follower:following
-//	public void unfollowUsers(){
-//		int sizeFollowers = /*DAL.sizeFollowers*/;
-//		int sizeFollowing = /*DAL.sizeFollowing*/;
-//		while(3>sizeFollowers/sizeFollowing){
-//			bird.destroyFriendship(/*DAL.popFollowing*/);
-//			sizeFollowing--;
-//		}
-//	}
+	public void followAndFavoriteUsers() throws TwitterException{
+		if(DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, "toFollow")!=0){
+			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
+			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
+			/*DAL addWhitelist(String.valueOf(to_follow))*/
+			/*DAL addFollowing(String.valueOf(to_follow))*/
+		}
+	}
+	
+	//done in bulk, number unfollowed is respective to follower:following
+	public void unfollowUsers(){
+		int sizeFollowers = /*DAL.sizeFollowers*/;
+		int sizeFollowing = /*DAL.sizeFollowing*/;
+		while(3>sizeFollowers/sizeFollowing){
+			bird.destroyFriendship(/*DAL.popFollowing*/);
+			sizeFollowing--;
+		}
+	}
 	
 	//Gets user timeline of a big account, gets retweeters, appends to to_follow in db
 	public void update_toFollow(){
