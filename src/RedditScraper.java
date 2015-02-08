@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +17,18 @@ public class RedditScraper {
 		String url = "http://www.reddit.com/r/blackpeopletwitter";
 		
 		//Loop through reddit and gathers title + image link
+		
+		
+		
+		
+		
 		//TODO set limits on content gathering
+		
+		
+		
+		
+		
+		
 		for(int j = 0; j<10; j++){
 			Document document = null;
 			

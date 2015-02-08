@@ -122,10 +122,6 @@ public class DataBaseHandler {
 
 	public static void main(String[] args) throws Exception {
 
-
-//		insertImage("test", "images", new AssImage("www.smokeWeed.com", "everyday", 0, new Date(0)));
-//		insertAuthorizationInfo("test", "info", new AuthorizationInfo("customerSecret", "customerKey", "authorizationSecret", "authorizationKey", true));
-
 		AssImage i = getRandomishAssImage("test", "images");
 		System.out.println(i.getCaption());
 		System.out.println(i.getLink());
