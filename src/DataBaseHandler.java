@@ -69,7 +69,7 @@ public class DataBaseHandler {
 	public static void main(String[] args) throws UnknownHostException {
 
 		
-		//insertImage("test", "collection1", new AssImage("www.smokeWeed.com", "everyday", 0, "02/07/15"));
+		//insertImage("test", "collection1", new AssImage("smokeWeed.jpg", "everyday", 0, "02/07/15"));
 		
 		AssImage i = getRandomAssImage("test", "collection1");
 		System.out.println(i.getCaption());

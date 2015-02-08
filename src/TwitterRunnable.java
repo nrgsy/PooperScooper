@@ -10,16 +10,18 @@ import twitter4j.conf.ConfigurationBuilder;
 
 
 public class TwitterRunnable implements Runnable {
-	Twitter bird = null;
+	private Twitter bird = null;
+	private boolean isIncubated;
 
-	public TwitterRunnable (int index){
+	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, boolean Incubated){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey("/*INSERT DAL STUFF*/")
-		.setOAuthConsumerSecret("/*INSERT DAL STUFF*/")
-		.setOAuthAccessToken("/*INSERT DAL STUFF*/")
-		.setOAuthAccessTokenSecret("/*INSERT DAL STUFF*/");
+		.setOAuthConsumerKey(OAuthConsumerKey)
+		.setOAuthConsumerSecret(OAuthConsumerSecret)
+		.setOAuthAccessToken(OAuthAccessToken)
+		.setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
 		TwitterFactory tf = new TwitterFactory(cb.build());
+		isIncubated = Incubated;
 		bird = tf.getInstance();
 	}
 	
@@ -35,8 +37,9 @@ public class TwitterRunnable implements Runnable {
 	}
 	
 	
-	
+	//TODO DAL get image link and turn into file, get caption, use placeholder Twitter object
 	public void uploadPic(File file, String message,Twitter twitter) throws Exception  {
+		twitter = bird;
 	    try{
 	        StatusUpdate status = new StatusUpdate(message);
 	        status.setMedia(file);
@@ -51,11 +54,19 @@ public class TwitterRunnable implements Runnable {
 	
 	public void run(){
 		try {
-			Status status = bird.updateStatus("Got that morning pump...");
-		} catch (TwitterException e) {
+			Twitter blah = null;
+			File loe = new File(/*GET from db using DAL*/);
+			TwitterRunnable lol = new TwitterRunnable();
+			lol.uploadPic(loe,/*GET from db using DAL*/,blah);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
+	
+	public static void main(String[]args){
+		new Thread(new TwitterRunnable()).start();
+	}
+	
 }
