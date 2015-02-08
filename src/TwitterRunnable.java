@@ -13,7 +13,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class TwitterRunnable implements Runnable {
 	private Twitter bird = null;
 
-	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, boolean Incubated){
+	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey(OAuthConsumerKey)
@@ -99,5 +99,10 @@ public class TwitterRunnable implements Runnable {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	
+	public static void main(String[]args){
+		new TwitterRunnable().prettyRateLimit();
 	}
 }
