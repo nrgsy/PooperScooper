@@ -183,6 +183,25 @@ public class DataBaseHandler {
 
 
 	}
+	
+	public static synchronized String popToFollow(String dbName, String collectionName, int index) throws UnknownHostException, FuckinUpKPException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+		DBCursor dbCursor = dbCollection.find();
+		for (int i = 0; i < index; i++) {			
+			if (dbCursor.hasNext())
+				dbCursor.next();
+			else {			
+				System.out.println("that ass passed in an invalid index");
+				throw new FuckinUpKPException();
+			}
+		}
+		
+		
+		dbCollection.update(dbCursor.next(), new BasicDBObject ("$pop", new BasicDBObject("to_follow",-1)));
+		
+	}
 
 	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
 
