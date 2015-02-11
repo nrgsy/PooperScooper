@@ -59,7 +59,7 @@ public class TwitterRunnable implements Runnable {
 		Twitter blah = null;
 		File loe = null;
 		try {
-			AssImage assContent = DataBaseHandler.getRandomishAssImage(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);
+			AssContent assContent = DataBaseHandler.getRandomishAssImage(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);
 
 			//creates temp image and puts file location in loe
 			loe = new File(imgman.getImageFile(assContent.getLink()));

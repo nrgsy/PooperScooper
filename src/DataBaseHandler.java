@@ -47,7 +47,7 @@ public class DataBaseHandler {
 	public static synchronized void insertImage(
 			String dbName,
 			String collectionName,
-			AssImage image) throws UnknownHostException {
+			AssContent image) throws UnknownHostException {
 
 		//check whether the image is already in the database (compare by link)
 
@@ -113,7 +113,7 @@ public class DataBaseHandler {
 		return getList(dbName, collectionName, index, listName).size();
 	}
 
-	public static synchronized AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
+	public static synchronized AssContent getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
 
 		System.out.println("scooping ass image");
 		MongoClient mongoClient = new MongoClient();
@@ -139,7 +139,7 @@ public class DataBaseHandler {
 		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
 		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
 
-		return new AssImage(link, caption, timesAccessed, lastAccessDate);		
+		return new AssContent(link, caption, timesAccessed, lastAccessDate);		
 	}
 
 

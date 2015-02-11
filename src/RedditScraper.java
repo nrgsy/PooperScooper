@@ -67,7 +67,7 @@ public class RedditScraper implements Runnable{
 				try {
 					DataBaseHandler.insertImage(GlobalStuff.DATABASE_NAME, 
 							GlobalStuff.COLLECTION_NAME, 
-							new AssImage(imglinks.get(i),
+							new AssContent(imglinks.get(i),
 									captions.get(i),
 									0,
 									new Date()));
