@@ -1,4 +1,5 @@
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.Date;
 
 import com.mongodb.BasicDBList;
@@ -8,9 +9,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-
-
-//TODO hard code collection names, remove the requirement for them to parameters for fn's below
 
 public class DataBaseHandler {
 
@@ -117,10 +115,6 @@ public class DataBaseHandler {
 
 	public static synchronized AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
 
-		//TODO account for times Accessed and last AccessDate
-		//Guarantee no images can be returned twice in a day (or week?)
-
-
 		System.out.println("scooping ass image");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB(dbName);
@@ -148,60 +142,6 @@ public class DataBaseHandler {
 		return new AssImage(link, caption, timesAccessed, lastAccessDate);		
 	}
 
-	public static synchronized SchwergsyAccount getSchwergsyAccount(String dbName, String collectionName, int index) throws UnknownHostException, FuckinUpKPException {
-
-		//		System.out.println("scooping Schwergs account at index " + index);
-		//		MongoClient mongoClient = new MongoClient();
-		//		DB db = mongoClient.getDB(dbName);
-		//		DBCollection dbCollection = db.getCollection(collectionName);
-		//
-		//		DBCursor dbCursor = dbCollection.find();
-		//
-		//		for (int i = 0; i < index; i++) {			
-		//			if (dbCursor.hasNext())
-		//				dbCursor.next();
-		//			else {			
-		//				System.out.println("that ass passed in an invalid index for this authorization info");
-		//				throw new FuckinUpKPException();
-		//			}
-		//		}
-		//
-		//		DBObject schwergsAccount = dbCursor.next();
-		//
-		//		//TODO check that this shouldn't actaully be a BasicBSONList instead
-		//		BasicDBList contents = (BasicDBList) ass.get("contents");
-		//		BasicDBList accessData = (BasicDBList) ass.get("accessData");
-		//
-		//		String link = (String) ((BasicDBObject) contents.get("0")).get("link");
-		//		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
-		//		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
-		//		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
-		//
-		//		return new AssImage(link, caption, timesAccessed, lastAccessDate);	
-
-		return null;
-
-
-	}
-	
-	public static synchronized String popToFollow(String dbName, String collectionName, int index) throws UnknownHostException, FuckinUpKPException{
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-		DBCursor dbCursor = dbCollection.find();
-		for (int i = 0; i < index; i++) {			
-			if (dbCursor.hasNext())
-				dbCursor.next();
-			else {			
-				System.out.println("that ass passed in an invalid index");
-				throw new FuckinUpKPException();
-			}
-		}
-		
-		
-		dbCollection.update(dbCursor.next(), new BasicDBObject ("$pop", new BasicDBObject("to_follow",-1)));
-		
-	}
 
 	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
 
@@ -248,17 +188,20 @@ public class DataBaseHandler {
 		}
 
 		DBObject schwergsyAccount = dbCursor.next();
+		//schwergsyAccount.get("_id")
+		
+		BasicDBObject newDocument = (BasicDBObject) schwergsyAccount;
+		
+		//newDocument.
+		
+		//System.out.println(newDocument);
+		
+//		newDocument.put(listName, list);
+//
+//		BasicDBObject searchQuery = new BasicDBObject().append("_id", schwergsyAccount.get("_id"));
+//
+//		dbCollection.update(searchQuery, newDocument);
 
-		System.out.println(schwergsyAccount);
-
-		BasicDBObject newDocument = new BasicDBObject();
-		newDocument.put(listName, list);
-
-		BasicDBObject searchQuery = new BasicDBObject().append("_id", schwergsyAccount.get("_id"));
-
-		dbCollection.update(searchQuery, newDocument);
-
-		System.out.println(schwergsyAccount);
 
 
 		//dbCollection.update(q, o)
@@ -279,54 +222,70 @@ public class DataBaseHandler {
 
 
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {		
+		
+//		MongoClient mongoClient = new MongoClient();
+//		DB db = mongoClient.getDB("test");
+//		DBCollection dbCollection = db.getCollection("collection1");
+	
+		
+//		BasicDBObject basicBitch = new BasicDBObject()
+//		.append("a", 1)
+//		.append("b", new BasicDBObject("c", 3).append("d", 4));
+//
+//		
+//		
+//		System.out.println(basicBitch);
+//		
+//		System.out.println(new BasicDBObject("$gt", 10));
+//
+//		System.out.println(new BasicDBObject("address.city", "London"));
+		
+		
+		
+		
+
+//				BasicDBList bdbl1 = new BasicDBList();
+//				BasicDBList bdbl2 = new BasicDBList();
+//				BasicDBList bdbl3 = new BasicDBList();
+//				BasicDBList bdbl4 = new BasicDBList();
+//				BasicDBList bdbl5 = new BasicDBList();
+//		
+//				bdbl1.add("followerabc");
+//				bdbl1.add("followerdef");
+//				bdbl2.add("following1");
+//				bdbl2.add("following2");
+//				bdbl3.add("toFollow1");
+//				bdbl3.add("toFollow2");
+//				bdbl4.add("whitelist1");
+//				bdbl4.add("whitelist2");
+//				bdbl5.add("bigAccount1");
+//				bdbl5.add("bigAccount2");
+//		
+//		
+//				insertSchwergsyAccount("test",
+//						"schwergsAccounts",
+//						new SchwergsyAccount(
+//								"abc",
+//								"this is an account name",
+//								new AuthorizationInfo("customerSHHH",
+//										"cuskey",
+//										"authSHH",
+//										"authkey",
+//										true),
+//										bdbl1,
+//										bdbl2,
+//										bdbl3,
+//										bdbl4,
+//										bdbl5)
+//						);
 
 
 
-		//		BasicDBList bdbl1 = new BasicDBList();
-		//		BasicDBList bdbl2 = new BasicDBList();
-		//		BasicDBList bdbl3 = new BasicDBList();
-		//		BasicDBList bdbl4 = new BasicDBList();
-		//		BasicDBList bdbl5 = new BasicDBList();
-		//
-		//		bdbl1.add("followerabc");
-		//		bdbl1.add("followerdef");
-		//		bdbl2.add("following1");
-		//		bdbl2.add("following2");
-		//		bdbl3.add("toFollow1");
-		//		bdbl3.add("toFollow2");
-		//		bdbl4.add("whitelist1");
-		//		bdbl4.add("whitelist2");
-		//		bdbl5.add("bigAccount1");
-		//		bdbl5.add("bigAccount2");
-		//
-		//
-		//		insertSchwergsyAccount("test",
-		//				"schwergsAccounts",
-		//				new SchwergsyAccount(
-		//						"abc",
-		//						"this is an account name",
-		//						new AuthorizationInfo("customerSHHH",
-		//								"cuskey",
-		//								"authSHH",
-		//								"authkey",
-		//								true),
-		//								bdbl1,
-		//								bdbl2,
-		//								bdbl3,
-		//								bdbl4,
-		//								bdbl5)
-		//				);
 
 
+		//addToList("test", "schwergsAccounts", 0, "followers", "newFollower");
 
-
-		System.out.println(getList("test", "schwergsAccounts", 0, "followers"));
-
-		addToList("test", "schwergsAccounts", 0, "followers", "newFollower");
-
-		System.out.println(getList("test", "schwergsAccounts", 0, "followers"));
-		System.out.println(getListSize("test", "schwergsAccounts", 0, "followers"));
 
 
 

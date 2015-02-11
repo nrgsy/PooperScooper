@@ -9,6 +9,10 @@ public class Director {
 
 		for(int id =0;id< DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);id++){
 			final AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME, id);
+<<<<<<< HEAD
+=======
+			
+>>>>>>> 3f994a2802b32fcb814a49408808a1ba8a1a4d3f
 			long followtime = 100000;
 			long posttime = 1380000;
 			
