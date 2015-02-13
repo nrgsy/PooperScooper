@@ -11,6 +11,86 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class DataBaseHandler {
+	
+	
+	
+	public static synchronized void getRandomAssContent() throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("AssContent");
+		
+		//Figure out randomness
+	}
+	
+	public static synchronized void newAssContent(String caption, String imglink) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("AssContent");
+		
+		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
+		
+		if(dbCollection.find(uniqueCheck).limit(1).count()==0){
+			int count = 0;
+			long id_time = new Date().getTime();
+
+			BasicDBObject newAss = new BasicDBObject("_id", id_time);
+			newAss.append("caption", caption);
+			newAss.append("imglink", imglink);
+			newAss.append("times_accessed", count);
+			newAss.append("last_accessed", id_time);
+
+			dbCollection.insert(newAss);
+			System.out.println("Successfully added new AssContent "+id_time);
+		}
+		
+		else{
+			System.out.println("Image is not unique: "+ imglink);
+		}
+	}
+
+	public static synchronized void addArrayToSchwergsArray(int index, String[] StringArr, String column) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		BasicDBObject arr = new BasicDBObject("$addToSet",
+				new BasicDBObject(column,
+						new BasicDBObject("$each", StringArr)));
+
+		dbCollection.update(query, arr);
+	}
+
+	public static synchronized void addElementToSchwergsArray(int index, String element, String column) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		BasicDBObject ele = new BasicDBObject("$addToSet",
+				new BasicDBObject(column, element));
+
+		dbCollection.update(query, ele);
+	}
+	
+	public static synchronized void addFollowers(int index, String[] followersArr) throws UnknownHostException{
+		addArrayToSchwergsArray(index,followersArr,"followers");
+	}
+	
+	public static synchronized void addFollowing(int index, String[]followingArr) throws UnknownHostException{
+		addArrayToSchwergsArray(index,followingArr,"following");
+	}
+	
+	public static synchronized void addToFollow(int index, String[]toFollowArr) throws UnknownHostException{
+		addArrayToSchwergsArray(index,toFollowArr,"to_follow");
+	}
+	
+	public static synchronized void addWhitelist(int index, String[]whitelistArr) throws UnknownHostException{
+		addArrayToSchwergsArray(index,whitelistArr,"whitelist");
+	}
+	
+	public static synchronized void addBigAccount(int index, String bigAccountElement) throws UnknownHostException{
+		addElementToSchwergsArray(index,bigAccountElement,"bigAccounts");
+	}
+	
 
 	public static synchronized void insertSchwergsyAccount(
 			String dbName,

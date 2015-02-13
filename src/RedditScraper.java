@@ -65,12 +65,7 @@ public class RedditScraper implements Runnable{
 			}
 			else{
 				try {
-					DataBaseHandler.insertImage(GlobalStuff.DATABASE_NAME, 
-							GlobalStuff.COLLECTION_NAME, 
-							new AssContent(imglinks.get(i),
-									captions.get(i),
-									0,
-									new Date()));
+					DataBaseHandler.newAssContent(captions.get(i),imglinks.get(i));
 				} catch (UnknownHostException e) {
 					System.out.println("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));
 					e.printStackTrace();
