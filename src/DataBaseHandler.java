@@ -12,14 +12,18 @@ import com.mongodb.MongoClient;
 
 public class DataBaseHandler {
 	
-	
-	
-	public static synchronized void getRandomAssContent() throws UnknownHostException{
+	public static synchronized String[] getRandomAssContent() throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("AssContent");
-		
+		String[] AssContent = null;
 		//Figure out randomness
+		
+		//[0] should be caption, [1] should be imglink. only returns a two element array.
+		
+		//add in update for last_accessed and times_accessed
+		mongoClient.close();
+		return AssContent;
 	}
 	
 	public static synchronized void newAssContent(String caption, String imglink) throws UnknownHostException{
@@ -46,6 +50,7 @@ public class DataBaseHandler {
 		else{
 			System.out.println("Image is not unique: "+ imglink);
 		}
+		mongoClient.close();
 	}
 
 	public static synchronized void addArrayToSchwergsArray(int index, String[] StringArr, String column) throws UnknownHostException{
@@ -58,6 +63,8 @@ public class DataBaseHandler {
 						new BasicDBObject("$each", StringArr)));
 
 		dbCollection.update(query, arr);
+		System.out.println("successfully added an array of size "+StringArr.length+" to "+column);
+		mongoClient.close();
 	}
 
 	public static synchronized void addElementToSchwergsArray(int index, String element, String column) throws UnknownHostException{
@@ -69,6 +76,8 @@ public class DataBaseHandler {
 				new BasicDBObject(column, element));
 
 		dbCollection.update(query, ele);
+		System.out.println("successfully added an element to "+ column);
+		mongoClient.close();
 	}
 	
 	public static synchronized void addFollowers(int index, String[] followersArr) throws UnknownHostException{
@@ -167,36 +176,6 @@ public class DataBaseHandler {
 	public static synchronized long getListSize(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
 		return getList(dbName, collectionName, index, listName).size();
 	}
-
-	public static synchronized AssContent getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
-
-		System.out.println("scooping ass image");
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-
-		int randIndex = (int) (Math.random() * dbCollection.getCount());
-
-		DBCursor dbCursor = dbCollection.find();
-
-		for (int i = 0; i < randIndex; i++) {
-			dbCursor.next();
-		}
-
-		DBObject ass = dbCursor.next();
-
-		//TODO check that this shouldn't actaully be a BasicBSONList instead
-		BasicDBList contents = (BasicDBList) ass.get("contents");
-		BasicDBList accessData = (BasicDBList) ass.get("accessData");
-
-		String link = (String) ((BasicDBObject) contents.get("0")).get("link");
-		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
-		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
-		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
-
-		return new AssContent(link, caption, timesAccessed, lastAccessDate);		
-	}
-
 
 	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
 

@@ -32,6 +32,8 @@ public class FollowRunnable implements Runnable{
 		bird = tf.getInstance();
 	}
 	
+	
+	//this constructor only for testing
 	public FollowRunnable(int lol){
 		if(lol ==1){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
