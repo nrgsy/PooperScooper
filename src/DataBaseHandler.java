@@ -33,7 +33,7 @@ public class DataBaseHandler{
 		
 		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
 		
-		if(dbCollection.find(uniqueCheck).limit(1).count()==0){
+		if(dbCollection.find(uniqueCheck).limit(1).count() == 0){
 			int count = 0;
 			long id_time = new Date().getTime();
 
@@ -44,7 +44,7 @@ public class DataBaseHandler{
 			newAss.append("last_accessed", id_time);
 
 			dbCollection.insert(newAss);
-			System.out.println("Successfully added new AssContent "+id_time);
+			System.out.println("Successfully added new AssContent " + id_time);
 		}
 		
 		else{
@@ -73,8 +73,7 @@ public class DataBaseHandler{
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject query = new BasicDBObject("_id", index);
-		BasicDBObject ele = new BasicDBObject("$addToSet",
-				new BasicDBObject(column, element));
+		BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject(column, element));
 
 		dbCollection.update(query, ele);
 		System.out.println("successfully added an element to "+ column);
@@ -116,6 +115,11 @@ public class DataBaseHandler{
 		DBCursor cursor = dbCollection.find(query,slice);
 		BasicDBList toFollowList = (BasicDBList) cursor.next().get("to_follow");
 		cursor.close();
+		
+		
+//Be sure to add them to whitelist and remove from toFollow
+		
+		
 		toFollowArr = Arrays.copyOf(toFollowList.toArray(), toFollowList.toArray().length, String[].class);
 		mongoClient.close();
 		return toFollowArr;
