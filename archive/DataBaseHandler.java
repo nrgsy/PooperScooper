@@ -1,5 +1,6 @@
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import com.mongodb.BasicDBList;
@@ -240,8 +241,217 @@ public class DataBaseHandler{
 		return dbCollection.count();
 
 	}
-	
-	public static void main(String[] args) {
-		System.out.println("test");
+
+<<<<<<< HEAD
+	public static synchronized long getListSize(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
+		return getList(dbName, collectionName, index, listName).size();
 	}
+
+	public static synchronized AssImage getRandomishAssImage(String dbName, String collectionName) throws UnknownHostException {
+
+		System.out.println("scooping ass image");
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+
+		int randIndex = (int) (Math.random() * dbCollection.getCount());
+
+		DBCursor dbCursor = dbCollection.find();
+
+		for (int i = 0; i < randIndex; i++) {
+			dbCursor.next();
+		}
+
+		DBObject ass = dbCursor.next();
+
+		//TODO check that this shouldn't actaully be a BasicBSONList instead
+		BasicDBList contents = (BasicDBList) ass.get("contents");
+		BasicDBList accessData = (BasicDBList) ass.get("accessData");
+
+		String link = (String) ((BasicDBObject) contents.get("0")).get("link");
+		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
+		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
+		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
+		
+		//only return link an caption
+		return new AssImage(link, caption, timesAccessed, lastAccessDate);		
+	}
+
+	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+
+		DBCursor dbCursor = dbCollection.find();
+
+		for (int i = 0; i < index; i++) {			
+			if (dbCursor.hasNext())
+				dbCursor.next();
+			else {			
+				System.out.println("that ass passed in an invalid index");
+				throw new FuckinUpKPException();
+			}
+		}
+
+		DBObject schwergsyAccount = dbCursor.next();	
+
+		BasicDBList list = (BasicDBList) schwergsyAccount.get(listName);
+
+		return list;
+	}
+
+	public static synchronized void addToList(String dbName, String collectionName, int index, String listName, String userID) throws UnknownHostException, FuckinUpKPException {
+
+		BasicDBList list = getList(dbName, collectionName, index, listName);	
+		list.add(userID);
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB(dbName);
+		DBCollection dbCollection = db.getCollection(collectionName);
+
+		DBCursor dbCursor = dbCollection.find();
+
+		for (int i = 0; i < index; i++) {			
+			if (dbCursor.hasNext())
+				dbCursor.next();
+			else {			
+				System.out.println("that ass passed in an invalid index");
+				throw new FuckinUpKPException();
+			}
+		}
+
+		DBObject schwergsyAccount = dbCursor.next();
+		//schwergsyAccount.get("_id")
+		
+		BasicDBObject newDocument = (BasicDBObject) schwergsyAccount;
+		
+		//newDocument.
+		
+		//System.out.println(newDocument);
+		
+//		newDocument.put(listName, list);
+//
+//		BasicDBObject searchQuery = new BasicDBObject().append("_id", schwergsyAccount.get("_id"));
+//
+//		dbCollection.update(searchQuery, newDocument);
+
+
+
+		//dbCollection.update(q, o)
+		//
+		//
+		//
+		//		BasicDBObject query = new BasicDBObject("_id", id);
+		//		query.append(new BasicDBObject("stats.employee", "rob"));
+		//
+		//		BasicDBObject update = new BasicDBObject("$set",
+		//				new BasicDBObject("stats.$.stat2", value));
+		//
+		//		dbCollection.update(query,update);
+
+
+	}
+
+
+
+
+	public static void main(String[] args) throws Exception {		
+		
+//		MongoClient mongoClient = new MongoClient();
+//		DB db = mongoClient.getDB("test");
+//		DBCollection dbCollection = db.getCollection("collection1");
+	
+		
+//		BasicDBObject basicBitch = new BasicDBObject()
+//		.append("a", 1)
+//		.append("b", new BasicDBObject("c", 3).append("d", 4));
+//
+//		
+//		
+//		System.out.println(basicBitch);
+//		
+//		System.out.println(new BasicDBObject("$gt", 10));
+//
+//		System.out.println(new BasicDBObject("address.city", "London"));
+		
+		
+		
+		
+
+//				BasicDBList bdbl1 = new BasicDBList();
+//				BasicDBList bdbl2 = new BasicDBList();
+//				BasicDBList bdbl3 = new BasicDBList();
+//				BasicDBList bdbl4 = new BasicDBList();
+//				BasicDBList bdbl5 = new BasicDBList();
+//		
+//				bdbl1.add("followerabc");
+//				bdbl1.add("followerdef");
+//				bdbl2.add("following1");
+//				bdbl2.add("following2");
+//				bdbl3.add("toFollow1");
+//				bdbl3.add("toFollow2");
+//				bdbl4.add("whitelist1");
+//				bdbl4.add("whitelist2");
+//				bdbl5.add("bigAccount1");
+//				bdbl5.add("bigAccount2");
+//		
+//		
+//				insertSchwergsyAccount("test",
+//						"schwergsAccounts",
+//						new SchwergsyAccount(
+//								"abc",
+//								"this is an account name",
+//								new AuthorizationInfo("customerSHHH",
+//										"cuskey",
+//										"authSHH",
+//										"authkey",
+//										true),
+//										bdbl1,
+//										bdbl2,
+//										bdbl3,
+//										bdbl4,
+//										bdbl5)
+//						);
+
+
+
+
+
+		//addToList("test", "schwergsAccounts", 0, "followers", "newFollower");
+
+
+
+
+		//insertImage("test", "assImages", new AssImage("www.assWebsite.com", "this is a caption", 0, new Date(0)));
+
+
+		//		AssImage i = getRandomishAssImage("test", "images");
+		//		System.out.println(i.getCaption());
+		//		System.out.println(i.getLink());
+		//		System.out.println(i.getLastAccessDate());
+		//		System.out.println(i.getTimesAccessed());
+		//		
+		//		System.out.println();
+		//		
+
+
+
+
+
+
+
+
+
+		//		MongoClient mongoClient = new MongoClient();
+		//		mongoClient.dropDatabase("mydb");
+
+		//		MongoClient mongoClient = new MongoClient();
+		//		DB db = mongoClient.getDB( "test" );
+		//		DBCollection coll = db.getCollection("Channel");
+		//		coll.drop();
+		//		System.out.println(db.getCollectionNames());
+	}
+=======
+>>>>>>> 6bb5068b8bc5588f41e0a5abf7a4a60f458e9dd0
 }
