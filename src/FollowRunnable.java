@@ -1,5 +1,7 @@
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -30,6 +32,8 @@ public class FollowRunnable implements Runnable{
 		bird = tf.getInstance();
 	}
 	
+	
+	//this constructor only for testing
 	public FollowRunnable(int lol){
 		if(lol ==1){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -144,6 +148,12 @@ public class FollowRunnable implements Runnable{
 
 	@Override
 	public void run() {
+		//Only run when not 3AM to allow database maintenance
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		int hours = calendar.get(Calendar.HOUR_OF_DAY);
+		
+		if(hours != 3){
 			try {
 				updateFollowers(true);
 				initUpdateFollowing();
@@ -151,6 +161,7 @@ public class FollowRunnable implements Runnable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
 
 //		try {
 //			followAndFavoriteUsers();

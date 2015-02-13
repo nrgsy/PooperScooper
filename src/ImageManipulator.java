@@ -4,14 +4,16 @@ import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Random;
+
 import javax.imageio.ImageIO;
 
 
 public class ImageManipulator {
 
 	File img = null;
-	int inc = 0;
+	long inc = 0;
 
 
 	public boolean isValid(String URI) throws FuckinUpKPException{
@@ -71,15 +73,12 @@ public class ImageManipulator {
 				if(!imgsrc.endsWith(".jpg")||!imgsrc.endsWith(".jpeg")){
 					bi = convertCMYK2RGB(bi);
 				}
-				
-				//makes random temp name so that concurrent functions are likely to not use same image
-				Random rand = new Random();
-			    int randomNum = rand.nextInt(5001);
-			    
+				long unique = new Date().getTime();
 			    //makes file name and saves it, returns file location
-				File f = new File("pics/"+randomNum+".jpg");
+				File f = new File("pics/"+unique+".jpg");
+				
 				ImageIO.write(bi, "jpg", f);
-				imgsrc = "pics/"+randomNum+".jpg";
+				imgsrc = "pics/"+unique+".jpg";
 				return imgsrc;
 				//The receiver must delete the file after posting to Twitter
 			}
