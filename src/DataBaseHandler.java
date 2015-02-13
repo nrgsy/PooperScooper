@@ -138,7 +138,8 @@ public class DataBaseHandler {
 		String caption = (String) ((BasicDBObject) contents.get("1")).get("caption");
 		int timesAccessed = (int) ((BasicDBObject) accessData.get("0")).get("timesAccessed");
 		Date lastAccessDate = (Date) ((BasicDBObject) accessData.get("1")).get("lastAccessDate");
-
+		
+		//only return link an caption
 		return new AssImage(link, caption, timesAccessed, lastAccessDate);		
 	}
 
