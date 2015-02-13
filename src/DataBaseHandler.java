@@ -2,7 +2,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -59,7 +58,6 @@ public class DataBaseHandler{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
-		String increment = column+".count";
 		BasicDBObject query = new BasicDBObject("_id", index);
 		
 		BasicDBObject arr = new BasicDBObject("$addToSet",
