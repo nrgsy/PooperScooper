@@ -242,32 +242,4 @@ public class DataBaseHandler{
 
 	}
 
-	public static synchronized long getListSize(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
-		return getList(dbName, collectionName, index, listName).size();
-	}
-
-	public static synchronized BasicDBList getList(String dbName, String collectionName, int index, String listName) throws UnknownHostException, FuckinUpKPException {
-
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
-		DBCollection dbCollection = db.getCollection(collectionName);
-
-		DBCursor dbCursor = dbCollection.find();
-
-		for (int i = 0; i < index; i++) {			
-			if (dbCursor.hasNext())
-				dbCursor.next();
-			else {			
-				System.out.println("that ass passed in an invalid index");
-				throw new FuckinUpKPException();
-			}
-		}
-
-		DBObject schwergsyAccount = dbCursor.next();	
-
-		BasicDBList list = (BasicDBList) schwergsyAccount.get(listName);
-
-		return list;
-	}
-
 }
