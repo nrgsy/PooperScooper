@@ -1,4 +1,5 @@
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -10,7 +11,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
-public class DataBaseHandler {
+public class DataBaseHandler{
 	
 	public static synchronized String[] getRandomAssContent() throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
@@ -52,12 +53,15 @@ public class DataBaseHandler {
 		}
 		mongoClient.close();
 	}
-
+	
+//////Start region: add to array
 	public static synchronized void addArrayToSchwergsArray(int index, String[] StringArr, String column) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+		String increment = column+".count";
 		BasicDBObject query = new BasicDBObject("_id", index);
+		
 		BasicDBObject arr = new BasicDBObject("$addToSet",
 				new BasicDBObject(column,
 						new BasicDBObject("$each", StringArr)));
@@ -99,8 +103,73 @@ public class DataBaseHandler {
 	public static synchronized void addBigAccount(int index, String bigAccountElement) throws UnknownHostException{
 		addElementToSchwergsArray(index,bigAccountElement,"bigAccounts");
 	}
+//////End region: Add to array
 	
+	public static synchronized void updateYesterdayFollowers(int index){
+		//TODO
+	}
+	
+	public static synchronized String[] getToFollow(int index, int amount) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+		String[] toFollowArr = null;
+		BasicDBObject query = new BasicDBObject("_id", index);
+		BasicDBObject slice = new BasicDBObject("to_follow",
+				new BasicDBObject("$slice", amount));
+		DBCursor cursor = dbCollection.find(query,slice);
+		BasicDBList toFollowList = (BasicDBList) cursor.next().get("to_follow");
+		cursor.close();
+		toFollowArr = Arrays.copyOf(toFollowList.toArray(), toFollowList.toArray().length, String[].class);
+		mongoClient.close();
+		return toFollowArr;
+	}
+	
+	
+	
+////// Start region: get array size
+	public static synchronized int getSchwergsAccountArraySize(int index, String column){
+		MongoClient mongoClient = null;
+		int size = 0;
+		
+		try {
+			mongoClient = new MongoClient();
+			DB db = mongoClient.getDB("Schwergsy");
+			DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+			BasicDBObject query = new BasicDBObject("_id", index);
+			DBCursor cursor = dbCollection.find(query);
+			BasicDBList SchwergsList = (BasicDBList)cursor.next().get(column);
+			cursor.close();
+			size =  SchwergsList.toArray().length;
+		} 
+		
+		catch (UnknownHostException e) {
+			System.out.println("Error getSchwergsAccountArraySize");
+			e.printStackTrace();
+		}
+		
+		finally{
+			mongoClient.close();
+		}
+		
+		return size;
+	}
+	
+	public static int getFollowersSize(int index) throws UnknownHostException{
+		return getSchwergsAccountArraySize(index, "followers");
+	}
+	
+	public static int getFollowingSize(int index) throws UnknownHostException{
+		return getSchwergsAccountArraySize(index, "following");
+	}
+	
+	public static int getToFollowSize(int index) throws UnknownHostException{
+		return getSchwergsAccountArraySize(index, "to_follow");
+	}
 
+//////End region: Get array size
+	
+	
 	public static synchronized void insertSchwergsyAccount(
 			String dbName,
 			String collectionName,
