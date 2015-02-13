@@ -59,7 +59,7 @@ public class FollowRunnable implements Runnable{
 	
 	
 	public void followAndFavoriteUsers() throws TwitterException{
-		if(DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, "toFollow")!=0){
+		if(DataBaseHandler.getCollectionSize("toFollow")!=0){
 			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
 			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
 			/*DAL addWhitelist(String.valueOf(to_follow))*/

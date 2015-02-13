@@ -57,7 +57,7 @@ public class DataBaseHandler{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 
-		DBCollection dbCollection = db.getCollection("SchwergsAccounts");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 
 		BasicDBObject query = new BasicDBObject("_id", index);
 		
@@ -128,7 +128,7 @@ public class DataBaseHandler{
 	
 	
 ////// Start region: get array size
-	public static synchronized int getSchwergsyAccountArraySize(int index, String column){
+	public static synchronized int getSchwergsyAccountArraySize(int index, String column) {
 		MongoClient mongoClient = null;
 		int size = 0;
 		
@@ -149,6 +149,7 @@ public class DataBaseHandler{
 		
 		finally{
 			mongoClient.close();
+			
 		}
 		
 		return size;
@@ -169,15 +170,12 @@ public class DataBaseHandler{
 //////End region: Get array size
 	
 	
-	public static synchronized void insertSchwergsyAccount(
-			String dbName,
-			String collectionName,
-			SchwergsyAccount account) throws UnknownHostException {
+	public static synchronized void insertSchwergsyAccount(SchwergsyAccount account) throws UnknownHostException {
 
 		System.out.println("inserting a new Schwergsy Account");
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
-		DBCollection dbCollection = db.getCollection(collectionName);
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 
 		AuthorizationInfo authInfo = account.getAuthorizationInfo();
 
@@ -199,14 +197,16 @@ public class DataBaseHandler{
 		.append("authorizationInfo", authInfoList);
 
 		dbCollection.insert(basicBitch);
+		
+		mongoClient.close();
 	}
 
-	public static synchronized AuthorizationInfo getAuthorizationInfo(String dbName, String collectionName, int index) throws Exception {
+	public static synchronized AuthorizationInfo getAuthorizationInfo(int index) throws Exception {
 
 		System.out.println("scooping authInfo at index " + index);
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
-		DBCollection dbCollection = db.getCollection(collectionName);
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 
 		DBCursor dbCursor = dbCollection.find();
 
@@ -228,20 +228,18 @@ public class DataBaseHandler{
 		String authorizationSecret = (String) ((BasicDBObject) authInfoList.get("2")).get("authorizationSecret");
 		String authorizationKey = (String) ((BasicDBObject) authInfoList.get("3")).get("authorizationKey");
 		boolean isIncubated = (boolean) ((BasicDBObject) authInfoList.get("4")).get("isIncubated");
+		
+		mongoClient.close();
+		dbCursor.close();
 
 		return new AuthorizationInfo(customerSecret, customerKey, authorizationSecret, authorizationKey, isIncubated);		
 	}
 
-	public static synchronized long getCollectionSize(String dbName, String collectionName) throws UnknownHostException {
-
+	public static synchronized long getCollectionSize(String collectionName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB(dbName);
+		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection(collectionName);
+		mongoClient.close();
 		return dbCollection.count();
-
-	}
-	
-	public static void main(String[] args) {
-		System.out.println("test");
 	}
 }
