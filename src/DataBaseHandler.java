@@ -1,6 +1,7 @@
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -45,7 +46,6 @@ public class DataBaseHandler{
 			dbCollection.insert(newAss);
 			System.out.println("Successfully added new AssContent " + id_time);
 		}
-		
 		else{
 			System.out.println("Image is not unique: "+ imglink);
 		}
@@ -140,7 +140,7 @@ public class DataBaseHandler{
 			DBCursor cursor = dbCollection.find(query);
 			BasicDBList SchwergsList = (BasicDBList)cursor.next().get(column);
 			cursor.close();
-			size =  SchwergsList.toArray().length;
+			size =  SchwergsList.size();
 		} 		
 		catch (UnknownHostException e) {
 			System.out.println("Error getSchwergsyAccountArraySize");
@@ -170,76 +170,72 @@ public class DataBaseHandler{
 //////End region: Get array size
 	
 	
-	public static synchronized void insertSchwergsyAccount(SchwergsyAccount account) throws UnknownHostException {
-
+	public static synchronized void insertSchwergsyAccount(
+			String accountID,
+			String name,
+			String customerSecret,
+			String customerKey,
+			String authorizationSecret,
+			String authorizationKey,
+			boolean isIncubated,
+			BasicDBList followers,
+			BasicDBList following,
+			BasicDBList toFollow,
+			BasicDBList whiteList,
+			BasicDBList bigAccounts) throws UnknownHostException {
+		
+		//make the id be an integer 0 to n, where n is the number of accounts we have. See what phil did for assContent as an example of how to make something the id
+		
 		System.out.println("inserting a new Schwergsy Account");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-
-		AuthorizationInfo authInfo = account.getAuthorizationInfo();
-
-		BasicDBList authInfoList = new BasicDBList();
-		authInfoList.add(new BasicDBObject("customerSecret", authInfo.getCustomerSecret()));
-		authInfoList.add(new BasicDBObject("customerKey", authInfo.getCustomerKey()));
-		authInfoList.add(new BasicDBObject("authorizationSecret", authInfo.getAuthorizationSecret()));
-		authInfoList.add(new BasicDBObject("authorizationKey", authInfo.getAuthorizationKey()));
-		authInfoList.add(new BasicDBObject("isIncubated", authInfo.isIncubated()));
-
-		BasicDBObject basicBitch = new BasicDBObject()
-		.append("accountID", account.getAccountID())
-		.append("name", account.getName())
-		.append("followers", account.getFollowers())
-		.append("following", account.getFollowing())
-		.append("toFollow", account.getToFollow())
-		.append("whiteList", account.getWhiteList())
-		.append("bigAccounts", account.getBigAccounts())
-		.append("authorizationInfo", authInfoList);
-
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
+		
+		BasicDBObject basicBitch = new BasicDBObject("_id", getCollectionSize("SchwergsyAccounts"))
+		.append("accountID", accountID)
+		.append("name", name)
+		.append("customerSecret", customerSecret)
+		.append("customerKey", customerKey)
+		.append("authorizationSecret", authorizationSecret)
+		.append("authorizationKey", authorizationKey)
+		.append("isIncubated", isIncubated)
+		.append("followers", followers)
+		.append("following", following)
+		.append("toFollow", toFollow)
+		.append("whiteList", whiteList)
+		.append("bigAccounts", bigAccounts);
+		
 		dbCollection.insert(basicBitch);
 		
 		mongoClient.close();
 	}
 
-	public static synchronized AuthorizationInfo getAuthorizationInfo(int index) throws Exception {
+	public static synchronized BasicDBObject getAuthorizationInfo(int index) throws Exception {
 
 		System.out.println("scooping authInfo at index " + index);
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-
-		DBCursor dbCursor = dbCollection.find();
-
-		for (int i = 0; i < index; i++) {			
-			if (dbCursor.hasNext())
-				dbCursor.next();
-			else {			
-				System.out.println("that ass passed in an invalid index for this authorization info");
-				throw new FuckinUpKPException();
-			}
-		}
-
-		DBObject schwergsAccount = dbCursor.next();	
-
-		BasicDBList authInfoList = (BasicDBList) schwergsAccount.get("authorizationInfo");		
-
-		String customerSecret = (String) ((BasicDBObject) authInfoList.get("0")).get("customerSecret");
-		String customerKey = (String) ((BasicDBObject) authInfoList.get("1")).get("customerKey");
-		String authorizationSecret = (String) ((BasicDBObject) authInfoList.get("2")).get("authorizationSecret");
-		String authorizationKey = (String) ((BasicDBObject) authInfoList.get("3")).get("authorizationKey");
-		boolean isIncubated = (boolean) ((BasicDBObject) authInfoList.get("4")).get("isIncubated");
+		
+		BasicDBObject query = new BasicDBObject("_id", index);
+		DBCursor cursor = dbCollection.find(query);
+		
+		DBObject schwergsyAccount = cursor.next();
 		
 		mongoClient.close();
-		dbCursor.close();
+		cursor.close();
 
-		return new AuthorizationInfo(customerSecret, customerKey, authorizationSecret, authorizationKey, isIncubated);		
+		BasicDBObject authInfo = (BasicDBObject) schwergsyAccount.get("authorizationInfo");		
+
+		return authInfo;	
 	}
 
 	public static synchronized long getCollectionSize(String collectionName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection(collectionName);
+		long count = dbCollection.count();
 		mongoClient.close();
-		return dbCollection.count();
+		return count;
 	}
 }

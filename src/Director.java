@@ -2,6 +2,8 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Timer;
 
+import com.mongodb.BasicDBObject;
+
 
 public class Director {
 
@@ -9,7 +11,7 @@ public class Director {
 		long scrapetime = 86400000;
 
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
-			final AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(id);
+			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);
 
 			long followtime_min = 86400L;
 			long followtime_max = 123430L;
@@ -18,32 +20,32 @@ public class Director {
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
-			
+
 			//If in incubation, follows at a rate of 425 per day
-			if(info.isIncubated()){
+			if((boolean) info.get("isIncubated")){
 				followtime = 203250;
 			}
-			
+
 			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 				@Override
 				public void run() {
-					new TwitterRunnable(info.getCustomerKey(),
-					info.getCustomerSecret(),
-					info.getAuthorizationKey(),
-					info.getAuthorizationSecret());
+					new TwitterRunnable((String) info.get("customerKey"),
+							(String) info.get("customerSecret"),
+							(String) info.get("authorizationKey"),
+							(String) info.get("authorizationSecret"));
 				}},0L, posttime);
 
 
 			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 				@Override
 				public void run() {
-							new FollowRunnable(info.getCustomerKey(),
-							info.getCustomerSecret(),
-							info.getAuthorizationKey(),
-							info.getAuthorizationSecret());
+					new FollowRunnable((String) info.get("customerKey"),
+							(String) info.get("customerSecret"),
+							(String) info.get("authorizationKey"),
+							(String) info.get("authorizationSecret"));
 				}}, 0L, followtime);
 		}
-		
+
 		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 			@Override
 			public void run() {
