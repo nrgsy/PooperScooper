@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -128,10 +129,18 @@ public class FollowRunnable implements Runnable{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
-		System.out.println(blah.getIDs().length);
+		String[] followers = new String[blah.getIDs().length];
+		for(int i = 0; i < blah.getIDs().length; i++){
+		    followers[i] = String.valueOf(blah.getIDs()[i]);
+		}
+		DataBaseHandler.addFollowers(index, followers);
 		while(blah.getNextCursor()!=0 && count<14){
 			blah = (bird.getFollowersIDs(blah.getNextCursor()));
-			System.out.println(blah.getIDs().length);
+			followers = new String[blah.getIDs().length];
+			for(int i = 0; i < blah.getIDs().length; i++){
+			    followers[i] = String.valueOf(blah.getIDs()[i]);
+			}
+			DataBaseHandler.addFollowers(index, followers);
 			count++;
 		}
 	}
@@ -164,14 +173,5 @@ public class FollowRunnable implements Runnable{
 				e.printStackTrace();
 			}
 		}
-
-//		try {
-//			followAndFavoriteUsers();
-//			unfollowUsers();
-//		} catch (TwitterException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 	}
 }
