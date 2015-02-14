@@ -105,24 +105,22 @@ public class DataBaseHandler{
 		//TODO
 	}
 	
-	public static synchronized String[] getToFollow(int index, int amount) throws UnknownHostException{
+	public static synchronized String getToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		String[] toFollowArr = null;
 		BasicDBObject query = new BasicDBObject("_id", index);
 		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("to_follow", -1));
-		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", amount));
+		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", 1));
 		DBCursor cursor = dbCollection.find(query,slice);
 		BasicDBList toFollowList = (BasicDBList) cursor.next().get("to_follow");
 		cursor.close();		
 		toFollowArr = Arrays.copyOf(toFollowList.toArray(), toFollowList.toArray().length, String[].class);
 		addWhitelist(index, toFollowArr);
-		for(int i = 0; i<amount; i++){
-			dbCollection.update(query, pop);
-		}
+		dbCollection.update(query, pop);
 		mongoClient.close();
-		return toFollowArr;
+		return toFollowArr[0];
 	}
 	
 	

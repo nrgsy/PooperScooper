@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -28,18 +29,102 @@ public class MongoFuckAround {
 //		
 //		dbCollection.insert(test_insert);
 		
-		String[] stringarr = new String[]{"Happy", "Birthday", "To","You","Donkeybrains","Happy","Dicknuts"};
-		List<Object> StringList = new ArrayList<Object>() ;
-		BasicDBObject query = new BasicDBObject("_id",1);
-		BasicDBList list = new BasicDBList();
-		StringList.add("Happy");
-		StringList.add("You");
-		StringList.add("Dicknuts");
 		
-		BasicDBObject slice = new BasicDBObject("$pull",
-				new BasicDBObject("test_Arr", StringList));
 		
-		System.out.println(dbCollection.update(query, slice));
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				MongoClient mongoClient;
+				try {
+					mongoClient = new MongoClient();
+				
+				DB db = mongoClient.getDB("foo");
+				DBCollection dbCollection = db.getCollection("foo");
+				BasicDBObject query = new BasicDBObject("_id", 1);
+				BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("test_arr", new Date()));
+				dbCollection.update(query, ele);
+				//mongoClient.close();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}},0L, 1100);
+		
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				MongoClient mongoClient;
+				try {
+					mongoClient = new MongoClient();
+				
+				DB db = mongoClient.getDB("foo");
+				DBCollection dbCollection = db.getCollection("foo");
+				BasicDBObject query = new BasicDBObject("_id", 1);
+				BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("test_arr", new Date().getTime()));
+				dbCollection.update(query, ele);
+				//mongoClient.close();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}},0L, 1000);
+		
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				MongoClient mongoClient;
+				try {
+					mongoClient = new MongoClient();
+				
+				DB db = mongoClient.getDB("foo");
+				DBCollection dbCollection = db.getCollection("foo");
+				BasicDBObject query = new BasicDBObject("_id", 1);
+				BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("test_arr", new Date().getTime()));
+				dbCollection.update(query, ele);
+				//mongoClient.close();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}},0L, 900);
+		
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				MongoClient mongoClient;
+				try {
+					mongoClient = new MongoClient();
+				
+				DB db = mongoClient.getDB("foo");
+				DBCollection dbCollection = db.getCollection("foo");
+				BasicDBObject query = new BasicDBObject("_id", 1);
+				BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("test_arr", new Date().getTime()));
+				dbCollection.update(query, ele);
+				//mongoClient.close();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}},0L, 800);
+		
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				MongoClient mongoClient;
+				try {
+					mongoClient = new MongoClient();
+				
+				DB db = mongoClient.getDB("foo");
+				DBCollection dbCollection = db.getCollection("foo");
+				BasicDBObject query = new BasicDBObject("_id", 1);
+				BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("test_arr", new Date().getTime()));
+				dbCollection.update(query, ele);
+				//mongoClient.close();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}},0L, 700);
 		
 	}
 

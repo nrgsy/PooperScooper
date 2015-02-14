@@ -35,7 +35,7 @@ public class FollowRunnable implements Runnable{
 	
 	//this constructor only for testing
 	public FollowRunnable(int lol){
-		if(lol ==1){
+		if(lol == 1){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
@@ -59,10 +59,8 @@ public class FollowRunnable implements Runnable{
 
 	
 	public void followAndFavoriteUsers() throws TwitterException{
-		if(DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, "toFollow")!=0){
-			//parsing long not necessary, creatFriendship() method can take string args.
-			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
-			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
+		if(DataBaseHandler.getCollectionSize("SchwergsAccounts", "toFollow")!=0){
+			bird.createFavorite(bird.createFriendship(DataBaseHandler.getToFollow(index)).getStatus().getId());
 		}
 	}
 	
@@ -70,13 +68,14 @@ public class FollowRunnable implements Runnable{
 	public void unfollowUsers(){
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
-		
-		//TODO find optimal ratio and get the explicit amount to unfollow, so that it could be
-		//put into an array and passed into popMultipleFollowing
-		
-		while(3>sizeFollowers/sizeFollowing){
-			bird.destroyFriendship(DataBaseHandler.);
-			sizeFollowing--;
+		//TODO get a ratio
+		double ratio = 0;
+		int amount = (int) (sizeFollowing - (sizeFollowers/ratio));
+		if(ratio<(sizeFollowing/sizeFollowers) && amount!=0){
+			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, amount);
+			for(int i =0; i<unfollowArr.length; i++){
+				bird.destroyFriendship(unfollowArr[i]);
+			}
 		}
 	}
 	
@@ -175,10 +174,4 @@ public class FollowRunnable implements Runnable{
 //		}
 		
 	}
-	
-	public static void main(String[]args){
-		new Thread(new FollowRunnable(1)).start();
-	}
-
-
 }
