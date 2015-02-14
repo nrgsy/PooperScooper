@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +36,7 @@ public class FollowRunnable implements Runnable{
 	
 	//this constructor only for testing
 	public FollowRunnable(int lol){
-		if(lol ==1){
+		if(lol == 1){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
@@ -56,24 +57,26 @@ public class FollowRunnable implements Runnable{
 			bird = tf.getInstance();
 		}
 	}
-	
+
 	
 	public void followAndFavoriteUsers() throws TwitterException{
-		if(DataBaseHandler.getCollectionSize("toFollow")!=0){
-			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
-			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
-			/*DAL addWhitelist(String.valueOf(to_follow))*/
-			/*DAL addFollowing(String.valueOf(to_follow))*/
+		if(DataBaseHandler.getCollectionSize("SchwergsAccounts", "toFollow")!=0){
+			bird.createFavorite(bird.createFriendship(DataBaseHandler.getToFollow(index)).getStatus().getId());
 		}
 	}
 	
 	//done in bulk, number unfollowed is respective to follower:following
 	public void unfollowUsers(){
-		int sizeFollowers = /*DAL.sizeFollowers*/;
-		int sizeFollowing = /*DAL.sizeFollowing*/;
-		while(3>sizeFollowers/sizeFollowing){
-			bird.destroyFriendship(/*DAL.popFollowing*/);
-			sizeFollowing--;
+		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
+		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
+		//TODO get a ratio
+		double ratio = 0;
+		int amount = (int) (sizeFollowing - (sizeFollowers/ratio));
+		if(ratio<(sizeFollowing/sizeFollowers) && amount!=0){
+			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, amount);
+			for(int i =0; i<unfollowArr.length; i++){
+				bird.destroyFriendship(unfollowArr[i]);
+			}
 		}
 	}
 	
@@ -126,10 +129,18 @@ public class FollowRunnable implements Runnable{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
-		System.out.println(blah.getIDs().length);
+		String[] followers = new String[blah.getIDs().length];
+		for(int i = 0; i < blah.getIDs().length; i++){
+		    followers[i] = String.valueOf(blah.getIDs()[i]);
+		}
+		DataBaseHandler.addFollowers(index, followers);
 		while(blah.getNextCursor()!=0 && count<14){
 			blah = (bird.getFollowersIDs(blah.getNextCursor()));
-			System.out.println(blah.getIDs().length);
+			followers = new String[blah.getIDs().length];
+			for(int i = 0; i < blah.getIDs().length; i++){
+			    followers[i] = String.valueOf(blah.getIDs()[i]);
+			}
+			DataBaseHandler.addFollowers(index, followers);
 			count++;
 		}
 	}
@@ -162,20 +173,5 @@ public class FollowRunnable implements Runnable{
 				e.printStackTrace();
 			}
 		}
-
-//		try {
-//			followAndFavoriteUsers();
-//			unfollowUsers();
-//		} catch (TwitterException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 	}
-	
-	public static void main(String[]args){
-		new Thread(new FollowRunnable(1)).start();
-	}
-
-
 }

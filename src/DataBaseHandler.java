@@ -105,27 +105,43 @@ public class DataBaseHandler{
 		//TODO
 	}
 	
-	public static synchronized String[] getToFollow(int index, int amount) throws UnknownHostException{
+	public static synchronized String getToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		String[] toFollowArr = null;
 		BasicDBObject query = new BasicDBObject("_id", index);
-		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", amount));
+		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("to_follow", -1));
+		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", 1));
 		DBCursor cursor = dbCollection.find(query,slice);
 		BasicDBList toFollowList = (BasicDBList) cursor.next().get("to_follow");
-		cursor.close();
-		
-		
-//Be sure to add them to whitelist and remove from toFollow
-		
-		
+		cursor.close();		
 		toFollowArr = Arrays.copyOf(toFollowList.toArray(), toFollowList.toArray().length, String[].class);
+		addWhitelist(index, toFollowArr);
+		dbCollection.update(query, pop);
 		mongoClient.close();
-		return toFollowArr;
+		return toFollowArr[0];
 	}
 	
 	
+	public static synchronized String[] popMultipleFollowing(int index, int amount) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		String[] toUnfollowArr = null;
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		BasicDBObject slice = new BasicDBObject("following", new BasicDBObject("$slice", amount));
+		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("following", -1));
+		DBCursor cursor = dbCollection.find(query, slice);
+		BasicDBList toUnfollowList = (BasicDBList) cursor.next().get("following");
+		cursor.close();
+		toUnfollowArr = Arrays.copyOf(toUnfollowList.toArray(), toUnfollowList.toArray().length, String[].class);
+		for(int i = 0; i<amount; i++){
+			dbCollection.update(query, pop);
+		}
+		mongoClient.close();
+		return toUnfollowArr;
+	}
 	
 ////// Start region: get array size
 	public static synchronized int getSchwergsyAccountArraySize(int index, String column) {
