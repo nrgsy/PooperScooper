@@ -8,8 +8,8 @@ public class Director {
 	public static void main(String[]args) throws UnknownHostException, Exception{
 		long scrapetime = 86400000;
 
-		for(int id =0;id< DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME);id++){
-			final AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(GlobalStuff.DATABASE_NAME, GlobalStuff.COLLECTION_NAME, id);
+		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
+			final AuthorizationInfo info = DataBaseHandler.getAuthorizationInfo(id);
 
 			long followtime_min = 86400L;
 			long followtime_max = 123430L;
