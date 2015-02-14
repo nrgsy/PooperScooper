@@ -56,23 +56,26 @@ public class FollowRunnable implements Runnable{
 			bird = tf.getInstance();
 		}
 	}
-	
+
 	
 	public void followAndFavoriteUsers() throws TwitterException{
 		if(DataBaseHandler.getCollectionSize(GlobalStuff.DATABASE_NAME, "toFollow")!=0){
+			//parsing long not necessary, creatFriendship() method can take string args.
 			long to_follow = Long.parseLong(/*DAL pop_toFollow*/, 10);
 			bird.createFavorite(bird.createFriendship(to_follow).getStatus().getId());
-			/*DAL addWhitelist(String.valueOf(to_follow))*/
-			/*DAL addFollowing(String.valueOf(to_follow))*/
 		}
 	}
 	
 	//done in bulk, number unfollowed is respective to follower:following
 	public void unfollowUsers(){
-		int sizeFollowers = /*DAL.sizeFollowers*/;
-		int sizeFollowing = /*DAL.sizeFollowing*/;
+		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
+		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
+		
+		//TODO find optimal ratio and get the explicit amount to unfollow, so that it could be
+		//put into an array and passed into popMultipleFollowing
+		
 		while(3>sizeFollowers/sizeFollowing){
-			bird.destroyFriendship(/*DAL.popFollowing*/);
+			bird.destroyFriendship(DataBaseHandler.);
 			sizeFollowing--;
 		}
 	}

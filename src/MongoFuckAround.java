@@ -1,7 +1,9 @@
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -27,16 +29,17 @@ public class MongoFuckAround {
 //		dbCollection.insert(test_insert);
 		
 		String[] stringarr = new String[]{"Happy", "Birthday", "To","You","Donkeybrains","Happy","Dicknuts"};
-		String[] testArr = new String[]{};
-		BasicDBObject query = new BasicDBObject("_id", 1);
-		BasicDBObject slice = new BasicDBObject("test_Arr",
-				new BasicDBObject("$slice", 3));
-		DBCursor cursor = dbCollection.find(query,slice);
-		BasicDBList e = (BasicDBList) cursor.next().get("test_Arr");
-		testArr = Arrays.copyOf(e.toArray(), e.toArray().length, String[].class);
-		for(int i=0; i<e.toArray().length; i++){
-			System.out.println(testArr[i]);
-		}
+		List<Object> StringList = new ArrayList<Object>() ;
+		BasicDBObject query = new BasicDBObject("_id",1);
+		BasicDBList list = new BasicDBList();
+		StringList.add("Happy");
+		StringList.add("You");
+		StringList.add("Dicknuts");
+		
+		BasicDBObject slice = new BasicDBObject("$pull",
+				new BasicDBObject("test_Arr", StringList));
+		
+		System.out.println(dbCollection.update(query, slice));
 		
 	}
 
