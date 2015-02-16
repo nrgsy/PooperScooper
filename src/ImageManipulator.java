@@ -10,12 +10,21 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 
+/**
+ * @author Bojangles and McChrpchrp
+ *
+ */
 public class ImageManipulator {
 
 	File img = null;
 	long inc = 0;
 
 
+	/**
+	 * @param URI
+	 * @return
+	 * @throws FuckinUpKPException
+	 */
 	public boolean isValid(String URI) throws FuckinUpKPException{
 		Image image = null;
 		
@@ -59,7 +68,13 @@ public class ImageManipulator {
 
 
 	
-	//Gets image link, saves image, returns image location
+	/**
+	 * Gets image link, saves image, returns image location
+	 * 
+	 * @param imgsrc
+	 * @return
+	 * @throws FuckinUpKPException
+	 */
 	public String getImageFile(String imgsrc) throws FuckinUpKPException{
 
 		Image image = null;

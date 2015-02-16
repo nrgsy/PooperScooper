@@ -5,8 +5,17 @@ import java.util.Timer;
 import com.mongodb.BasicDBObject;
 
 
+/**
+ * @author Bojangles and McChrpchrp
+ *
+ */
 public class Director {
 
+	/**
+	 * @param args
+	 * @throws UnknownHostException
+	 * @throws Exception
+	 */
 	public static void main(String[]args) throws UnknownHostException, Exception{
 		long scrapetime = 86400000;
 

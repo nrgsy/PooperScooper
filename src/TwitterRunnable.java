@@ -11,9 +11,19 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 
+/**
+ * @author Bojangles and McChrpchrp
+ *
+ */
 public class TwitterRunnable implements Runnable {
 	private Twitter bird = null;
 
+	/**
+	 * @param OAuthConsumerKey
+	 * @param OAuthConsumerSecret
+	 * @param OAuthAccessToken
+	 * @param OAuthAccessTokenSecret
+	 */
 	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
@@ -26,7 +36,9 @@ public class TwitterRunnable implements Runnable {
 	}
 
 
-	// temp testing constructor
+	/**
+	 * temp testing constructor
+	 */
 	public TwitterRunnable(){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
@@ -39,7 +51,14 @@ public class TwitterRunnable implements Runnable {
 	}
 
 
-	//handles actual uploading to twitter
+	/**
+	 * handles actual uploading to twitter
+	 * 
+	 * @param file
+	 * @param message
+	 * @param twitter
+	 * @throws Exception
+	 */
 	public void uploadPicTwitter(File file, String message,Twitter twitter) throws Exception  {
 		twitter = bird;
 		try{
@@ -53,7 +72,9 @@ public class TwitterRunnable implements Runnable {
 	}
 
 
-	//handles downloading image, updating db, and deleting image after upload
+	/**
+	 * 	handles downloading image, updating db, and deleting image after upload
+	 */
 	public void uploadPic(){
 		ImageManipulator imgman = new ImageManipulator();
 		Twitter blah = null;
@@ -77,6 +98,9 @@ public class TwitterRunnable implements Runnable {
 
 
 
+	/**
+	 * 
+	 */
 	public void prettyRateLimit(){
 		try {
 			for(Map.Entry<String, RateLimitStatus> element : bird.getRateLimitStatus().entrySet()){
@@ -89,6 +113,9 @@ public class TwitterRunnable implements Runnable {
 	}
 
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run(){
 		//Only run when not 3AM to allow database maintenance
