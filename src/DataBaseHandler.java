@@ -1,8 +1,8 @@
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
-
+import java.util.Map.Entry;
+import java.util.Set;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -182,7 +182,7 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void addNewStatistic(int index, int unfollows, int newFollows) throws UnknownHostException, FuckinUpKPException {
 		MongoClient mongoClient = null;
-		
+
 
 		long now = new Date().getTime();
 		long oldStatCreationTime = now;
@@ -214,7 +214,7 @@ public class DataBaseHandler{
 
 		addElementToSchwergsArray(index, stat, "statistics");
 	}
-	
+
 	//////End region: Add to array
 
 	/**
@@ -225,26 +225,28 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void updateFollowers(int index) throws UnknownHostException, FuckinUpKPException {
 
+
 		
-//TODO get the real fresh followers from twitter instead of this ass dummy data		
+		
+		//TODO get the real fresh followers from twitter instead of this ass dummy data		
 		BasicDBList freshFollowerList = new BasicDBList();
 		freshFollowerList.add("f1");
 		freshFollowerList.add("f2");
-		
-//TODO will the twitter id's be Strings or ints?
+
+		//TODO will the twitter id's be Strings or ints?
 		String[] freshFollowers = (String[]) freshFollowerList.toArray();	
 		String[] storedFollowers = (String[]) getSchwergsyAccountArray(index, "followers").toArray();
 
 		int newFollows = 0;
 		int unfollows = 0;
-		
+
 		//getting the number of new followers and people that unfollowed
 		int i = 0;
 		int j = 0;
-		
+
 		while(i < storedFollowers.length) {
-			
-//TODO change to == if elements are ints and not Strings
+
+			//TODO change to == if elements are ints and not Strings
 			if (storedFollowers[i].equals(freshFollowers[j])) {
 				i++;
 				j++;
@@ -258,14 +260,16 @@ public class DataBaseHandler{
 			newFollows++;
 			j++;
 		}
-		
+
 		addNewStatistic(index, unfollows, newFollows);
-				
-//TODO now actually replace the follower list in the database with freshFollowerList
+
+		//TODO now actually replace the follower list in the database with freshFollowerList
+		
+		
+		
+		
 		
 	}
-	
-	
 
 	/**
 	 * @param index
@@ -323,14 +327,14 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return toFollowArr[0];
 	}
-	
+
 	/**
 	 * @param index the Schwergsy Account to get the list from
 	 * @param column the specific list to return
 	 * @return
 	 */
 	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) {
-		
+
 		MongoClient mongoClient = null;
 
 		try {
@@ -351,7 +355,7 @@ public class DataBaseHandler{
 		finally{
 			mongoClient.close();
 		}
-		
+
 		return null;
 	}
 
@@ -490,8 +494,6 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-
-
 	/**
 	 * @param index the id of the Schwergsy account
 	 * @return a BasicDBObject containing the customerSecret, customerKey, authorizationSecret, authorizationKey,
@@ -542,4 +544,85 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return count;
 	}
+
+	/**
+	 * Print all the elements of Schwergsy account nicely to the console
+	 * @param schwergsyAccountName
+	 */
+	public static synchronized void prettyPrintAccount(String schwergsyAccountName) {		
+		MongoClient mongoClient = null;
+
+		try {
+			mongoClient = new MongoClient();
+			DB db = mongoClient.getDB("Schwergsy");
+			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+			BasicDBObject query = new BasicDBObject("name", schwergsyAccountName);
+			DBCursor cursor = dbCollection.find(query);
+			BasicDBObject account = (BasicDBObject) cursor.next();
+			cursor.close();
+			Set<Entry<String, Object>> entrySet = account.entrySet();
+
+			for (Entry<String, Object> e : entrySet) {
+				System.out.println(e.getKey() + " = " + e.getValue() + "\n");
+			}
+		} 		
+		catch (Exception e) {
+			System.out.println("Error printing");
+			e.printStackTrace();
+		}
+		finally{
+			mongoClient.close();
+		}		
+	}
+
+	/**
+	 * print the statistics from the given account real nicely
+	 * @param schwergsyAccountName
+	 */
+	public static synchronized void prettyPrintStatistics(String schwergsyAccountName) {		
+
+		MongoClient mongoClient = null;
+
+		try {
+			mongoClient = new MongoClient();
+			DB db = mongoClient.getDB("Schwergsy");
+			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+			BasicDBObject query = new BasicDBObject("name", schwergsyAccountName);
+			DBCursor cursor = dbCollection.find(query);
+			BasicDBObject account = (BasicDBObject) cursor.next();
+			BasicDBList statList = (BasicDBList) account.get("statistics");
+			
+			System.out.println("Statistics for account " + account.get("name") + ":\n");
+			
+			cursor.close();
+			
+			for (Object obj : statList) {
+				
+				System.out.println("----------------------------------");
+				
+				BasicDBObject stat = (BasicDBObject) obj;
+				Set<Entry<String, Object>> entrySet = stat.entrySet();
+				for (Entry<String, Object> e : entrySet) {
+					System.out.println(e.getKey() + " = " + e.getValue());
+				}
+			}
+		} 		
+		catch (Exception e) {
+			System.out.println("Error printing");
+			e.printStackTrace();
+		}
+
+		finally{
+			mongoClient.close();
+		}		
+	}
 }
+
+
+
+
+
+
+
+
+

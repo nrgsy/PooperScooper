@@ -25,11 +25,12 @@ public class MongoFuckAround {
 //		
 //		DataBaseHandler.insertSchwergsyAccount("thisIsTheID", "Thisisthename", "cussssh", "cuskey", "authshhh", "authkey", true, bdbl1, bdbl2, bdbl3, bdbl4, bdbl5, new BasicDBList());
 		
-//		DataBaseHandler.addNewStatistic(0, 56, 78);
-//		System.out.println(DataBaseHandler.getSchwergsyAccountArraySize(0, "statistics"));
+		//DataBaseHandler.addNewStatistic(0, 0, 1);
+		//System.out.println(DataBaseHandler.getSchwergsyAccountArraySize(0, "statistics"));
 		
+		DataBaseHandler.prettyPrintAccount("Thisisthename");
 
-
+		DataBaseHandler.prettyPrintStatistics("Thisisthename");
 
 		
 
