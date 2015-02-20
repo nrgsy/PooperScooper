@@ -10,9 +10,17 @@ import org.jsoup.select.Elements;
 
 
 
+/**
+ * @author Bojangles and McChrpchrp
+ *
+ */
 public class RedditScraper implements Runnable{
 
 
+	/**
+	 * @param init
+	 * @throws FuckinUpKPException
+	 */
 	public void contentSnatch(boolean init) throws FuckinUpKPException{
 		ArrayList<String> captions = new ArrayList<String>();
 		ArrayList<String> imglinks = new ArrayList<String>(); 
@@ -74,10 +82,16 @@ public class RedditScraper implements Runnable{
 		}
 	}
 
+	/**
+	 * @throws FuckinUpKPException
+	 */
 	public void contentSnatch() throws FuckinUpKPException{
 		contentSnatch(false);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		try {

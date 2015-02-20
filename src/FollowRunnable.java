@@ -19,11 +19,21 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 
+/**
+ * @author Bojangles and McChrpchrp
+ *
+ */
 public class FollowRunnable implements Runnable{
 	private Twitter bird;
 	int index;
 	
-	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
+	/**
+	 * @param OAuthConsumerKey
+	 * @param OAuthConsumerSecret
+	 * @param OAuthAccessToken
+	 * @param OAuthAccessTokenSecret
+	 */
+	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey(OAuthConsumerKey)
@@ -37,6 +47,9 @@ public class FollowRunnable implements Runnable{
 	
 	
 	//this constructor only for testing
+	/**
+	 * @param lol
+	 */
 	public FollowRunnable(int lol){
 		if(lol == 1){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -61,14 +74,23 @@ public class FollowRunnable implements Runnable{
 	}
 
 	
-	public void followAndFavoriteUsers() throws TwitterException, UnknownHostException{
+	/**
+	 * @throws TwitterException
+	 */
+	public void followAndFavoriteUsers() throws TwitterException{
+
+//TODO use getFollowersSize in dbhandler		
+
 		if(DataBaseHandler.getCollectionSize("SchwergsAccounts", "toFollow")!=0){
 			bird.createFavorite(bird.createFriendship(DataBaseHandler.getToFollow(index)).getStatus().getId());
 		}
 	}
 	
 	//done in bulk, number unfollowed is respective to follower:following
-	public void unfollowUsers() throws UnknownHostException, TwitterException{
+	/**
+	 * 
+	 */
+	public void unfollowUsers(){
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
 		//TODO get a ratio
@@ -84,6 +106,9 @@ public class FollowRunnable implements Runnable{
 	}
 	
 	//Gets user timeline of a big account, gets retweeters, appends to to_follow in db
+	/**
+	 * 
+	 */
 	public void update_toFollow(){
 		List<Status> statuses = null;
 		String longToString = "";
@@ -128,7 +153,11 @@ public class FollowRunnable implements Runnable{
 
 	}
 	
-	public void updateFollowers(boolean init) throws TwitterException, UnknownHostException{
+	/**
+	 * @param init
+	 * @throws TwitterException
+	 */
+	public void updateFollowers(boolean init) throws TwitterException{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
@@ -148,10 +177,10 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 
-	
-	
-	//TODO update
-	public void updateFollowing() throws TwitterException{
+	/**
+	 * @throws TwitterException
+	 */
+	public void initUpdateFollowing() throws TwitterException{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFriendsIDs(-1);
@@ -163,8 +192,9 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 
-	
-	
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		//Only run when not 3AM to allow database maintenance
