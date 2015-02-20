@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -22,6 +23,10 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 */
 	public static synchronized String[] getRandomAssContent() throws UnknownHostException{
+
+		//TODO keep the ass content sorted by date last used so that you only scoop a random ass-content from the section
+		//that hasn't been used in the last x days.
+
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("AssContent");
@@ -226,16 +231,23 @@ public class DataBaseHandler{
 	public static synchronized void updateFollowers(int index) throws UnknownHostException, FuckinUpKPException {
 
 
-		
-		
+
+
 		//TODO get the real fresh followers from twitter instead of this ass dummy data		
 		BasicDBList freshFollowerList = new BasicDBList();
-		freshFollowerList.add("f1");
-		freshFollowerList.add("f2");
+		freshFollowerList.add(1L);
+		freshFollowerList.add(6L);
+		freshFollowerList.add(7L);
+		freshFollowerList.add(8L);
+		freshFollowerList.add(9L);
+		freshFollowerList.add(10L);
+		freshFollowerList.add(11L);
+		freshFollowerList.add(12L);
 
-		//TODO will the twitter id's be Strings or ints?
-		String[] freshFollowers = (String[]) freshFollowerList.toArray();	
-		String[] storedFollowers = (String[]) getSchwergsyAccountArray(index, "followers").toArray();
+		Long[] l = new Long[0];
+
+		Long[] freshFollowers = freshFollowerList.toArray(l);
+		Long[] storedFollowers = getSchwergsyAccountArray(index, "followers").toArray(l);
 
 		int newFollows = 0;
 		int unfollows = 0;
@@ -246,8 +258,7 @@ public class DataBaseHandler{
 
 		while(i < storedFollowers.length) {
 
-			//TODO change to == if elements are ints and not Strings
-			if (storedFollowers[i].equals(freshFollowers[j])) {
+			if (storedFollowers[i] == freshFollowers[j]) {
 				i++;
 				j++;
 			}
@@ -263,12 +274,16 @@ public class DataBaseHandler{
 
 		addNewStatistic(index, unfollows, newFollows);
 
-		//TODO now actually replace the follower list in the database with freshFollowerList
-		
-		
-		
-		
-		
+		//Now replace the follower list in the database with freshFollowerList
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
+		dbCollection.update(
+				new BasicDBObject("_id", index),
+				new BasicDBObject("$set", new BasicDBObject("followers", freshFollowerList)));
+
+		mongoClient.close();
+
 	}
 
 	/**
@@ -348,14 +363,13 @@ public class DataBaseHandler{
 			return SchwergsList;
 		} 		
 		catch (Exception e) {
-			System.out.println("Error getSchwergsyAccountArraySize");
+			System.out.println("Error in getting " + column);
 			e.printStackTrace();
 		}
 
 		finally{
 			mongoClient.close();
 		}
-
 		return null;
 	}
 
@@ -590,21 +604,95 @@ public class DataBaseHandler{
 			BasicDBObject query = new BasicDBObject("name", schwergsyAccountName);
 			DBCursor cursor = dbCollection.find(query);
 			BasicDBObject account = (BasicDBObject) cursor.next();
-			BasicDBList statList = (BasicDBList) account.get("statistics");
-			
-			System.out.println("Statistics for account " + account.get("name") + ":\n");
-			
 			cursor.close();
-			
-			for (Object obj : statList) {
-				
-				System.out.println("----------------------------------");
-				
-				BasicDBObject stat = (BasicDBObject) obj;
-				Set<Entry<String, Object>> entrySet = stat.entrySet();
+			BasicDBList statList = (BasicDBList) account.get("statistics");
+
+			if (statList.size() > 0) {
+
+				System.out.println("Statistics for account " + account.get("name") + ":\n");
+				Set<Entry<String, Object>> entrySet = ((BasicDBObject) statList.get(0)).entrySet();
+				int columnWidth = 32;
+
+				//print the stat names
 				for (Entry<String, Object> e : entrySet) {
-					System.out.println(e.getKey() + " = " + e.getValue());
+
+					String key = e.getKey();
+					int textWidth = key.length();
+
+					//the number of spaces to insert on each side
+					int padding = (columnWidth - textWidth)/2;
+
+					if (padding < 0) {
+						System.out.println("String to large for column");
+					}
+
+					printNSpaces(padding);
+					System.out.print(key);
+					//need this if to fix off by one misprints
+					if (textWidth % 2 == 0)
+						printNSpaces(padding - 1);
+					else
+						printNSpaces(padding);
+					System.out.print("|");
+
 				}
+				System.out.println("\n");
+
+				//print the values for each stat
+				for (Object obj : statList) {
+
+					BasicDBObject stat = (BasicDBObject) obj;
+					entrySet = stat.entrySet();
+					boolean isDate = true;
+					boolean isTime = true;
+					
+					for (Entry<String, Object> e : entrySet) {
+
+						String value = null;
+						
+						//convert to millisecond date to something more readable
+						if(isDate) {
+							Long millisecondDate = (Long) e.getValue();
+							Date date = new Date(millisecondDate);
+							value = date.toString();
+							isDate = false;
+						}
+						else if (isTime) {
+							float millisecondTime = ((Long) e.getValue()).floatValue();
+							int hours = (int) (millisecondTime / (60 * 60 * 1000));
+							int mins = (int) (millisecondTime / (60 * 1000)) % 60;
+							float secs = Math.round(((millisecondTime / 1000) % 60) * 1000)/1000f;
+							value = hours + ":" + mins + ":" + secs;
+							isTime = false;
+						}
+						else {
+							value = e.getValue().toString();
+						}
+						
+						int textWidth = value.length();
+
+						//the number of spaces to insert on each side
+						int padding = (columnWidth - textWidth)/2;
+
+						if (padding < 0) {
+							System.out.println("String to large for column");
+						}
+
+						printNSpaces(padding);
+						System.out.print(value);
+
+						//need this if to fix off by one misprints
+						if (textWidth % 2 == 0)
+							printNSpaces(padding - 1);
+						else
+							printNSpaces(padding);
+						System.out.print("|");
+					}
+					System.out.println();
+				}
+			}
+			else {
+				System.out.println("No stats have been entered yet");
 			}
 		} 		
 		catch (Exception e) {
@@ -616,6 +704,13 @@ public class DataBaseHandler{
 			mongoClient.close();
 		}		
 	}
+
+	public static synchronized void printNSpaces(int n) {	
+		for (int i = 0; i < n; i++) {
+			System.out.print(" ");
+		}
+	}
+
 }
 
 
