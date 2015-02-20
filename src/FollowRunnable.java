@@ -1,3 +1,4 @@
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -7,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import twitter4j.IDs;
 import twitter4j.PagableResponseList;
 import twitter4j.RateLimitStatus;
@@ -21,14 +21,16 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class FollowRunnable implements Runnable{
 	private Twitter bird;
+	int index;
 	
-	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
+	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey(OAuthConsumerKey)
 		  .setOAuthConsumerSecret(OAuthConsumerSecret)
 		  .setOAuthAccessToken(OAuthAccessToken)
 		  .setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
+		this.index = index;
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
 	}
@@ -59,19 +61,20 @@ public class FollowRunnable implements Runnable{
 	}
 
 	
-	public void followAndFavoriteUsers() throws TwitterException{
+	public void followAndFavoriteUsers() throws TwitterException, UnknownHostException{
 		if(DataBaseHandler.getCollectionSize("SchwergsAccounts", "toFollow")!=0){
 			bird.createFavorite(bird.createFriendship(DataBaseHandler.getToFollow(index)).getStatus().getId());
 		}
 	}
 	
 	//done in bulk, number unfollowed is respective to follower:following
-	public void unfollowUsers(){
+	public void unfollowUsers() throws UnknownHostException, TwitterException{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
 		//TODO get a ratio
 		double ratio = 0;
 		int amount = (int) (sizeFollowing - (sizeFollowers/ratio));
+		
 		if(ratio<(sizeFollowing/sizeFollowers) && amount!=0){
 			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, amount);
 			for(int i =0; i<unfollowArr.length; i++){
@@ -125,7 +128,7 @@ public class FollowRunnable implements Runnable{
 
 	}
 	
-	public void updateFollowers(boolean init) throws TwitterException{
+	public void updateFollowers(boolean init) throws TwitterException, UnknownHostException{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
@@ -134,7 +137,7 @@ public class FollowRunnable implements Runnable{
 		    followers[i] = String.valueOf(blah.getIDs()[i]);
 		}
 		DataBaseHandler.addFollowers(index, followers);
-		while(blah.getNextCursor()!=0 && count<14){
+		while(blah.getNextCursor()!=0 && count<14 && init){
 			blah = (bird.getFollowersIDs(blah.getNextCursor()));
 			followers = new String[blah.getIDs().length];
 			for(int i = 0; i < blah.getIDs().length; i++){
@@ -145,7 +148,10 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 
-	public void initUpdateFollowing() throws TwitterException{
+	
+	
+	//TODO update
+	public void updateFollowing() throws TwitterException{
 		int count = 0;
 		IDs blah;
 		blah = bird.getFriendsIDs(-1);
@@ -157,6 +163,8 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 
+	
+	
 	@Override
 	public void run() {
 		//Only run when not 3AM to allow database maintenance
@@ -167,7 +175,7 @@ public class FollowRunnable implements Runnable{
 		if(hours != 3){
 			try {
 				updateFollowers(true);
-				initUpdateFollowing();
+				updateFollowing();
 			} catch (TwitterException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
