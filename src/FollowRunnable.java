@@ -87,8 +87,8 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 	
-	//done in bulk, number unfollowed is respective to follower:following
 	/**
+	 * done in bulk, number unfollowed is respective to follower:following
 	 * @throws UnknownHostException 
 	 * @throws TwitterException 
 	 * 
@@ -158,31 +158,7 @@ public class FollowRunnable implements Runnable{
 //		}
 //
 //	}
-	
-	/**
-	 * @param init
-	 * @throws TwitterException
-	 * @throws UnknownHostException 
-	 */
-//	public void updateFollowers(boolean init) throws TwitterException, UnknownHostException{
-//		int count = 0;
-//		IDs blah;
-//		blah = bird.getFollowersIDs(-1);
-//		String[] followers = new String[blah.getIDs().length];
-//		for(int i = 0; i < blah.getIDs().length; i++){
-//		    followers[i] = String.valueOf(blah.getIDs()[i]);
-//		}
-//		DataBaseHandler.addFollowers(index, followers);
-//		while(blah.getNextCursor()!=0 && count<14 && init){
-//			blah = (bird.getFollowersIDs(blah.getNextCursor()));
-//			followers = new String[blah.getIDs().length];
-//			for(int i = 0; i < blah.getIDs().length; i++){
-//			    followers[i] = String.valueOf(blah.getIDs()[i]);
-//			}
-//			DataBaseHandler.addFollowers(index, followers);
-//			count++;
-//		}
-//	}
+
 
 	/**
 	 * @throws TwitterException
