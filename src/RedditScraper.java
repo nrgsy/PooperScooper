@@ -14,6 +14,7 @@ import org.jsoup.select.Elements;
  * @author Bojangles and McChrpchrp
  *
  */
+
 public class RedditScraper implements Runnable{
 
 

@@ -2,7 +2,6 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
-
 import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -118,19 +117,10 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run(){
-		//Only run when not 3AM to allow database maintenance
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		int hours = calendar.get(Calendar.HOUR_OF_DAY);
-
-		if(hours != 3){
-			try {
-				uploadPic();	
-			} catch (Exception e) {
-				System.out.println("TwitterRunnable b trippin");
-				e.printStackTrace();
-			}
-		}
-
+		prettyRateLimit();
+	}
+	
+	public static void main(String[] args){
+		new Thread(new TwitterRunnable()).start();
 	}
 }

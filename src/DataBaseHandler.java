@@ -314,7 +314,7 @@ public class DataBaseHandler{
 	/**
 	 * 
 	 * 
-	 * Phal why/what is this doing? why does it just return the first item of toFollowArr? can you write a nice comment? Thonx beb
+	 * Gets one user_id from ToFollow to follow
 	 * 
 	 * 
 	 * 
@@ -323,7 +323,7 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String getToFollow(int index) throws UnknownHostException{
+	public static synchronized String getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
