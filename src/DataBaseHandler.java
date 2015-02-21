@@ -230,7 +230,7 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void updateFollowers(int index) throws UnknownHostException, FuckinUpKPException {
 
-
+		
 
 
 		//TODO get the real fresh followers from twitter instead of this ass dummy data		

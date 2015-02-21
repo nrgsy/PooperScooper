@@ -111,10 +111,14 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 	
+	
+	//TODO can we move this to DataBaseHandler?
+	
 	//Gets user timeline of a big account, gets retweeters, appends to to_follow in db
 	/**
 	 * 
 	 */
+
 	public void update_toFollow(int index){
 		List<Status> statuses = null;
 		String longToString = "";
@@ -158,6 +162,7 @@ public class FollowRunnable implements Runnable{
 		}
 
 	}
+
 	
 	/**
 	 * @param init
