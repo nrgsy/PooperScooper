@@ -102,77 +102,80 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 	
+	
+	//TODO can we move this to DataBaseHandler?
+	
 	//Gets user timeline of a big account, gets retweeters, appends to to_follow in db
 	/**
 	 * 
 	 */
-	public void update_toFollow(){
-		List<Status> statuses = null;
-		String longToString = "";
-		long[] rters_ids;
-		int statuses_size = 15;
-		try {
-			statuses=bird.getUserTimeline(/*DAL get BigAccount*/);
-			if(statuses.size()<=statuses_size){
-				statuses_size = statuses.size();
-			}
-			//If more than 15 tweets are returned, sort by tweets with most retweets first
-			else{
-				Collections.sort(statuses, new Comparator<Status>() {
-					@Override
-					public int compare(Status t1, Status t2) {
-						int rts1 = t1.getRetweetCount();
-						int rts2 = t2.getRetweetCount();
-
-						if (rts1 == rts2)
-							return 0;
-						else if (rts1 > rts2)
-							return 1;
-						else
-							return -1;
-					}
-				});
-			}
-
-			for(int i = 0; i<statuses_size; i++){
-				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
-				for(long user_id : rters_ids){
-					longToString = String.valueOf(user_id);
-					/*DAL add to to_follow*/
-					System.out.println(longToString);
-				}
-			}
-
-		} catch (TwitterException e) {
-			System.out.println("Something in updateFollowers went wrong");
-			e.printStackTrace();
-		}
-
-	}
+//	public void update_toFollow(){
+//		List<Status> statuses = null;
+//		String longToString = "";
+//		long[] rters_ids;
+//		int statuses_size = 15;
+//		try {
+//			statuses=bird.getUserTimeline(/*DAL get BigAccount*/);
+//			if(statuses.size()<=statuses_size){
+//				statuses_size = statuses.size();
+//			}
+//			//If more than 15 tweets are returned, sort by tweets with most retweets first
+//			else{
+//				Collections.sort(statuses, new Comparator<Status>() {
+//					@Override
+//					public int compare(Status t1, Status t2) {
+//						int rts1 = t1.getRetweetCount();
+//						int rts2 = t2.getRetweetCount();
+//
+//						if (rts1 == rts2)
+//							return 0;
+//						else if (rts1 > rts2)
+//							return 1;
+//						else
+//							return -1;
+//					}
+//				});
+//			}
+//
+//			for(int i = 0; i<statuses_size; i++){
+//				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
+//				for(long user_id : rters_ids){
+//					longToString = String.valueOf(user_id);
+//					/*DAL add to to_follow*/
+//					System.out.println(longToString);
+//				}
+//			}
+//
+//		} catch (TwitterException e) {
+//			System.out.println("Something in updateFollowers went wrong");
+//			e.printStackTrace();
+//		}
+//
+//	}
 	
 	/**
 	 * @param init
 	 * @throws TwitterException
 	 */
-	public void updateFollowers(boolean init) throws TwitterException{
-		int count = 0;
-		IDs blah;
-		blah = bird.getFollowersIDs(-1);
-		String[] followers = new String[blah.getIDs().length];
-		for(int i = 0; i < blah.getIDs().length; i++){
-		    followers[i] = String.valueOf(blah.getIDs()[i]);
-		}
-		DataBaseHandler.addFollowers(index, followers);
-		while(blah.getNextCursor()!=0 && count<14){
-			blah = (bird.getFollowersIDs(blah.getNextCursor()));
-			followers = new String[blah.getIDs().length];
-			for(int i = 0; i < blah.getIDs().length; i++){
-			    followers[i] = String.valueOf(blah.getIDs()[i]);
-			}
-			DataBaseHandler.addFollowers(index, followers);
-			count++;
-		}
-	}
+//	public void updateFollowers(boolean init) throws TwitterException{
+//		int count = 0;
+//		IDs blah;
+//		blah = bird.getFollowersIDs(-1);
+//		String[] followers = new String[blah.getIDs().length];
+//		for(int i = 0; i < blah.getIDs().length; i++){
+//		    followers[i] = String.valueOf(blah.getIDs()[i]);
+//		}
+//		DataBaseHandler.addFollowers(index, followers);
+//		while(blah.getNextCursor()!=0 && count<14){
+//			blah = (bird.getFollowersIDs(blah.getNextCursor()));
+//			followers = new String[blah.getIDs().length];
+//			for(int i = 0; i < blah.getIDs().length; i++){
+//			    followers[i] = String.valueOf(blah.getIDs()[i]);
+//			}
+//			DataBaseHandler.addFollowers(index, followers);
+//			count++;
+//		}
+//	}
 
 	/**
 	 * @throws TwitterException
@@ -201,7 +204,6 @@ public class FollowRunnable implements Runnable{
 		
 		if(hours != 3){
 			try {
-				updateFollowers(true);
 				initUpdateFollowing();
 			} catch (TwitterException e) {
 				// TODO Auto-generated catch block
