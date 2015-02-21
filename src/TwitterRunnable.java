@@ -1,6 +1,4 @@
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
@@ -16,6 +14,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 public class TwitterRunnable implements Runnable {
 	private Twitter bird = null;
+	private int index;
 
 	/**
 	 * @param OAuthConsumerKey
@@ -23,7 +22,7 @@ public class TwitterRunnable implements Runnable {
 	 * @param OAuthAccessToken
 	 * @param OAuthAccessTokenSecret
 	 */
-	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
+	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		.setOAuthConsumerKey(OAuthConsumerKey)
@@ -31,6 +30,7 @@ public class TwitterRunnable implements Runnable {
 		.setOAuthAccessToken(OAuthAccessToken)
 		.setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
 		TwitterFactory tf = new TwitterFactory(cb.build());
+		this.index = index;
 		bird = tf.getInstance();
 	}
 
@@ -47,6 +47,7 @@ public class TwitterRunnable implements Runnable {
 		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
+		this.index = 0;
 	}
 
 
