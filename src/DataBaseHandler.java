@@ -98,6 +98,32 @@ public class DataBaseHandler{
 	}
 
 	/**
+	 * replaces the schwergs array in column with the given String Array
+	 * 
+	 * @param index
+	 * @param StringArr
+	 * @param column
+	 * @throws UnknownHostException
+	 */
+	public static synchronized void replaceSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
+
+		BasicDBList freshList = new BasicDBList();		
+		for (int i = 0; i < StringArr.length; i++) {
+			freshList.add(StringArr[i]);
+		}
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
+		dbCollection.update(
+				new BasicDBObject("_id", index),
+				new BasicDBObject("$set", new BasicDBObject("followers", freshList)));
+		mongoClient.close();
+		
+		System.out.println("successfully replaced array: " + column);
+	}
+
+	/**
 	 * Adds the given object to the given list in the a particular schwergsy account
 	 * @param index The index (databse id) of the schwergsy account
 	 * @param element The object that should be a String (a twitter id) or a BasicDBObject (a statistic) 
@@ -228,25 +254,9 @@ public class DataBaseHandler{
 	 * @throws FuckinUpKPException 
 	 * @throws UnknownHostException 
 	 */
-	public static synchronized void updateFollowers(int index) throws UnknownHostException, FuckinUpKPException {
-
-		
-
-
-		//TODO get the real fresh followers from twitter instead of this ass dummy data		
-		BasicDBList freshFollowerList = new BasicDBList();
-		freshFollowerList.add(1L);
-		freshFollowerList.add(6L);
-		freshFollowerList.add(7L);
-		freshFollowerList.add(8L);
-		freshFollowerList.add(9L);
-		freshFollowerList.add(10L);
-		freshFollowerList.add(11L);
-		freshFollowerList.add(12L);
+	public static synchronized void updateFollowers(int index, Long[] freshFollowers)  throws UnknownHostException, FuckinUpKPException {
 
 		Long[] l = new Long[0];
-
-		Long[] freshFollowers = freshFollowerList.toArray(l);
 		Long[] storedFollowers = getSchwergsyAccountArray(index, "followers").toArray(l);
 
 		int newFollows = 0;
@@ -273,17 +283,7 @@ public class DataBaseHandler{
 		}
 
 		addNewStatistic(index, unfollows, newFollows);
-
-		//Now replace the follower list in the database with freshFollowerList
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
-		dbCollection.update(
-				new BasicDBObject("_id", index),
-				new BasicDBObject("$set", new BasicDBObject("followers", freshFollowerList)));
-
-		mongoClient.close();
-
+		replaceSchwergsArray(index, freshFollowers, "followers");
 	}
 
 	/**
@@ -314,7 +314,7 @@ public class DataBaseHandler{
 	/**
 	 * 
 	 * 
-	 * Phal why/what is this doing? why does it just return the first item of toFollowArr? can you write a nice comment? Thonx beb
+	 * Gets one user_id from ToFollow to follow
 	 * 
 	 * 
 	 * 
@@ -323,7 +323,7 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String getToFollow(int index) throws UnknownHostException{
+	public static synchronized String getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
@@ -645,11 +645,11 @@ public class DataBaseHandler{
 					entrySet = stat.entrySet();
 					boolean isDate = true;
 					boolean isTime = true;
-					
+
 					for (Entry<String, Object> e : entrySet) {
 
 						String value = null;
-						
+
 						//convert to millisecond date to something more readable
 						if(isDate) {
 							Long millisecondDate = (Long) e.getValue();
@@ -668,7 +668,7 @@ public class DataBaseHandler{
 						else {
 							value = e.getValue().toString();
 						}
-						
+
 						int textWidth = value.length();
 
 						//the number of spaces to insert on each side

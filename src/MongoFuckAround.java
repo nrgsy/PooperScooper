@@ -24,15 +24,11 @@ public class MongoFuckAround {
 //		bdbl4.add("whitelist2");
 //		bdbl5.add("bigAccount1");
 //		bdbl5.add("bigAccount2");
+//		
+//		DataBaseHandler.insertSchwergsyAccount("thisIsTheID", "Thisisthename", "cussssh", "cuskey", "authshhh", "authkey", true, bdbl1, bdbl2, bdbl3, bdbl4, bdbl5, new BasicDBList());
 		
-		//DataBaseHandler.insertSchwergsyAccount("thisIsTheID", "Thisisthename", "cussssh", "cuskey", "authshhh", "authkey", true, bdbl1, bdbl2, bdbl3, bdbl4, bdbl5, new BasicDBList());
 		
-		//DataBaseHandler.newAssContent("Acaption", "link.com");
-		
-//		DataBaseHandler.addNewStatistic(0, 11, 12);
-		
-		DataBaseHandler.updateFollowers(0);
-		
+				
 		DataBaseHandler.prettyPrintAccount("Thisisthename");
 		DataBaseHandler.prettyPrintStatistics("Thisisthename");
 

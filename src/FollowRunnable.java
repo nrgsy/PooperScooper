@@ -1,4 +1,5 @@
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import twitter4j.IDs;
 import twitter4j.PagableResponseList;
 import twitter4j.RateLimitStatus;
@@ -51,7 +53,7 @@ public class FollowRunnable implements Runnable{
 	 * @param lol
 	 */
 	public FollowRunnable(int lol){
-		if(lol == 1){
+		if(lol == 0){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
@@ -60,6 +62,7 @@ public class FollowRunnable implements Runnable{
 		  .setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
+		index = 0;
 		}
 		else{
 			ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -82,8 +85,8 @@ public class FollowRunnable implements Runnable{
 
 //TODO use getFollowersSize in dbhandler		
 
-		if(DataBaseHandler.getCollectionSize("toFollow")!=0){
-			bird.createFavorite(bird.createFriendship(DataBaseHandler.getToFollow(index)).getStatus().getId());
+		if(DataBaseHandler.getToFollowSize(index)!=0){
+			bird.createFavorite(bird.createFriendship(DataBaseHandler.getOneToFollow(index)).getStatus().getId());
 		}
 	}
 	
@@ -115,7 +118,7 @@ public class FollowRunnable implements Runnable{
 	/**
 	 * 
 	 */
-//	public void update_toFollow(){
+//	public void update_toFollow(int index){
 //		List<Status> statuses = null;
 //		String longToString = "";
 //		long[] rters_ids;
@@ -159,6 +162,30 @@ public class FollowRunnable implements Runnable{
 //
 //	}
 
+	
+	/**
+	 * @param init
+	 * @throws TwitterException
+	 * @throws UnknownHostException 
+	 */
+	public Long[] getFollowers() throws TwitterException, UnknownHostException{
+		int ratecount = 0;
+		IDs blah;
+		blah = bird.getFollowersIDs(-1);
+		ArrayList<Long> followers = new ArrayList<Long>();
+		for(int i = 0; i < blah.getIDs().length; i++){
+		    followers.add(blah.getIDs()[i]);
+		}
+		ratecount++;
+		while(blah.getNextCursor()!=0 && ratecount<14){
+			blah = (bird.getFollowersIDs(blah.getNextCursor()));
+			for(int i = 0; i < blah.getIDs().length; i++){
+				followers.add(blah.getIDs()[i]);
+			}
+			ratecount++;
+		}
+		return  followers.toArray(new Long[0]);
+	}
 
 	/**
 	 * @throws TwitterException
@@ -180,18 +207,23 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
-		//Only run when not 3AM to allow database maintenance
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		int hours = calendar.get(Calendar.HOUR_OF_DAY);
-		
-		if(hours != 3){
-			try {
-				initUpdateFollowing();
-			} catch (TwitterException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			DataBaseHandler.updateFollowers(index, getFollowers());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FuckinUpKPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+	
+	public static void main(String[] args){
+		(new Thread(new FollowRunnable(0))).start();
+	}
+	
 }
+
