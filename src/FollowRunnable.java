@@ -3,6 +3,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import com.mongodb.BasicDBList;
+
 import twitter4j.IDs;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -172,7 +175,14 @@ public class FollowRunnable implements Runnable{
 			}
 			ratecount++;
 		}
-		return  followers.toArray(new Long[0]);
+		
+		Long[] followersArray = new Long[followers.size()];
+				
+		for (int i = 0; i < followers.size(); i++) {
+			followersArray[i] = followers.get(i);
+		}
+		
+		return followersArray;
 	}
 
 	/**

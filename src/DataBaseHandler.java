@@ -1,6 +1,7 @@
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -119,7 +120,7 @@ public class DataBaseHandler{
 				new BasicDBObject("_id", index),
 				new BasicDBObject("$set", new BasicDBObject("followers", freshList)));
 		mongoClient.close();
-		
+
 		System.out.println("successfully replaced array: " + column);
 	}
 
@@ -256,19 +257,26 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void updateFollowers(int index, Long[] freshFollowers)  throws UnknownHostException, FuckinUpKPException {
 
-		Long[] l = new Long[0];
-		Long[] storedFollowers = getSchwergsyAccountArray(index, "followers").toArray(l);
+		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
+		Long[] storedFollowers = new Long[tmpList.size()];
+		
+		ListIterator<Object> iter = tmpList.listIterator();
+		int i = 0;
+		while (iter.hasNext()) {
+			storedFollowers[i] = (Long) iter.next();
+			i++;
+		}
 
 		int newFollows = 0;
 		int unfollows = 0;
 
 		//getting the number of new followers and people that unfollowed
-		int i = 0;
+		i = 0;
 		int j = 0;
 
 		while(i < storedFollowers.length) {
 
-			if (storedFollowers[i] == freshFollowers[j]) {
+			if (storedFollowers[i].longValue() == freshFollowers[j].longValue()) {
 				i++;
 				j++;
 			}
