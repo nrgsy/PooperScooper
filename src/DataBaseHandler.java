@@ -259,7 +259,7 @@ public class DataBaseHandler{
 
 		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
 		Long[] storedFollowers = new Long[tmpList.size()];
-		
+
 		ListIterator<Object> iter = tmpList.listIterator();
 		int i = 0;
 		while (iter.hasNext()) {
@@ -270,24 +270,33 @@ public class DataBaseHandler{
 		int newFollows = 0;
 		int unfollows = 0;
 
-		//getting the number of new followers and people that unfollowed
-		i = 0;
-		int j = 0;
-
-		while(i < storedFollowers.length) {
+		//getting the number of cool new followers and unfollowing bastards.
+		//We need to walk backwards because the newFollowers come first in freshFollowers list.
+		//Otherwise we couldn't determine where the the new/retained follower boundary of
+		//freshFollowers is in O(n) time
+		i = storedFollowers.length - 1;
+		int j = freshFollowers.length - 1;
+		
+		while(i > -1 && j > -1) {
 
 			if (storedFollowers[i].longValue() == freshFollowers[j].longValue()) {
-				i++;
-				j++;
+				i--;
+				j--;
 			}
 			else {
 				unfollows++;
-				i++;
+				i--;
 			}
 		}
-		while(j < freshFollowers.length) {
+		
+		while(i > -1) {
+			unfollows++;
+			i--;
+		}
+		
+		while(j > -1) {
 			newFollows++;
-			j++;
+			j--;
 		}
 
 		addNewStatistic(index, unfollows, newFollows);

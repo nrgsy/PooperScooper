@@ -12,9 +12,9 @@ public class MongoFuckAround {
 //		BasicDBList bdbl4 = new BasicDBList();
 //		BasicDBList bdbl5 = new BasicDBList();
 //
-//		bdbl1.add(1L);
-//		bdbl1.add(2L);
-//		bdbl1.add(3L);
+////		bdbl1.add(1L);
+////		bdbl1.add(2L);
+////		bdbl1.add(3L);
 //		
 //		bdbl2.add("following1");
 //		bdbl2.add("following2");
@@ -32,7 +32,7 @@ public class MongoFuckAround {
 		DataBaseHandler.prettyPrintAccount("Thisisthename");
 		DataBaseHandler.prettyPrintStatistics("Thisisthename");
 
-		
+		System.out.println(DataBaseHandler.getFollowersSize(0));
 
 	}
 
