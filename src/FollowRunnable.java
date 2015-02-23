@@ -1,25 +1,14 @@
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import twitter4j.IDs;
-import twitter4j.PagableResponseList;
-import twitter4j.RateLimitStatus;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
-
 
 /**
  * @author Bojangles and McChrpchrp
@@ -35,7 +24,7 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessToken
 	 * @param OAuthAccessTokenSecret
 	 */
-	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret){
+	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		  .setOAuthConsumerKey(OAuthConsumerKey)
@@ -100,11 +89,10 @@ public class FollowRunnable implements Runnable{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
 		//TODO get a ratio
-		double ratio = 0;
-		int amount = (int) (sizeFollowing - (sizeFollowers/ratio));
-		
-		if(ratio<(sizeFollowing/sizeFollowers) && amount!=0){
-			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, amount);
+		int cap = 1000;
+		int diff = (int)(cap+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
+		if(diff>0){
+			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, diff);
 			for(int i =0; i<unfollowArr.length; i++){
 				bird.destroyFriendship(unfollowArr[i]);
 			}

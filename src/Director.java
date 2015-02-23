@@ -41,7 +41,8 @@ public class Director {
 					new TwitterRunnable((String) info.get("customerKey"),
 							(String) info.get("customerSecret"),
 							(String) info.get("authorizationKey"),
-							(String) info.get("authorizationSecret"));
+							(String) info.get("authorizationSecret"),
+							0);
 				}},0L, posttime);
 
 
@@ -51,7 +52,8 @@ public class Director {
 					new FollowRunnable((String) info.get("customerKey"),
 							(String) info.get("customerSecret"),
 							(String) info.get("authorizationKey"),
-							(String) info.get("authorizationSecret"));
+							(String) info.get("authorizationSecret"),
+							0);
 				}}, 0L, followtime);
 		}
 
