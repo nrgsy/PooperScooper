@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -214,6 +216,12 @@ public class FollowRunnable implements Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FuckinUpKPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

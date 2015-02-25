@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
@@ -254,8 +257,10 @@ public class DataBaseHandler{
 	 * @param index The id of the Schwergsy account
 	 * @throws FuckinUpKPException 
 	 * @throws UnknownHostException 
+	 * @throws UnsupportedEncodingException 
+	 * @throws FileNotFoundException 
 	 */
-	public static synchronized void updateFollowers(int index, Long[] freshFollowers)  throws UnknownHostException, FuckinUpKPException {
+	public static synchronized void updateFollowers(int index, Long[] freshFollowers)  throws UnknownHostException, FuckinUpKPException, FileNotFoundException, UnsupportedEncodingException {
 
 		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
 		Long[] storedFollowers = new Long[tmpList.size()];
@@ -276,7 +281,7 @@ public class DataBaseHandler{
 		//freshFollowers is in O(n) time
 		i = storedFollowers.length - 1;
 		int j = freshFollowers.length - 1;
-		
+
 		while(i > -1 && j > -1) {
 
 			if (storedFollowers[i].longValue() == freshFollowers[j].longValue()) {
@@ -288,16 +293,39 @@ public class DataBaseHandler{
 				i--;
 			}
 		}
-		
+
 		while(i > -1) {
 			unfollows++;
 			i--;
 		}
-		
+
 		while(j > -1) {
 			newFollows++;
 			j--;
 		}
+
+
+		//Temporary, write the new FollowerList to a file so we have it recorded	
+		Date now = new Date();
+		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();
+		PrintWriter writer = new PrintWriter("FollowerLists/" + fileName + ".txt", "UTF-8");
+
+		int x = 0;
+
+		while (x < freshFollowers.length) {
+			if (x%11 != 0) {
+				writer.print(freshFollowers[x] + ", ");
+				x++;
+			}
+			else {
+				writer.print("\n" + freshFollowers[x] + ", ");
+				x++;
+			}
+		}
+
+		writer.close();
+
+
 
 		addNewStatistic(index, unfollows, newFollows);
 		replaceSchwergsArray(index, freshFollowers, "followers");
