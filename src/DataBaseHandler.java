@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -109,12 +111,11 @@ public class DataBaseHandler{
 	 * @param column
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void replaceSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
+	public static synchronized void replaceSchwergsArray(int index, HashSet<Long> Set, String column) throws UnknownHostException{
 
-		BasicDBList freshList = new BasicDBList();		
-		for (int i = 0; i < StringArr.length; i++) {
-			freshList.add(StringArr[i]);
-		}
+		BasicDBList freshList = new BasicDBList();
+		
+		freshList.addAll(Set);
 
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -212,10 +213,11 @@ public class DataBaseHandler{
 	 * @param index The index of the Schwergsy account we want to add the statistic to
 	 * @param unFollows number of unFollows since the last Statistic was taken
 	 * @param newFollows unFollows since the last Statistic was taken
+	 * @param totalFollowers 
 	 * @throws FuckinUpKPException 
 	 * @throws UnknownHostException 
 	 */
-	public static synchronized void addNewStatistic(int index, int unfollows, int newFollows) throws UnknownHostException, FuckinUpKPException {
+	public static synchronized void addNewStatistic(int index, int unfollows, int newFollows, int retainedFollowers, int totalFollowers) throws UnknownHostException, FuckinUpKPException {
 		MongoClient mongoClient = null;
 
 
@@ -245,7 +247,9 @@ public class DataBaseHandler{
 		.append("creationDate", now)
 		.append("timeSinceLastStat", now - oldStatCreationTime)
 		.append("unFollows", unfollows)
-		.append("newFollows", newFollows);
+		.append("newFollows", newFollows)
+		.append("retainedFollowers", retainedFollowers)
+		.append("totalFollowers", totalFollowers);
 
 		addElementToSchwergsArray(index, stat, "statistics");
 	}
@@ -260,75 +264,64 @@ public class DataBaseHandler{
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
-	public static synchronized void updateFollowers(int index, Long[] freshFollowers)  throws UnknownHostException, FuckinUpKPException, FileNotFoundException, UnsupportedEncodingException {
+	public static synchronized void updateFollowers(int index, HashSet<Long> freshFollowerSet)  throws UnknownHostException, FuckinUpKPException, FileNotFoundException, UnsupportedEncodingException {
 
-		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
-		Long[] storedFollowers = new Long[tmpList.size()];
-
-		ListIterator<Object> iter = tmpList.listIterator();
-		int i = 0;
-		while (iter.hasNext()) {
-			storedFollowers[i] = (Long) iter.next();
-			i++;
-		}
-
-		int newFollows = 0;
-		int unfollows = 0;
-
-		//getting the number of cool new followers and unfollowing bastards.
-		//We need to walk backwards because the newFollowers come first in freshFollowers list.
-		//Otherwise we couldn't determine where the the new/retained follower boundary of
-		//freshFollowers is in O(n) time
-		i = storedFollowers.length - 1;
-		int j = freshFollowers.length - 1;
-
-		while(i > -1 && j > -1) {
-
-			if (storedFollowers[i].longValue() == freshFollowers[j].longValue()) {
-				i--;
-				j--;
-			}
-			else {
-				unfollows++;
-				i--;
-			}
-		}
-
-		while(i > -1) {
-			unfollows++;
-			i--;
-		}
-
-		while(j > -1) {
-			newFollows++;
-			j--;
-		}
-
-
-		//Temporary, write the new FollowerList to a file so we have it recorded	
+		//******Temporary, write the new FollowerList to a file so we have it recorded	
 		Date now = new Date();
 		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();
 		PrintWriter writer = new PrintWriter("FollowerLists/" + fileName + ".txt", "UTF-8");
 
-		int x = 0;
+		Long[] freshFollowerArray = freshFollowerSet.toArray(new Long[0]);
 
-		while (x < freshFollowers.length) {
+		int x = 0;				
+		while (x < freshFollowerArray.length) {
 			if (x%11 != 0) {
-				writer.print(freshFollowers[x] + ", ");
+				writer.print(freshFollowerArray[x] + ", ");
 				x++;
 			}
 			else {
-				writer.print("\n" + freshFollowers[x] + ", ");
+				writer.print("\n" + freshFollowerArray[x] + ", ");
 				x++;
 			}
 		}
-
 		writer.close();
+		//********
 
+		int OGsize = freshFollowerSet.size();
 
+		HashSet<Long> storedFollowerSet = new HashSet<>();
 
-		addNewStatistic(index, unfollows, newFollows);
-		replaceSchwergsArray(index, freshFollowers, "followers");
+		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
+		ListIterator<Object> iter = tmpList.listIterator();
+
+		while (iter.hasNext()) {
+			storedFollowerSet.add((Long) iter.next());
+		}
+
+		//getting the number of cool new followers and unfollowing bastards.
+
+		@SuppressWarnings("unchecked")
+		HashSet<Long> retainedFollowerSet = (HashSet<Long>) freshFollowerSet.clone();
+		@SuppressWarnings("unchecked")
+		HashSet<Long> OGFreshFollowerSet = (HashSet<Long>) freshFollowerSet.clone();
+
+		if (!retainedFollowerSet.retainAll(storedFollowerSet)) {
+			System.out.println("FYI: freshFollowerSet doesn't have any elements that weren't already in storedFollowerSet");
+		}
+		int retainedFollowers = retainedFollowerSet.size();
+
+		if (!freshFollowerSet.removeAll(retainedFollowerSet)) {
+			System.out.println("FYI: freshFollowerSet doesn't have any common elements with retainedFollowerSet");
+		}
+		int newFollows = freshFollowerSet.size();
+
+		if (!storedFollowerSet.removeAll(retainedFollowerSet)) {
+			System.out.println("FYI: storedFollowerSet doesn't have any common elements with retainedFollowerSet");
+		}
+		int unfollows = storedFollowerSet.size();
+
+		addNewStatistic(index, unfollows, newFollows, retainedFollowers, OGsize);
+		replaceSchwergsArray(index, OGFreshFollowerSet, "followers");
 	}
 
 	/**

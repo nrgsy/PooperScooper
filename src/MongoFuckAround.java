@@ -36,10 +36,10 @@ public class MongoFuckAround {
 		//
 		//		DataBaseHandler.updateFollowers(0,followers);
 
-		DataBaseHandler.prettyPrintAccount("Thisisthename");
+		//DataBaseHandler.prettyPrintAccount("Thisisthename");
 		DataBaseHandler.prettyPrintStatistics("Thisisthename");
 
-		System.out.println(DataBaseHandler.getFollowersSize(0));
+		//System.out.println(DataBaseHandler.getFollowersSize(0));
 
 
 

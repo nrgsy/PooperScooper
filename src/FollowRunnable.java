@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import com.mongodb.BasicDBList;
@@ -161,7 +162,7 @@ public class FollowRunnable implements Runnable{
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
 	 */
-	public Long[] getFollowers() throws TwitterException, UnknownHostException{
+	public HashSet<Long> getFollowers() throws TwitterException, UnknownHostException{
 		int ratecount = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
@@ -178,13 +179,10 @@ public class FollowRunnable implements Runnable{
 			ratecount++;
 		}
 		
-		Long[] followersArray = new Long[followers.size()];
-				
-		for (int i = 0; i < followers.size(); i++) {
-			followersArray[i] = followers.get(i);
-		}
+		HashSet<Long> followersSet = new HashSet<>();				
+		followersSet.addAll(followers);
 		
-		return followersArray;
+		return followersSet;
 	}
 
 	/**
