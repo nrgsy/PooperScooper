@@ -1,8 +1,14 @@
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+
+import com.mongodb.BasicDBList;
+
 import twitter4j.IDs;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -79,8 +85,8 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 	
-	//done in bulk, number unfollowed is respective to follower:following
 	/**
+	 * done in bulk, number unfollowed is respective to follower:following
 	 * @throws UnknownHostException 
 	 * @throws TwitterException 
 	 * 
@@ -106,53 +112,50 @@ public class FollowRunnable implements Runnable{
 	/**
 	 * 
 	 */
+//	public void update_toFollow(int index){
+//		List<Status> statuses = null;
+//		String longToString = "";
+//		long[] rters_ids;
+//		int statuses_size = 15;
+//		try {
+//			statuses=bird.getUserTimeline(/*DAL get BigAccount*/);
+//			if(statuses.size()<=statuses_size){
+//				statuses_size = statuses.size();
+//			}
+//			//If more than 15 tweets are returned, sort by tweets with most retweets first
+//			else{
+//				Collections.sort(statuses, new Comparator<Status>() {
+//					@Override
+//					public int compare(Status t1, Status t2) {
+//						int rts1 = t1.getRetweetCount();
+//						int rts2 = t2.getRetweetCount();
+//
+//						if (rts1 == rts2)
+//							return 0;
+//						else if (rts1 > rts2)
+//							return 1;
+//						else
+//							return -1;
+//					}
+//				});
+//			}
+//
+//			for(int i = 0; i<statuses_size; i++){
+//				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
+//				for(long user_id : rters_ids){
+//					longToString = String.valueOf(user_id);
+//					/*DAL add to to_follow*/
+//					System.out.println(longToString);
+//				}
+//			}
+//
+//		} catch (TwitterException e) {
+//			System.out.println("Something in updateFollowers went wrong");
+//			e.printStackTrace();
+//		}
+//
+//	}
 
-	public void update_toFollow(int index){
-		List<Status> statuses = null;
-		String longToString = "";
-		ArrayList<Long> rters_ids = new ArrayList<Long>();
-		long[] rters_ids_arr;
-		int statuses_size = 15;
-		try {
-			statuses=bird.getUserTimeline(/*DAL get BigAccount*/);
-			if(statuses.size()<=statuses_size){
-				statuses_size = statuses.size();
-			}
-			//If more than 15 tweets are returned, sort by tweets with most retweets first
-			else{
-				Collections.sort(statuses, new Comparator<Status>() {
-					@Override
-					public int compare(Status t1, Status t2) {
-						int rts1 = t1.getRetweetCount();
-						int rts2 = t2.getRetweetCount();
-
-						if (rts1 == rts2)
-							return 0;
-						else if (rts1 > rts2)
-							return 1;
-						else
-							return -1;
-					}
-				});
-			}
-
-			for(int i = 0; i<statuses_size; i++){
-				rters_ids_arr = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
-				for(long user_id : rters_ids){
-					if()
-					DataBaseHandler.addToFollow(index, rt);
-					longToString = String.valueOf(user_id);
-					/*DAL add to to_follow*/
-					System.out.println(longToString);
-				}
-			}
-
-		} catch (TwitterException e) {
-			System.out.println("Something in updateFollowers went wrong");
-			e.printStackTrace();
-		}
-
-	}
 
 	
 	/**
@@ -160,7 +163,7 @@ public class FollowRunnable implements Runnable{
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
 	 */
-	public Long[] getFollowers() throws TwitterException, UnknownHostException{
+	public HashSet<Long> getFollowers() throws TwitterException, UnknownHostException{
 		int ratecount = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
@@ -176,7 +179,11 @@ public class FollowRunnable implements Runnable{
 			}
 			ratecount++;
 		}
-		return  followers.toArray(new Long[0]);
+		
+		HashSet<Long> followersSet = new HashSet<>();				
+		followersSet.addAll(followers);
+		
+		return followersSet;
 	}
 
 	/**
@@ -200,14 +207,20 @@ public class FollowRunnable implements Runnable{
 	@Override
 	public void run() {
 		try {
-			Long[] longarr = getFollowers();
-			for(int i =0; i<longarr.length; i++){
-			System.out.println(longarr[i] + " : "+i);
-			}
+			DataBaseHandler.updateFollowers(index, getFollowers());
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FuckinUpKPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
