@@ -110,7 +110,8 @@ public class FollowRunnable implements Runnable{
 	public void update_toFollow(int index){
 		List<Status> statuses = null;
 		String longToString = "";
-		long[] rters_ids;
+		ArrayList<Long> rters_ids = new ArrayList<Long>();
+		long[] rters_ids_arr;
 		int statuses_size = 15;
 		try {
 			statuses=bird.getUserTimeline(/*DAL get BigAccount*/);
@@ -136,8 +137,10 @@ public class FollowRunnable implements Runnable{
 			}
 
 			for(int i = 0; i<statuses_size; i++){
-				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
+				rters_ids_arr = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
 				for(long user_id : rters_ids){
+					if()
+					DataBaseHandler.addToFollow(index, rt);
 					longToString = String.valueOf(user_id);
 					/*DAL add to to_follow*/
 					System.out.println(longToString);
