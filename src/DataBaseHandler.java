@@ -88,7 +88,7 @@ public class DataBaseHandler{
 	 * @param column The list to add to (e.g. followers, toFollow, whiteList, etc)
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void addArrayToSchwergsArray(int index, String[] StringArr, String column) throws UnknownHostException{
+	public static synchronized void addArrayToSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 
@@ -167,7 +167,7 @@ public class DataBaseHandler{
 	 * @param followersArr
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void addFollowers(int index, String[] followersArr) throws UnknownHostException{
+	public static synchronized void addFollowers(int index, Long[] followersArr) throws UnknownHostException{
 		addArrayToSchwergsArray(index,followersArr,"followers");
 	}
 
@@ -176,7 +176,7 @@ public class DataBaseHandler{
 	 * @param followingArr
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void addFollowing(int index, String[]followingArr) throws UnknownHostException{
+	public static synchronized void addFollowing(int index, Long[]followingArr) throws UnknownHostException{
 		addArrayToSchwergsArray(index,followingArr,"following");
 	}
 
@@ -185,7 +185,7 @@ public class DataBaseHandler{
 	 * @param toFollowArr
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void addToFollow(int index, String[]toFollowArr) throws UnknownHostException{
+	public static synchronized void addToFollow(int index, Long[]toFollowArr) throws UnknownHostException{
 		addArrayToSchwergsArray(index,toFollowArr,"to_follow");
 	}
 
@@ -194,7 +194,7 @@ public class DataBaseHandler{
 	 * @param whitelistArr
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void addWhitelist(int index, String[]whitelistArr) throws UnknownHostException{
+	public static synchronized void addWhitelist(int index, Long[]whitelistArr) throws UnknownHostException{
 		addArrayToSchwergsArray(index,whitelistArr,"whitelist");
 	}
 
@@ -330,10 +330,10 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String[] popMultipleFollowing(int index, int amount) throws UnknownHostException{
+	public static synchronized Long[] popMultipleFollowing(int index, int amount) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		String[] toUnfollowArr = null;
+		Long[] toUnfollowArr = null;
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject query = new BasicDBObject("_id", index);
 		BasicDBObject slice = new BasicDBObject("following", new BasicDBObject("$slice", amount));
@@ -341,12 +341,44 @@ public class DataBaseHandler{
 		DBCursor cursor = dbCollection.find(query, slice);
 		BasicDBList toUnfollowList = (BasicDBList) cursor.next().get("following");
 		cursor.close();
-		toUnfollowArr = Arrays.copyOf(toUnfollowList.toArray(), toUnfollowList.toArray().length, String[].class);
+		toUnfollowArr = Arrays.copyOf(toUnfollowList.toArray(), toUnfollowList.toArray().length, Long[].class);
 		for(int i = 0; i<amount; i++){
 			dbCollection.update(query, pop);
 		}
 		mongoClient.close();
 		return toUnfollowArr;
+	}
+	
+	public static synchronized Long getBigAccount(int index)throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		Long bigAccount = null;
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject query = new BasicDBObject("_id",index);
+		BasicDBObject slice = new BasicDBObject("bigAccounts", new BasicDBObject("$slice",1));
+		DBCursor cursor = dbCollection.find(query,slice);
+		BasicDBList bigAccountList = (BasicDBList) cursor.next().get("bigAccounts");
+		cursor.close();
+		bigAccount = Arrays.copyOf(bigAccountList.toArray(), bigAccountList.toArray().length, Long[].class)[0];
+		mongoClient.close();
+		return bigAccount;
+	}
+	
+	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject clause1 = new BasicDBObject("$eq", new BasicDBObject("_id", index));
+		BasicDBObject clause2 = new BasicDBObject("_whiteList", new BasicDBObject("$in", user_id));
+		BasicDBList and = new BasicDBList();
+		and.add(clause1);
+		and.add(clause2);
+		BasicDBObject query = new BasicDBObject("$and", and);
+		DBCursor cursor = dbCollection.find(query);
+		if(cursor.hasNext()){
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -361,11 +393,11 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String getOneToFollow(int index) throws UnknownHostException{
+	public static synchronized Long getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		String[] toFollowArr = null;
+		Long[] toFollowArr = null;
 		BasicDBObject query = new BasicDBObject("_id", index);
 		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("to_follow", -1));
 		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", 1));
@@ -374,7 +406,7 @@ public class DataBaseHandler{
 		cursor.close();
 		//added so we don't have to call toArray() twice
 		Object[] toFollowArray = toFollowList.toArray();
-		toFollowArr = Arrays.copyOf(toFollowArray, toFollowArray.length, String[].class);
+		toFollowArr = Arrays.copyOf(toFollowArray, toFollowArray.length, Long[].class);
 		addWhitelist(index, toFollowArr);
 		dbCollection.update(query, pop);
 		mongoClient.close();
