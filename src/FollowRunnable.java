@@ -71,18 +71,18 @@ public class FollowRunnable implements Runnable{
 	}
 
 	
+	
 	/**
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
 	 */
 	public void followAndFavoriteUsers() throws TwitterException, UnknownHostException{
-
-//TODO use getFollowersSize in dbhandler		
-
 		if(DataBaseHandler.getToFollowSize(index)!=0){
 			bird.createFavorite(bird.createFriendship(DataBaseHandler.getOneToFollow(index)).getStatus().getId());
 		}
 	}
+	
+	
 	
 	/**
 	 * done in bulk, number unfollowed is respective to follower:following
@@ -97,13 +97,16 @@ public class FollowRunnable implements Runnable{
 		int cap = 1000;
 		int diff = (int)(cap+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
 		if(diff>0){
-			String[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, diff);
+			Long[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, diff);
 			for(int i =0; i<unfollowArr.length; i++){
 				bird.destroyFriendship(unfollowArr[i]);
 			}
 		}
 	}
 
+	
+	
+	//Need to add functionality to remove bigAccounts which are exhausted
 	/**
 	 * @throws FuckinUpKPException 
 	 * 
