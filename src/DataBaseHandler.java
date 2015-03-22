@@ -25,17 +25,19 @@ import com.mongodb.MongoClient;
 public class DataBaseHandler{
 
 	/**
+	 * @param type The type of content, e.g. ass, pendingass, etc
+	 * @param index The index of the Schwergs account that want the content
 	 * @return an array of Strings containing some pseudo-random content 
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String[] getRandomAssContent() throws UnknownHostException{
+	public static synchronized String[] getRandomContent(String type, int index) throws UnknownHostException{
 
 		//TODO keep the ass content sorted by date last used so that you only scoop a random ass-content from the section
 		//that hasn't been used in the last x days.
 
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("AssContent");
+		DBCollection dbCollection = getCollection(type, db);
 		String[] AssContent = null;
 		//Figure out randomness
 
@@ -54,13 +56,14 @@ public class DataBaseHandler{
 	 * @param imglink
 	 * @throws UnknownHostException
 	 */
-	public static synchronized void newAssContent(String caption, String imglink) throws UnknownHostException{
+	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("AssContent");
 
 		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
 
+		DBCollection dbCollection = getCollection(type, db);
+		
 		if(dbCollection.find(uniqueCheck).limit(1).count() == 0){
 			int count = 0;
 			long id_time = new Date().getTime();
@@ -70,7 +73,9 @@ public class DataBaseHandler{
 			newAss.append("imglink", imglink);
 			newAss.append("times_accessed", count);
 			newAss.append("last_accessed", id_time);
-
+			//accessInfo is a list of key value pairs, keys being the account that accessed it, and the values being the number of times it did
+			newAss.append("accessInfo", new BasicDBObject());
+			
 			dbCollection.insert(newAss);
 			System.out.println("Successfully added new AssContent " + id_time);
 		}
@@ -78,6 +83,47 @@ public class DataBaseHandler{
 			System.out.println("Image is not unique: "+ imglink);
 		}
 		mongoClient.close();
+	}
+
+	public static DBCollection getCollection(String type, DB db) {
+		
+		DBCollection dbCollection = null;
+		switch (type.toLowerCase()) {
+		case "ass" :
+			dbCollection = db.getCollection("AssContent");
+			break;
+		case "pendingass" :
+			dbCollection = db.getCollection("PendingAssContent");
+			break;
+		case "workout" :
+			dbCollection = db.getCollection("Workout");
+			break;
+		case "pendingworkout" :
+			dbCollection = db.getCollection("PendingWorkout");
+			break;
+		case "weed" :
+			dbCollection = db.getCollection("Weed");
+			break;
+		case "pendingweed" :
+			dbCollection = db.getCollection("PendingWeed");
+			break;
+		case "college" :
+			dbCollection = db.getCollection("College");
+			break;
+		case "pendingcollege" :
+			dbCollection = db.getCollection("PendingCollege");
+			break;
+		case "canimals" :
+			dbCollection = db.getCollection("Canimals");
+			break;
+		case "pendingcanimals" :
+			dbCollection = db.getCollection("PendingCanimals");
+			break;
+		default:
+			System.out.println("Tears, " + type + " is schwag");
+		}
+		
+		return dbCollection;
 	}
 
 	//////Start region: add to array
@@ -114,7 +160,7 @@ public class DataBaseHandler{
 	public static synchronized void replaceSchwergsArray(int index, HashSet<Long> Set, String column) throws UnknownHostException{
 
 		BasicDBList freshList = new BasicDBList();
-		
+
 		freshList.addAll(Set);
 
 		MongoClient mongoClient = new MongoClient();
@@ -348,7 +394,7 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return toUnfollowArr;
 	}
-	
+
 	public static synchronized Long getBigAccount(int index)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -363,7 +409,7 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return bigAccount;
 	}
-	
+
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -782,12 +828,6 @@ public class DataBaseHandler{
 	}
 
 }
-
-
-
-
-
-
 
 
 
