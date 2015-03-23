@@ -30,7 +30,7 @@ public class DataBaseHandler{
 	 * @return an array of Strings containing some pseudo-random content 
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String[] getRandomContent(String type, int index) throws UnknownHostException{
+	public static synchronized String[] getRandomContent(String type, int index) throws UnknownHostException {
 
 		//TODO keep the ass content sorted by date last used so that you only scoop a random ass-content from the section
 		//that hasn't been used in the last x days.
