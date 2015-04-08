@@ -199,8 +199,8 @@ public class DataBaseHandler{
 			ele = new BasicDBObject("$addToSet", new BasicDBObject(column, (BasicDBObject) element));
 		}
 		else {
-			System.out.println("This method is not a trash can. You can't just be throwin' whatever you please in.");
-			throw new FuckinUpKPException();
+			System.out.println();
+			throw new FuckinUpKPException("method addElementToSchwergsArray is not a trash can.\nYou can't just be throwin' whatever you please in.");
 		}
 
 		dbCollection.update(query, ele);
