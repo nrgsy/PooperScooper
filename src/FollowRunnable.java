@@ -68,9 +68,7 @@ public class FollowRunnable implements Runnable{
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			bird = tf.getInstance();
 		}
-	}
-
-	
+	}	
 	
 	/**
 	 * @throws TwitterException
@@ -81,8 +79,6 @@ public class FollowRunnable implements Runnable{
 			bird.createFavorite(bird.createFriendship(DataBaseHandler.getOneToFollow(index)).getStatus().getId());
 		}
 	}
-	
-	
 	
 	/**
 	 * done in bulk, number unfollowed is respective to follower:following
@@ -103,15 +99,13 @@ public class FollowRunnable implements Runnable{
 			}
 		}
 	}
-
-	
 	
 	//Need to add functionality to remove bigAccounts which are exhausted
 	/**
 	 * @throws FuckinUpKPException 
 	 * 
 	 */
-	public void getToFollow() throws TwitterException,UnknownHostException, FuckinUpKPException{
+	public void updateToFollow() throws TwitterException,UnknownHostException, FuckinUpKPException{
 		List<Status> statuses = null;
 		String longToString = "";
 		long[] rters_ids;
