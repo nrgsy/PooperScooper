@@ -1,5 +1,8 @@
 import java.io.File;
 import java.util.Map;
+
+import com.mongodb.DBObject;
+
 import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -80,14 +83,16 @@ public class TwitterRunnable implements Runnable {
 		Twitter blah = null;
 		File loe = null;
 		try {
-			String[] assContent = DataBaseHandler.getRandomContent("ass", 0);
+			DBObject assContent = DataBaseHandler.getRandomContent("ass", 0);
+			String caption = assContent.get("caption").toString();
+			String link = assContent.get("imglink").toString();
 
 			//creates temp image and puts file location in loe
-			loe = new File(imgman.getImageFile(assContent[1]));
+			loe = new File(imgman.getImageFile(link));
 			TwitterRunnable lol = new TwitterRunnable();
 
 			//calls uploadPicTwitter to upload to twitter
-			lol.uploadPicTwitter(loe,assContent[0],blah);
+			lol.uploadPicTwitter(loe, caption, blah);
 			loe.delete();
 		}
 		catch (Exception e) {

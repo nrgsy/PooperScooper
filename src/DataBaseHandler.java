@@ -1,3 +1,4 @@
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -5,7 +6,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,57 +27,200 @@ public class DataBaseHandler{
 	/**
 	 * @param type The type of content, types are "ass", "pendingass", "workout", "weed"
 	 * @param index The index of the Schwergs account that want the content
-	 * @return an array of Strings containing some pseudo-random content 
+	 * @return a DBObject that is the random content, or null if none found
 	 * @throws UnknownHostException
 	 */
-	public static synchronized String[] getRandomContent(String type, int index) throws UnknownHostException {
-
-		//TODO keep the ass content sorted by date last used so that you only scoop a random ass-content from the section
-		//that hasn't been used in the last x days.
+	public static synchronized DBObject getRandomContent(String type, long index) throws UnknownHostException {
 
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = getCollection(type, db);
-		String[] AssContent = null;
-		//Figure out randomness
+		DBCollection collection = getCollection(type, db);
 
-		//[0] should be caption, [1] should be imglink. only returns a two element array.
+		double size = collection.count();
 
-		//add in update for last_accessed and times_accessed
+		HashSet<DBObject> contentSample = new HashSet<>();
+
+		//just add them all if we have less than 200 contents
+		if (size < 200) {
+			DBCursor cursor = collection.find();
+			while (cursor.hasNext()) {
+				DBObject content = cursor.next();
+				BasicDBList list = (BasicDBList) content.get("accessInfo");
+				boolean valid = true;
+				for (Object o : list) {
+					DBObject info = (DBObject) o;
+					if ((long) info.get("index") == index) {
+						long msSinceLastAccess = new Date().getTime() - (long) info.get("lastAccess");
+						//don't consider content that's been posted sooner that a week ago (on this account)
+						if (msSinceLastAccess < 604800000) {
+							valid = false;
+						}
+						break;
+					}
+				}
+				if (valid) {
+					contentSample.add(content);
+				}
+			}
+		}
+		else {
+			int numAttempts = 0;
+			while (contentSample.size() < 100 && numAttempts < 1000) {
+				numAttempts++;
+				int randNum = (int) (Math.random() * size);
+				DBObject content = collection.find().limit(-1).skip(randNum).next();
+				BasicDBList list = (BasicDBList) content.get("accessInfo");
+				boolean valid = true;
+				for (Object o : list) {
+					DBObject info = (DBObject) o;
+					if ((long) info.get("index") == index) {
+						long msSinceLastAccess = new Date().getTime() - (long) info.get("lastAccess");
+						//don't consider content that's been posted sooner that a week ago (on this account)
+						if (msSinceLastAccess < 604800000) {
+							valid = false;
+						}
+						break;
+					}
+				}
+				if (valid) {
+					contentSample.add(content);
+				}
+			}
+		}
+
+		Object[] contentArray = contentSample.toArray();
+		DBObject bestContent = null;
+		long minTimesAccessed = Long.MAX_VALUE;
+		for (int i = 0; i < contentArray.length; i++) {
+			DBObject candidateContent = (DBObject)contentArray[i];		
+			BasicDBList list = (BasicDBList) candidateContent.get("accessInfo");
+			boolean foundMatch = false;
+
+			for (Object o : list) {
+				DBObject info = (DBObject) o;
+				if ((long) info.get("index") == index) {
+					foundMatch = true;
+					long timesAccessed = (long) info.get("timesAccessed");
+					if (timesAccessed < minTimesAccessed) {
+						minTimesAccessed = timesAccessed;
+						bestContent = candidateContent;
+					}
+					break;
+				}
+			}
+			if (!foundMatch) {
+				//because we know this content has never been used before
+				bestContent = candidateContent;
+				break;
+			}
+		}
+
+		if (bestContent != null) {
+			BasicDBList list = (BasicDBList) bestContent.get("accessInfo");
+			DBObject info = null;
+			for (Object o : list) {
+				info = (DBObject) o;
+				if ((long) info.get("index") == index) {
+					long timesAccessed = (long) info.removeField("timesAccessed");
+					info.removeField("lastAccess");
+					info.put("timesAccessed", timesAccessed + 1);
+					info.put("lastAccess", new Date().getTime());
+					break;
+				}
+				info = null;
+			}
+
+			if (info == null) {
+				info = new BasicDBObject()
+				.append("index", index)
+				.append("timesAccessed", 1L)
+				.append("lastAccess", new Date().getTime());
+				list.add(info);
+			}
+
+			bestContent.removeField("accessInfo");
+			bestContent.put("accessInfo", list);
+
+			long id = (long) bestContent.get("_id");
+			BasicDBObject query = new BasicDBObject("_id", id);
+
+			collection.findAndModify(query, bestContent);
+		}
+
 		mongoClient.close();
-		return AssContent;
+		return bestContent;
 	}
 
+	/**
+	 * 
+	 * It was so nice... but not needed anymo...
+	 * 
+	 * Moves a image from some pending content collection to some actual content collections
+	 * 
+	 * @param sourceCollection
+	 * @param sourceLink
+	 * @param destinationCollection
+	 * @param destinationLink
+	 * @throws UnknownHostException 
+	 */
+	//	public static synchronized void moveImage(String sourceType, String sourceLink, 
+	//			String destinationType) throws UnknownHostException {
+	//		
+	//		MongoClient mongoClient = new MongoClient();
+	//		DB db = mongoClient.getDB("Schwergsy");
+	//		DBCollection sourceCollection = getCollection(sourceType, db);
+	//		
+	//		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
+	//
+	//		DBObject content = sourceCollection.findAndRemove(query);	
+	//		
+	//		if (content == null) {
+	//			System.err.println("Cannot move image, image not found");
+	//		}
+	//		else {
+	//			DBCollection destinationCollection = getCollection(destinationType, db);
+	//			destinationCollection.insert(content);
+	//			System.out.println("Image moved from " + sourceCollection.getName() +
+	//					" to " + destinationCollection.getName());
+	//			
+	//		}
+	//		mongoClient.close();
+	//	}
+
+	public static synchronized void removeContent(String sourceType, String sourceLink)
+			throws UnknownHostException {		
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection sourceCollection = getCollection(sourceType, db);		
+		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
+		sourceCollection.remove(query);
+		mongoClient.close();
+	}
 
 	/**
-	 * inserts a new caption and link to the image into the database
-	 * 
 	 * @param caption
 	 * @param imglink
+	 * @param type see getCollection below for content types
 	 * @throws UnknownHostException
 	 */
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-
 		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
-
 		DBCollection dbCollection = getCollection(type, db);
 
-		if(dbCollection.find(uniqueCheck).limit(1).count() == 0){
-			int count = 0;
+		if(dbCollection.find(uniqueCheck).limit(1).count() == 0) {
 			long id_time = new Date().getTime();
 
 			BasicDBObject newAss = new BasicDBObject("_id", id_time);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
-			newAss.append("times_accessed", count);
-			newAss.append("last_accessed", id_time);
-			//accessInfo is a list of key value pairs, keys being the account that accessed it, and the values being the number of times it did
-			newAss.append("accessInfo", new BasicDBObject());
+			//accessInfo is a list of DBObjects, [{index : ..., timesAccessed : ..., lastAccess: ...},{...}]
+			newAss.append("accessInfo", new BasicDBList());
+
 
 			dbCollection.insert(newAss);
-			System.out.println("Successfully added new AssContent " + id_time);
+			System.out.println("Successfully added new content of type " + type);
 		}
 		else{
 			System.out.println("Image is not unique: "+ imglink);
@@ -119,8 +262,14 @@ public class DataBaseHandler{
 		case "pendingcanimals" :
 			dbCollection = db.getCollection("PendingCanimals");
 			break;
+		case "space" :
+			dbCollection = db.getCollection("Canimals");
+			break;
+		case "pendingspace" :
+			dbCollection = db.getCollection("PendingCanimals");
+			break;
 		default:
-			System.out.println("Tears, " + type + " is schwag");
+			System.err.println("Tears, " + type + " is schwag");
 		}
 
 		return dbCollection;
@@ -325,7 +474,6 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void updateFollowers(int index, HashSet<Long> freshFollowerSet)  throws UnknownHostException, FuckinUpKPException, FileNotFoundException, UnsupportedEncodingException {
 
-		//******Temporary, write the new FollowerList to a file so we have it recorded	
 		Date now = new Date();
 		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();
 		PrintWriter writer = new PrintWriter("FollowerLists/" + fileName + ".txt", "UTF-8");
@@ -344,7 +492,6 @@ public class DataBaseHandler{
 			}
 		}
 		writer.close();
-		//********
 
 		int OGsize = freshFollowerSet.size();
 
@@ -878,11 +1025,8 @@ public class DataBaseHandler{
 			System.out.print(" ");
 		}
 	}
-
-
-	
-
 }
+
 
 
 
