@@ -33,7 +33,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
-
+//NOTICE: for this to work, you must pass in the content type (ass, workout, weed, etc)
 public class ApprovalGUI {
 
 	private static Boolean lastWasApproved;
@@ -161,6 +161,7 @@ public class ApprovalGUI {
 			}
 			for (String link : schwagLinks) {
 				try {
+					DataBaseHandler.newContent(null, link, "schwagass");
 					DataBaseHandler.removeContent("pending" + kind, link);
 				} catch (UnknownHostException e1) {
 					e1.printStackTrace();

@@ -3,6 +3,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Random;
@@ -42,8 +43,11 @@ public class ImageManipulator {
 			}
 			
 		}
+		catch (SocketTimeoutException e){
+			return false;
+		}
 		catch(IOException e) {
-			throw new FuckinUpKPException("dammit kp");
+			return false;
 		}
 		finally{
 			img.delete();

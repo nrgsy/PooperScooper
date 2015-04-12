@@ -1,4 +1,7 @@
 import java.net.UnknownHostException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 
@@ -11,12 +14,68 @@ import com.mongodb.BasicDBObject;
  */
 public class Director {
 
+	public static HashMap<String, Boolean> runStatus; 
+
+	public static Date getNextTime(Date base, int hourOfDay) {
+	    Calendar then = Calendar.getInstance();
+	    then.setTime(base);
+	    then.set(Calendar.HOUR_OF_DAY, hourOfDay);
+	    then.set(Calendar.MINUTE, 0);
+	    then.set(Calendar.SECOND, 0);
+	    then.set(Calendar.MILLISECOND, 0);
+	    if (then.getTime().before(base)) {
+	        then.add(Calendar.DAY_OF_YEAR, 1);
+	    }
+	    return then.getTime();
+	}
+	
 	/**
 	 * @param args
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception{
+
+		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
+		
+		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			@Override
+			public void run() {
+				System.out.println("maintenance started");
+				GlobalMaintenance.flagSet = true;				
+				boolean activityExists = true;
+				while (activityExists) {
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					//look for a status that's true (indicating that something's still running)
+					boolean somethingStillRunning = false;
+					for (boolean status : runStatus.values()) {
+						if (status) {
+							somethingStillRunning = true;
+							break;
+						}
+					}
+					
+					if (!somethingStillRunning) {
+						activityExists = false;
+					}
+				}	
+				
+				//TODO the actual maintenance
+				
+				//Update followers
+				//old content garbage collection
+				//get big accounts (because of high api call amount)
+				
+				GlobalMaintenance.flagSet = false;
+				System.out.println("maintenance complete");
+			}}, nextOccurrenceOf3am, 86400000);
+		
+		
 		long scrapetime = 86400000;
 
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
@@ -38,22 +97,45 @@ public class Director {
 			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 				@Override
 				public void run() {
-					new TwitterRunnable((String) info.get("customerKey"),
-							(String) info.get("customerSecret"),
-							(String) info.get("authorizationKey"),
-							(String) info.get("authorizationSecret"),
-							0);
+
+					String cusKey = (String) info.get("customerKey");
+					String customKey = cusKey + "twitter";
+					if (!GlobalMaintenance.flagSet) {
+
+						runStatus.put(customKey, true);
+						new TwitterRunnable(cusKey,
+								(String) info.get("customerSecret"),
+								(String) info.get("authorizationKey"),
+								(String) info.get("authorizationSecret"),
+								0);
+						runStatus.put(customKey, false);
+					}
+					else {
+						runStatus.put(customKey, false);
+					}
 				}},0L, posttime);
 
 
 			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
 				@Override
 				public void run() {
-					new FollowRunnable((String) info.get("customerKey"),
-							(String) info.get("customerSecret"),
-							(String) info.get("authorizationKey"),
-							(String) info.get("authorizationSecret"),
-							0);
+
+					String cusKey = (String) info.get("customerKey");
+					String customKey = cusKey + "follow";
+					if (!GlobalMaintenance.flagSet) {
+
+						runStatus.put(customKey, true);
+						new FollowRunnable(cusKey,
+								(String) info.get("customerSecret"),
+								(String) info.get("authorizationKey"),
+								(String) info.get("authorizationSecret"),
+								0);
+						runStatus.put(customKey, false);
+					}
+					else {
+						runStatus.put(customKey, false);
+					}
+
 				}}, 0L, followtime);
 		}
 

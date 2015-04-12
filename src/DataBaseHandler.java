@@ -203,6 +203,11 @@ public class DataBaseHandler{
 	 * @param type see getCollection below for content types
 	 * @throws UnknownHostException
 	 */
+	
+	
+	//TODO, 
+	
+	
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -238,11 +243,17 @@ public class DataBaseHandler{
 		case "pendingass" :
 			dbCollection = db.getCollection("PendingAssContent");
 			break;
+		case "schwagass" :
+			dbCollection = db.getCollection("SchwagAssContent");
+			break;
 		case "workout" :
 			dbCollection = db.getCollection("Workout");
 			break;
 		case "pendingworkout" :
 			dbCollection = db.getCollection("PendingWorkout");
+			break;
+		case "schwagworkout" :
+			dbCollection = db.getCollection("SchwagWorkout");
 			break;
 		case "weed" :
 			dbCollection = db.getCollection("Weed");
@@ -250,11 +261,17 @@ public class DataBaseHandler{
 		case "pendingweed" :
 			dbCollection = db.getCollection("PendingWeed");
 			break;
+		case "schwagweed" :
+			dbCollection = db.getCollection("SchwagWeed");
+			break;
 		case "college" :
 			dbCollection = db.getCollection("College");
 			break;
 		case "pendingcollege" :
 			dbCollection = db.getCollection("PendingCollege");
+			break;
+		case "schwagcollege" :
+			dbCollection = db.getCollection("SchwagCollege");
 			break;
 		case "canimals" :
 			dbCollection = db.getCollection("Canimals");
@@ -262,11 +279,17 @@ public class DataBaseHandler{
 		case "pendingcanimals" :
 			dbCollection = db.getCollection("PendingCanimals");
 			break;
+		case "schwagcanimals" :
+			dbCollection = db.getCollection("SchwagCanimals");
+			break;
 		case "space" :
-			dbCollection = db.getCollection("Canimals");
+			dbCollection = db.getCollection("Space");
 			break;
 		case "pendingspace" :
-			dbCollection = db.getCollection("PendingCanimals");
+			dbCollection = db.getCollection("PendingSpace");
+			break;
+		case "schwagspace" :
+			dbCollection = db.getCollection("SchwagSpace");
 			break;
 		default:
 			System.err.println("Tears, " + type + " is schwag");
