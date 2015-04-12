@@ -60,7 +60,7 @@ public class bigAccRunnable implements Runnable {
 		long latestTweet = 0;
 
 		if(DataBaseHandler.getBigAccountsSize(index)!=0){
-			ArrayList<Long> AllRTerIDs = null;
+			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = bird.getHomeTimeline();
 
 			if(OwnTweets.size()>15){
@@ -131,7 +131,7 @@ public class bigAccRunnable implements Runnable {
 			System.out.println("considering candidate...");
 			Long id = AllCandidatesArr[i];
 			Paging query = new Paging();
-			query.setCount(5);
+			query.setCount(200);
 			ResponseList<Status> timeline = bird.getUserTimeline(id, query);
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
@@ -164,6 +164,7 @@ public class bigAccRunnable implements Runnable {
 				}
 			}
 		}
+		System.out.println("done");
 
 		Thread.sleep(900000);
 	}
@@ -202,7 +203,13 @@ public class bigAccRunnable implements Runnable {
 				}
 			}
 			else{
+				for(Long user_id: toFollowSet){
+					if(DataBaseHandler.isWhiteListed(index, user_id)){
+						toFollowSet.remove(user_id);
+					}
+				}
 				DataBaseHandler.addToFollow(index, (Long[])toFollowSet.toArray());
+				DataBaseHandler.addWhitelist(index, (Long[])toFollowSet.toArray());
 			}
 			bigAccIndex++;
 		}
