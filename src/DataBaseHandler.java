@@ -205,7 +205,9 @@ public class DataBaseHandler{
 	 */
 	
 	
-	//TODO, 
+	//TODO, add specialization such that content that's created depends on the type
+	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
+	//ass should have all attributes as shown belows
 	
 	
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
