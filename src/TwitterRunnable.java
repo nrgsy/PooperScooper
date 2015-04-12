@@ -1,5 +1,8 @@
 import java.io.File;
 import java.util.Map;
+
+import com.mongodb.DBObject;
+
 import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -80,14 +83,16 @@ public class TwitterRunnable implements Runnable {
 		Twitter blah = null;
 		File loe = null;
 		try {
-			String[] assContent = DataBaseHandler.getRandomContent("ass", 0);
+			DBObject assContent = DataBaseHandler.getRandomContent("ass", 0);
+			String caption = assContent.get("caption").toString();
+			String link = assContent.get("imglink").toString();
 
 			//creates temp image and puts file location in loe
-			loe = new File(imgman.getImageFile(assContent[1]));
+			loe = new File(imgman.getImageFile(link));
 			TwitterRunnable lol = new TwitterRunnable();
 
 			//calls uploadPicTwitter to upload to twitter
-			lol.uploadPicTwitter(loe,assContent[0],blah);
+			lol.uploadPicTwitter(loe, caption, blah);
 			loe.delete();
 		}
 		catch (Exception e) {
@@ -99,17 +104,19 @@ public class TwitterRunnable implements Runnable {
 
 
 	/**
+	 * @throws TwitterException 
 	 * 
 	 */
-	public void prettyRateLimit(){
-		try {
-			for(Map.Entry<String, RateLimitStatus> element : bird.getRateLimitStatus().entrySet()){
-				System.out.println(element+"\n");
-			}
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		};
+	public void prettyRateLimit() throws TwitterException{
+		Map<String ,RateLimitStatus> rateLimitStatus = bird.getRateLimitStatus();
+		for (String endpoint : rateLimitStatus.keySet()) {
+		    RateLimitStatus status = rateLimitStatus.get(endpoint);
+		    System.out.println("Endpoint: " + endpoint);
+		    System.out.println(" Limit: " + status.getLimit());
+		    System.out.println(" Remaining: " + status.getRemaining());
+		    System.out.println(" ResetTimeInSeconds: " + status.getResetTimeInSeconds());
+		    System.out.println(" SecondsUntilReset: " + status.getSecondsUntilReset());
+		}
 	}
 
 
@@ -118,7 +125,12 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run(){
-		prettyRateLimit();
+		try {
+			prettyRateLimit();
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args){

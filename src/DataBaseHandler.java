@@ -215,10 +215,9 @@ public class DataBaseHandler{
 			BasicDBObject newAss = new BasicDBObject("_id", id_time);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
-			//accessInfo is a list of key value pairs, key being the account that accessed it,
-			//and the value being a list :
-			//[number of times it has accessed it before, last access date]
+			//accessInfo is a list of DBObjects, [{index : ..., timesAccessed : ..., lastAccess: ...},{...}]
 			newAss.append("accessInfo", new BasicDBList());
+
 
 			dbCollection.insert(newAss);
 			System.out.println("Successfully added new content of type " + type);
@@ -400,8 +399,21 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 * @throws FuckinUpKPException 
 	 */
-	public static synchronized void addBigAccount(int index, String bigAccountElement) throws UnknownHostException, FuckinUpKPException{
-		addElementToSchwergsArray(index,bigAccountElement,"bigAccounts");
+	public static synchronized void addBigAccount(int index, long bigAccountID, long latestTweet) throws UnknownHostException, FuckinUpKPException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+
+		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
+		bigAccount.append("strikes", 0);
+		bigAccount.append("latestTweet", latestTweet);
+
+		BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("bigAccounts",bigAccount));
+
+		dbCollection.update(query, ele);
+		System.out.println("successfully added an element to bigAccounts");
+		mongoClient.close();
 	}
 
 
@@ -543,19 +555,54 @@ public class DataBaseHandler{
 		return toUnfollowArr;
 	}
 
-	public static synchronized Long getBigAccount(int index)throws UnknownHostException{
+	private static synchronized Object getBigAccountStuff(int index, int bigAccountIndex, String property)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		Long bigAccount = null;
 		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
 		BasicDBObject query = new BasicDBObject("_id",index);
-		BasicDBObject slice = new BasicDBObject("bigAccounts", new BasicDBObject("$slice",1));
-		DBCursor cursor = dbCollection.find(query,slice);
-		BasicDBList bigAccountList = (BasicDBList) cursor.next().get("bigAccounts");
+		BasicDBObject find = new BasicDBObject("bigAccounts", new BasicDBObject("$elemMatch",
+				new BasicDBObject ("user_id", bigAccountIndex)));
+		DBCursor cursor = dbCollection.find(query, find);
+		DBObject answer = cursor.next();
 		cursor.close();
-		bigAccount = Arrays.copyOf(bigAccountList.toArray(), bigAccountList.toArray().length, Long[].class)[0];
 		mongoClient.close();
-		return bigAccount;
+		return answer.get(property);
+	}
+
+	public static synchronized Long getBigAccount(int index, int bigAccountIndex)throws UnknownHostException{
+		return (Long)getBigAccountStuff(index, bigAccountIndex,"user_id");
+	}
+
+	public static synchronized int getBigAccountStrikes(int index, int bigAccountIndex) throws UnknownHostException{
+		return (int)getBigAccountStuff(index, bigAccountIndex,"strikes");
+	}
+
+	public static synchronized Long getBigAccountLatestTweet(int index, int bigAccountIndex) throws UnknownHostException{
+		return (Long)getBigAccountStuff(index, bigAccountIndex,"latestTweet");
+	}
+
+	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject query = new BasicDBObject("_id",index);
+		BasicDBObject updater = new BasicDBObject("$set", new BasicDBObject("bigAccounts."+bigAccountIndex+"."+property,
+				change));
+		dbCollection.findAndModify(query, updater);
+		mongoClient.close();
+	}
+	
+	public static synchronized void editBigAccountStrikes(int index, int bigAccountIndex, int number) throws UnknownHostException{
+		editBigAccountStuff(index,bigAccountIndex,"strikes",number);
+	}
+
+	public static synchronized void editBigAccountLatestTweet(int index, int bigAccountIndex, long tweetID) throws UnknownHostException{
+		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
+	}
+	
+	public static void moveBigAccountToEnd(int index, int bigAccIndex) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
@@ -655,6 +702,10 @@ public class DataBaseHandler{
 	 */
 	public static int getFollowersSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "followers");
+	}
+
+	public static int getBigAccountsSize(int index) throws UnknownHostException{
+		return getSchwergsyAccountArraySize(index, "bigAccounts");
 	}
 
 	/**

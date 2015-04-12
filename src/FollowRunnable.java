@@ -105,50 +105,50 @@ public class FollowRunnable implements Runnable{
 	 * @throws FuckinUpKPException 
 	 * 
 	 */
-	public void updateToFollow() throws TwitterException,UnknownHostException, FuckinUpKPException{
-		List<Status> statuses = null;
-		String longToString = "";
-		long[] rters_ids;
-		int statuses_size = 15;
-		try {
-			statuses=bird.getUserTimeline(DataBaseHandler.getBigAccount(index));
-			if(statuses.size()<=statuses_size){
-				statuses_size = statuses.size();
-			}
-			//If more than 15 tweets are returned, sort by tweets with most retweets first
-			else{
-				Collections.sort(statuses, new Comparator<Status>() {
-					@Override
-					public int compare(Status t1, Status t2) {
-						int rts1 = t1.getRetweetCount();
-						int rts2 = t2.getRetweetCount();
-
-						if (rts1 == rts2)
-							return 0;
-						else if (rts1 > rts2)
-							return 1;
-						else
-							return -1;
-					}
-				});
-			}
-			
-			//need to add in check so that exhausted bigAccounts are removed
-			for(int i = 0; i<statuses_size; i++){
-				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
-				for(long user_id : rters_ids){
-					if(!DataBaseHandler.isWhiteListed(index, user_id)){
-					DataBaseHandler.addElementToSchwergsArray(index, user_id, "toFollow");
-					}
-					System.out.println(longToString);
-				}
-			}
-		} catch (TwitterException e) {
-			System.out.println("Something in updateFollowers went wrong");
-			e.printStackTrace();
-		}
-	}
-
+	//TODO update this part to reflect changes made by bigAccRunnable
+//	public void getToFollow() throws TwitterException,UnknownHostException, FuckinUpKPException{
+//		List<Status> statuses = null;
+//		String longToString = "";
+//		long[] rters_ids;
+//		int statuses_size = 15;
+//		try {
+//			statuses=bird.getUserTimeline(DataBaseHandler.getBigAccount(index));
+//			if(statuses.size()<=statuses_size){
+//				statuses_size = statuses.size();
+//			}
+//			//If more than 15 tweets are returned, sort by tweets with most retweets first
+//			else{
+//				Collections.sort(statuses, new Comparator<Status>() {
+//					@Override
+//					public int compare(Status t1, Status t2) {
+//						int rts1 = t1.getRetweetCount();
+//						int rts2 = t2.getRetweetCount();
+//
+//						if (rts1 == rts2)
+//							return 0;
+//						else if (rts1 > rts2)
+//							return 1;
+//						else
+//							return -1;
+//					}
+//				});
+//			}
+//			
+//			//need to add in check so that exhausted bigAccounts are removed
+//			for(int i = 0; i<statuses_size; i++){
+//				rters_ids = bird.getRetweeterIds(Long.valueOf(statuses.get(i).getId()),100).getIDs();
+//				for(long user_id : rters_ids){
+//					if(!DataBaseHandler.isWhiteListed(index, user_id)){
+//					DataBaseHandler.addElementToSchwergsArray(index, user_id, "toFollow");
+//					}
+//					System.out.println(longToString);
+//				}
+//			}
+//		} catch (TwitterException e) {
+//			System.out.println("Something in updateFollowers went wrong");
+//			e.printStackTrace();
+//		}
+//	}
 
 	
 	/**
