@@ -623,9 +623,40 @@ public class DataBaseHandler{
 		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
 	}
 	
-	public static void moveBigAccountToEnd(int index, int bigAccIndex) {
-		// TODO Auto-generated method stub
+	public static void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
+		long user_id = getBigAccount(index, bigAccIndex);
+		int strikes = getBigAccountStrikes(index,bigAccIndex);
+		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
 		
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject match = new BasicDBObject("_id", index); //to match your direct app document
+		BasicDBObject update = new BasicDBObject("user_id", user_id);
+		dbCollection.update(match, new BasicDBObject("$pull", update));
+		mongoClient.close();
+		
+		addBigAccount(index, user_id, latestTweet);
+		
+		
+	}
+	
+	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject clause1 = new BasicDBObject("$eq", new BasicDBObject("_id", index));
+		BasicDBObject clause2 = new BasicDBObject("whiteList", new BasicDBObject("$in", 
+					new BasicDBObject("user_id",bigAccountID)));
+		BasicDBList and = new BasicDBList();
+		and.add(clause1);
+		and.add(clause2);
+		BasicDBObject query = new BasicDBObject("$and", and);
+		DBCursor cursor = dbCollection.find(query);
+		if(cursor.hasNext()){
+			return true;
+		}
+		return false;
 	}
 
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
@@ -633,7 +664,7 @@ public class DataBaseHandler{
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
 		BasicDBObject clause1 = new BasicDBObject("$eq", new BasicDBObject("_id", index));
-		BasicDBObject clause2 = new BasicDBObject("_whiteList", new BasicDBObject("$in", user_id));
+		BasicDBObject clause2 = new BasicDBObject("whiteList", new BasicDBObject("$in", user_id));
 		BasicDBList and = new BasicDBList();
 		and.add(clause1);
 		and.add(clause2);

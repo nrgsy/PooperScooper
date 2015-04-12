@@ -15,7 +15,6 @@ import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
-
 public class bigAccRunnable implements Runnable {
 	//TODO when getting new bigAccs, check that it doesn't exist already in bigAccs
 	private Twitter bird;
@@ -59,9 +58,9 @@ public class bigAccRunnable implements Runnable {
 		Long[] AllCandidatesArr;
 		long latestTweet = 0;
 
-		if(DataBaseHandler.getBigAccountsSize(index)!=0){
+		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			ResponseList<Status> OwnTweets = bird.getHomeTimeline();
+			ResponseList<Status> OwnTweets = bird.getUserTimeline(bird.getId());
 
 			if(OwnTweets.size()>15){
 				//sorts by most retweets near 0 index and cuts out tweets with little retweets
@@ -73,19 +72,19 @@ public class bigAccRunnable implements Runnable {
 						if (rts1 == rts2)
 							return 0;
 						else if (rts1 > rts2)
-							return 1;
-						else
 							return -1;
+						else
+							return 1;
 					}
 				});
-				while(OwnTweets.size()>15){
-					OwnTweets.remove(15);
+				while(OwnTweets.size()>1){
+					OwnTweets.remove(1);
 				}
 			}
 
 			for(Status tweet : OwnTweets){
 				if(tweet.getRetweetCount()!=0){
-					long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100).getIDs();
+					long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100, -1).getIDs();
 					for(long id : RTerIDs){
 
 						AllRTerIDs.add(id);
@@ -102,7 +101,7 @@ public class bigAccRunnable implements Runnable {
 				querySettings.setCount(50);
 				ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
 				for(Status tweet: potentialBigAccs){
-					if(tweet.isRetweeted() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
+					if(tweet.isRetweet() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
 							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()){
 						AllCandidates.add(tweet.getRetweetedStatus().getUser().getId());
 					}
@@ -111,7 +110,7 @@ public class bigAccRunnable implements Runnable {
 		}
 		else{
 			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
-			int limit = 3;
+			int limit = 1;
 			for(User user : suggestedUsers){
 				if(limit != 0){
 					limit--;
@@ -169,7 +168,7 @@ public class bigAccRunnable implements Runnable {
 		Thread.sleep(900000);
 	}
 
-	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException{
+	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException, FuckinUpKPException{
 		int bigAccIndex = 0;
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		while(DataBaseHandler.getToFollowSize(index)<11900 && bigAccIndex!= DataBaseHandler.getBigAccountsSize(index)){
@@ -235,7 +234,7 @@ public class bigAccRunnable implements Runnable {
 			e.printStackTrace();
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
