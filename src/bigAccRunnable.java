@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
-
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
@@ -12,14 +11,14 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 
 public class bigAccRunnable implements Runnable {
-
+	//TODO when getting new bigAccs, check that it doesn't exist already in bigAccs
 	private Twitter bird;
 	private int index;
+
 
 	/**
 	 * @param OAuthConsumerKey
@@ -39,11 +38,11 @@ public class bigAccRunnable implements Runnable {
 		bird = tf.getInstance();
 	}
 
-	public void findBigAccounts() throws TwitterException, InterruptedException{
+	public void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
 		ArrayList<Long> AllCandidates = null; 
 		ArrayList<Long> AllRTerIDs = null;
 		ResponseList<Status> OwnTweets = bird.getHomeTimeline();
-		long latestTweet;
+		long latestTweet = 0;
 
 		if(OwnTweets.size()>15){
 
@@ -53,7 +52,6 @@ public class bigAccRunnable implements Runnable {
 				public int compare(Status t1, Status t2) {
 					int rts1 = t1.getRetweetCount();
 					int rts2 = t2.getRetweetCount();
-
 					if (rts1 == rts2)
 						return 0;
 					else if (rts1 > rts2)
@@ -122,7 +120,7 @@ public class bigAccRunnable implements Runnable {
 			int avgRTs = totalRTs/count;
 
 			if(avgRTs>=15 &&avgTime<=172800000){
-				//TODO add "id" and "latestTweet" into bigAccount list
+				DataBaseHandler.addBigAccount(index, id, latestTweet);
 			}
 		}
 		Thread.sleep(900000);
@@ -150,7 +148,21 @@ public class bigAccRunnable implements Runnable {
 					toFollowSet.add(id);
 				}
 			}
-			DataBaseHandler.addToFollow(index, (Long[])toFollowSet.toArray());
+			if(toFollowSet.size()==0){
+				if(DataBaseHandler.getBigAccountStrikes(index, bigAccIndex)==2){
+					DataBaseHandler.editBigAccountStrikes(index, bigAccIndex, 0);
+					DataBaseHandler.moveBigAccountToEnd(index, bigAccIndex);
+				}
+				else{
+					DataBaseHandler.editBigAccountStrikes(index, bigAccIndex, 
+
+							DataBaseHandler.getBigAccountStrikes(index, bigAccIndex) +1);
+				}
+			}
+			else{
+				DataBaseHandler.addToFollow(index, (Long[])toFollowSet.toArray());
+			}
+			bigAccIndex++;
 		}
 	}
 
@@ -168,7 +180,6 @@ public class bigAccRunnable implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-
 	}
 
 }
