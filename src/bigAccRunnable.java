@@ -1,5 +1,6 @@
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 
@@ -38,91 +40,131 @@ public class bigAccRunnable implements Runnable {
 		bird = tf.getInstance();
 	}
 
-	public void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
-		ArrayList<Long> AllCandidates = null; 
-		ArrayList<Long> AllRTerIDs = null;
-		ResponseList<Status> OwnTweets = bird.getHomeTimeline();
+	public bigAccRunnable(){
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setDebugEnabled(true)
+		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
+		.setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
+		.setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
+		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
+		TwitterFactory tf = new TwitterFactory(cb.build());
+		bird = tf.getInstance();
+		this.index = 0;
+	}
+
+
+	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
+
+		HashSet<Long> AllCandidates = new HashSet<Long>(); 
+		Long[] AllCandidatesArr;
 		long latestTweet = 0;
 
-		if(OwnTweets.size()>15){
+		if(DataBaseHandler.getBigAccountsSize(index)!=0){
+			ArrayList<Long> AllRTerIDs = null;
+			ResponseList<Status> OwnTweets = bird.getHomeTimeline();
 
-			//sorts by most retweets near 0 index and cuts out tweets with little retweets
-			Collections.sort(OwnTweets, new Comparator<Status>() {
-				@Override
-				public int compare(Status t1, Status t2) {
-					int rts1 = t1.getRetweetCount();
-					int rts2 = t2.getRetweetCount();
-					if (rts1 == rts2)
-						return 0;
-					else if (rts1 > rts2)
-						return 1;
-					else
-						return -1;
+			if(OwnTweets.size()>15){
+				//sorts by most retweets near 0 index and cuts out tweets with little retweets
+				Collections.sort(OwnTweets, new Comparator<Status>() {
+					@Override
+					public int compare(Status t1, Status t2) {
+						int rts1 = t1.getRetweetCount();
+						int rts2 = t2.getRetweetCount();
+						if (rts1 == rts2)
+							return 0;
+						else if (rts1 > rts2)
+							return 1;
+						else
+							return -1;
+					}
+				});
+				while(OwnTweets.size()>15){
+					OwnTweets.remove(15);
 				}
-			});
-			while(OwnTweets.size()>15){
-				OwnTweets.remove(15);
+			}
+
+			for(Status tweet : OwnTweets){
+				if(tweet.getRetweetCount()!=0){
+					long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100).getIDs();
+					for(long id : RTerIDs){
+
+						AllRTerIDs.add(id);
+					}
+				}
+			}
+
+			while(AllRTerIDs.size()>50){
+				AllRTerIDs.remove(50);
+			}
+
+			for(long id : AllRTerIDs){
+				Paging querySettings = new Paging();
+				querySettings.setCount(50);
+				ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
+				for(Status tweet: potentialBigAccs){
+					if(tweet.isRetweeted() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
+							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()){
+						AllCandidates.add(tweet.getRetweetedStatus().getUser().getId());
+					}
+				}
+			}
+		}
+		else{
+			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
+			int limit = 3;
+			for(User user : suggestedUsers){
+				if(limit != 0){
+					limit--;
+					AllCandidates.add(user.getId());
+				}
 			}
 		}
 
-		for(Status tweet : OwnTweets){
-			if(tweet.getRetweetCount()!=0){
-				long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100).getIDs();
-				for(long id : RTerIDs){
-					AllRTerIDs.add(id);
-				}
-			}
+		AllCandidatesArr = Arrays.copyOf(AllCandidates.toArray(), AllCandidates.toArray().length, Long[].class);
+
+		int maxCandidates = 100;
+		if(AllCandidatesArr.length<maxCandidates){
+			maxCandidates = AllCandidatesArr.length;
 		}
 
-		while(AllRTerIDs.size()>50){
-			AllRTerIDs.remove(50);
-		}
-
-		for(long id : AllRTerIDs){
-			Paging querySettings = new Paging();
-			querySettings.setCount(50);
-			ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
-			for(Status tweet: potentialBigAccs){
-				if(tweet.isRetweeted() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000){
-					AllCandidates.add(tweet.getRetweetedStatus().getUser().getId());
-				}
-			}
-		}
-
-		while(AllCandidates.size()>100){
-			AllCandidates.remove(100);
-		}
-
-		for(long id : AllCandidates){
-			ResponseList<Status> timeline = bird.getUserTimeline(id, new Paging(200));
+		for(int i =0; i<maxCandidates; i++){
+			System.out.println("considering candidate...");
+			Long id = AllCandidatesArr[i];
+			Paging query = new Paging();
+			query.setCount(5);
+			ResponseList<Status> timeline = bird.getUserTimeline(id, query);
+			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
 			long firstTime = 0;
 			long lastTime = 0;
 			for(Status tweet: timeline){
-				if(tweet.isRetweet()){
-					timeline.remove(tweet);
+				if(!tweet.isRetweet()){
+					noRTTimeline.add(tweet);
 				}
 			}
-			for(Status tweet: timeline){
+			for(Status tweet: noRTTimeline){
 				count++;
 				totalRTs+= tweet.getRetweetCount();
 				if(count == 1){
 					firstTime += tweet.getCreatedAt().getTime();
 				}
-				if(count == timeline.size()){
+				if(count == noRTTimeline.size()){
 					lastTime += tweet.getCreatedAt().getTime();
 					latestTweet = tweet.getId();
 				}
 			}
 
-			long avgTime = (lastTime-firstTime)/count;
-			int avgRTs = totalRTs/count;
+			if(count>0){
+				long avgTime = (lastTime-firstTime)/count;
+				int avgRTs = totalRTs/count;
 
-			if(avgRTs>=15 &&avgTime<=172800000){
-				DataBaseHandler.addBigAccount(index, id, latestTweet);
+				if(avgRTs>=30 && avgTime<=86400000){
+					DataBaseHandler.addBigAccount(index, id, latestTweet);
+				}
 			}
 		}
+
 		Thread.sleep(900000);
 	}
 
@@ -134,12 +176,13 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setCount(200);
 			querySettings.setSinceId(DataBaseHandler.getBigAccountLatestTweet(index,bigAccIndex));
 			ResponseList<Status> tweets = bird.getUserTimeline(DataBaseHandler.getBigAccount(index, bigAccIndex), querySettings);
+			ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 			for(Status tweet: tweets){
-				if(tweet.isRetweet()){
-					tweets.remove(tweet);
+				if(!tweet.isRetweet()){
+					NoRTTweets.add(tweet);
 				}
 			}
-			for(Status tweet :tweets){
+			for(Status tweet :NoRTTweets){
 				if(isAtRateLimit("/statuses/retweets/:id")){
 					Thread.sleep(900000);
 				}
@@ -155,7 +198,6 @@ public class bigAccRunnable implements Runnable {
 				}
 				else{
 					DataBaseHandler.editBigAccountStrikes(index, bigAccIndex, 
-
 							DataBaseHandler.getBigAccountStrikes(index, bigAccIndex) +1);
 				}
 			}
@@ -179,7 +221,26 @@ public class bigAccRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		try {
+			findBigAccounts();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FuckinUpKPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void main(String[] args){
+		new Thread(new bigAccRunnable()).start();
 	}
 
 }

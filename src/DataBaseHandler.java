@@ -260,7 +260,7 @@ public class DataBaseHandler{
 		bigAccount.append("strikes", 0);
 		bigAccount.append("latestTweet", latestTweet);
 
-		BasicDBObject ele = new BasicDBObject("$addToSet", bigAccount);
+		BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("bigAccounts",bigAccount));
 
 		dbCollection.update(query, ele);
 		System.out.println("successfully added an element to bigAccounts");
@@ -441,7 +441,7 @@ public class DataBaseHandler{
 		BasicDBObject query = new BasicDBObject("_id",index);
 		BasicDBObject updater = new BasicDBObject("$set", new BasicDBObject("bigAccounts."+bigAccountIndex+"."+property,
 				change));
-		dbCollection.update(query, updater);
+		dbCollection.findAndModify(query, updater);
 		mongoClient.close();
 	}
 	
