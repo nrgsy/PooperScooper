@@ -397,7 +397,8 @@ public class DataBaseHandler{
 		return toUnfollowArr;
 	}
 
-	public static synchronized Long getBigAccount(int index)throws UnknownHostException{
+	public static synchronized Long getBigAccount(int index, int bigAccountIndex)throws UnknownHostException{
+		//TODO add in selection of bigAccounts by index
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		Long bigAccount = null;
@@ -410,6 +411,16 @@ public class DataBaseHandler{
 		bigAccount = Arrays.copyOf(bigAccountList.toArray(), bigAccountList.toArray().length, Long[].class)[0];
 		mongoClient.close();
 		return bigAccount;
+	}
+	
+	public static synchronized Long getBigAccountLatestTweet(int index, int bigAccountIndex) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		Long bigAccountLatestTweet = null;
+		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		BasicDBObject query = new BasicDBObject("_id",index);
+		//TODO all this shit. New bigAccounts is now in key-value pairs, with the bigacc id as key and latest tweet as value
+		return bigAccountLatestTweet;
 	}
 
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
@@ -509,6 +520,10 @@ public class DataBaseHandler{
 	 */
 	public static int getFollowersSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "followers");
+	}
+	
+	public static int getBigAccountsSize(int index) throws UnknownHostException{
+		return getSchwergsyAccountArraySize(index, "bigAccounts");
 	}
 
 	/**

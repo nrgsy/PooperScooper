@@ -99,17 +99,19 @@ public class TwitterRunnable implements Runnable {
 
 
 	/**
+	 * @throws TwitterException 
 	 * 
 	 */
-	public void prettyRateLimit(){
-		try {
-			for(Map.Entry<String, RateLimitStatus> element : bird.getRateLimitStatus().entrySet()){
-				System.out.println(element+"\n");
-			}
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		};
+	public void prettyRateLimit() throws TwitterException{
+		Map<String ,RateLimitStatus> rateLimitStatus = bird.getRateLimitStatus();
+		for (String endpoint : rateLimitStatus.keySet()) {
+		    RateLimitStatus status = rateLimitStatus.get(endpoint);
+		    System.out.println("Endpoint: " + endpoint);
+		    System.out.println(" Limit: " + status.getLimit());
+		    System.out.println(" Remaining: " + status.getRemaining());
+		    System.out.println(" ResetTimeInSeconds: " + status.getResetTimeInSeconds());
+		    System.out.println(" SecondsUntilReset: " + status.getSecondsUntilReset());
+		}
 	}
 
 
@@ -118,7 +120,12 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run(){
-		prettyRateLimit();
+		try {
+			prettyRateLimit();
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args){
