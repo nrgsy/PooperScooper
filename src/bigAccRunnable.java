@@ -147,10 +147,11 @@ public class bigAccRunnable implements Runnable {
 				totalRTs+= tweet.getRetweetCount();
 				if(count == 1){
 					firstTime += tweet.getCreatedAt().getTime();
+					latestTweet = tweet.getId();
 				}
 				if(count == noRTTimeline.size()){
 					lastTime += tweet.getCreatedAt().getTime();
-					latestTweet = tweet.getId();
+					
 				}
 			}
 
@@ -159,7 +160,7 @@ public class bigAccRunnable implements Runnable {
 				int avgRTs = totalRTs/count;
 
 				if(avgRTs>=30 && avgTime<=86400000){
-					DataBaseHandler.addBigAccount(index, id, latestTweet);
+					DataBaseHandler.addBigAccount(index, id, -1);
 				}
 			}
 		}
@@ -169,19 +170,26 @@ public class bigAccRunnable implements Runnable {
 	}
 
 	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException, FuckinUpKPException{
-		int bigAccIndex = 0;
 		HashSet<Long> toFollowSet = new HashSet<Long>();
-		while(DataBaseHandler.getToFollowSize(index)<11900 && bigAccIndex!= DataBaseHandler.getBigAccountsSize(index)){
-			Paging querySettings = new Paging();
-			querySettings.setCount(200);
-			querySettings.setSinceId(DataBaseHandler.getBigAccountLatestTweet(index,bigAccIndex));
-			ResponseList<Status> tweets = bird.getUserTimeline(DataBaseHandler.getBigAccount(index, bigAccIndex), querySettings);
-			ArrayList<Status> NoRTTweets = new ArrayList<Status>();
+		Long[] toFollowSetArray;
+		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,0);
+		
+		Paging querySettings = new Paging();
+		querySettings.setCount(5);
+		if(lastTweet != -1){
+			querySettings.setSinceId(lastTweet);
+		}
+		
+		ResponseList<Status> tweets = bird.getUserTimeline(DataBaseHandler.getBigAccount(index, 0), querySettings);
+		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
+		
+		if(DataBaseHandler.getToFollowSize(index)<11900){
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet()){
 					NoRTTweets.add(tweet);
 				}
 			}
+			
 			for(Status tweet :NoRTTweets){
 				if(isAtRateLimit("/statuses/retweets/:id")){
 					Thread.sleep(900000);
@@ -190,28 +198,33 @@ public class bigAccRunnable implements Runnable {
 				for(long id : toFollows){
 					toFollowSet.add(id);
 				}
+				DataBaseHandler.editBigAccountLatestTweet(index, 0, tweet.getId());
 			}
-			if(toFollowSet.size()==0){
-				if(DataBaseHandler.getBigAccountStrikes(index, bigAccIndex)==2){
-					DataBaseHandler.editBigAccountStrikes(index, bigAccIndex, 0);
-					DataBaseHandler.moveBigAccountToEnd(index, bigAccIndex);
+			
+			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
+			for(Long user_id: toFollowSetArray){
+				if(DataBaseHandler.isWhiteListed(index, user_id)){
+					toFollowSet.remove(user_id);
+				}
+			}
+			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
+			
+			if(toFollowSetArray.length==0){
+				if(DataBaseHandler.getBigAccountStrikes(index, 0)==2){
+					DataBaseHandler.editBigAccountStrikes(index, 0, 0);
+					DataBaseHandler.moveBigAccountToEnd(index, 0);
 				}
 				else{
-					DataBaseHandler.editBigAccountStrikes(index, bigAccIndex, 
-							DataBaseHandler.getBigAccountStrikes(index, bigAccIndex) +1);
+					DataBaseHandler.editBigAccountStrikes(index, 0, 
+							DataBaseHandler.getBigAccountStrikes(index, 0) +1);
 				}
 			}
 			else{
-				for(Long user_id: toFollowSet){
-					if(DataBaseHandler.isWhiteListed(index, user_id)){
-						toFollowSet.remove(user_id);
-					}
-				}
-				DataBaseHandler.addToFollow(index, (Long[])toFollowSet.toArray());
-				DataBaseHandler.addWhitelist(index, (Long[])toFollowSet.toArray());
+				DataBaseHandler.addToFollow(index, toFollowSetArray);
+				DataBaseHandler.addWhitelist(index, toFollowSetArray);
 			}
-			bigAccIndex++;
 		}
+		System.out.println("done harvesting");
 	}
 
 	public boolean isAtRateLimit(String endpoint) throws TwitterException{
@@ -224,24 +237,16 @@ public class bigAccRunnable implements Runnable {
 			return false;
 		}
 	}
+	
+	public String test() throws UnknownHostException{
+		return DataBaseHandler.getBigAccount(index, 0)+":"+
+				DataBaseHandler.getBigAccountStrikes(index, 0)+":"+
+				DataBaseHandler.getBigAccountLatestTweet(index, 0);
+	}
+	
 
 	@Override
 	public void run() {
-		try {
-			findBigAccounts();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FuckinUpKPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 	}
 

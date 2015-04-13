@@ -10,6 +10,8 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.bson.types.BasicBSONList;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -404,7 +406,7 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 */
 	public static synchronized void addToFollow(int index, Long[]toFollowArr) throws UnknownHostException{
-		addArrayToSchwergsArray(index,toFollowArr,"to_follow");
+		addArrayToSchwergsArray(index,toFollowArr,"toFollow");
 	}
 
 	/**
@@ -413,7 +415,7 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 */
 	public static synchronized void addWhitelist(int index, Long[]whitelistArr) throws UnknownHostException{
-		addArrayToSchwergsArray(index,whitelistArr,"whitelist");
+		addArrayToSchwergsArray(index,whitelistArr,"whiteList");
 	}
 
 	/**
@@ -431,8 +433,7 @@ public class DataBaseHandler{
 		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
 		bigAccount.append("strikes", 0);
 		bigAccount.append("latestTweet", latestTweet);
-
-		BasicDBObject ele = new BasicDBObject("$addToSet", new BasicDBObject("bigAccounts",bigAccount));
+		BasicDBObject ele = new BasicDBObject("$push", new BasicDBObject("bigAccounts",bigAccount));
 
 		dbCollection.update(query, ele);
 		System.out.println("successfully added an element to bigAccounts");
@@ -578,22 +579,34 @@ public class DataBaseHandler{
 		return toUnfollowArr;
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	private static synchronized Object getBigAccountStuff(int index, int bigAccountIndex, String property)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject query = new BasicDBObject("_id",index);
-		BasicDBObject find = new BasicDBObject("bigAccounts", new BasicDBObject("$elemMatch",
-				new BasicDBObject ("user_id", bigAccountIndex)));
+		BasicDBObject find;
+		if(bigAccountIndex != 0){		
+			BasicDBList sliceParameters = new BasicDBList();
+			sliceParameters.add(bigAccountIndex-1);
+			sliceParameters.add(1);
+			find = new BasicDBObject("bigAccounts", new BasicDBObject("$slice", sliceParameters));
+		}
+		else{
+			int sliceParameters = 1;
+			find = new BasicDBObject("bigAccounts", new BasicDBObject("$slice", sliceParameters));
+		}
+		
 		DBCursor cursor = dbCollection.find(query, find);
-		DBObject answer = cursor.next();
+		BasicDBList answerList = (BasicDBList)cursor.next().get("bigAccounts");
+		BasicDBObject answer = (BasicDBObject)answerList.get(0);
 		cursor.close();
 		mongoClient.close();
 		return answer.get(property);
 	}
 
-	public static synchronized Long getBigAccount(int index, int bigAccountIndex)throws UnknownHostException{
-		return (Long)getBigAccountStuff(index, bigAccountIndex,"user_id");
+	public static synchronized long getBigAccount(int index, int bigAccountIndex)throws UnknownHostException{
+		return  (Long)getBigAccountStuff(index, bigAccountIndex,"user_id");
 	}
 
 	public static synchronized int getBigAccountStrikes(int index, int bigAccountIndex) throws UnknownHostException{
@@ -604,10 +617,11 @@ public class DataBaseHandler{
 		return (Long)getBigAccountStuff(index, bigAccountIndex,"latestTweet");
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject query = new BasicDBObject("_id",index);
 		BasicDBObject updater = new BasicDBObject("$set", new BasicDBObject("bigAccounts."+bigAccountIndex+"."+property,
 				change));
@@ -623,17 +637,19 @@ public class DataBaseHandler{
 		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
 	}
 	
+	//Tested and given the Bojangles Seal of Approval
 	public static void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
 		long user_id = getBigAccount(index, bigAccIndex);
 		int strikes = getBigAccountStrikes(index,bigAccIndex);
-		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
+		long latestTweet = -1;//getBigAccountLatestTweet(index,bigAccIndex);
 		
+		System.out.println(user_id+":"+strikes+":"+latestTweet);
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject match = new BasicDBObject("_id", index); //to match your direct app document
 		BasicDBObject update = new BasicDBObject("user_id", user_id);
-		dbCollection.update(match, new BasicDBObject("$pull", update));
+		dbCollection.update(match, new BasicDBObject("$pull", new BasicDBObject("bigAccounts", update)));
 		mongoClient.close();
 		
 		addBigAccount(index, user_id, latestTweet);
@@ -641,35 +657,30 @@ public class DataBaseHandler{
 		
 	}
 	
+	//Tested and given the Bojangles Seal of Approval
 	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
-		BasicDBObject clause1 = new BasicDBObject("$eq", new BasicDBObject("_id", index));
-		BasicDBObject clause2 = new BasicDBObject("whiteList", new BasicDBObject("$in", 
-					new BasicDBObject("user_id",bigAccountID)));
-		BasicDBList and = new BasicDBList();
-		and.add(clause1);
-		and.add(clause2);
-		BasicDBObject query = new BasicDBObject("$and", and);
-		DBCursor cursor = dbCollection.find(query);
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		query.append("bigAccounts",new BasicDBObject("$elemMatch", new BasicDBObject("user_id", bigAccountID)));
+		BasicDBObject call = new BasicDBObject("bigAccounts.$",1);
+		DBCursor cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
 		}
 		return false;
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccount");
-		BasicDBObject clause1 = new BasicDBObject("$eq", new BasicDBObject("_id", index));
-		BasicDBObject clause2 = new BasicDBObject("whiteList", new BasicDBObject("$in", user_id));
-		BasicDBList and = new BasicDBList();
-		and.add(clause1);
-		and.add(clause2);
-		BasicDBObject query = new BasicDBObject("$and", and);
-		DBCursor cursor = dbCollection.find(query);
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		query.append("whiteList", new BasicDBObject("$eq", user_id));
+		BasicDBObject call = new BasicDBObject("whiteList.$", 1);
+		DBCursor cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
 		}
@@ -694,10 +705,10 @@ public class DataBaseHandler{
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		Long[] toFollowArr = null;
 		BasicDBObject query = new BasicDBObject("_id", index);
-		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("to_follow", -1));
-		BasicDBObject slice = new BasicDBObject("to_follow", new BasicDBObject("$slice", 1));
+		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("toFollow", -1));
+		BasicDBObject slice = new BasicDBObject("toFollow", new BasicDBObject("$slice", 1));
 		DBCursor cursor = dbCollection.find(query,slice);
-		BasicDBList toFollowList = (BasicDBList) cursor.next().get("to_follow");
+		BasicDBList toFollowList = (BasicDBList) cursor.next().get("toFollow");
 		cursor.close();
 		//added so we don't have to call toArray() twice
 		Object[] toFollowArray = toFollowList.toArray();
@@ -712,30 +723,20 @@ public class DataBaseHandler{
 	 * @param index the Schwergsy Account to get the list from
 	 * @param column the specific list to return
 	 * @return
+	 * @throws UnknownHostException 
 	 */
-	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) {
+	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
 
-		MongoClient mongoClient = null;
-
-		try {
-			mongoClient = new MongoClient();
+		MongoClient mongoClient = new MongoClient();
 			DB db = mongoClient.getDB("Schwergsy");
 			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 			BasicDBObject query = new BasicDBObject("_id", index);
 			DBCursor cursor = dbCollection.find(query);
 			BasicDBList SchwergsList = (BasicDBList) cursor.next().get(column);
 			cursor.close();
-			return SchwergsList;
-		} 		
-		catch (Exception e) {
-			System.out.println("Error in getting " + column);
-			e.printStackTrace();
-		}
-
-		finally{
 			mongoClient.close();
-		}
-		return null;
+			return SchwergsList;
+			
 	}
 
 	////// Start region: get array size
@@ -743,8 +744,9 @@ public class DataBaseHandler{
 	 * @param index
 	 * @param column
 	 * @return
+	 * @throws UnknownHostException 
 	 */
-	public static synchronized int getSchwergsyAccountArraySize(int index, String column) {
+	public static synchronized int getSchwergsyAccountArraySize(int index, String column) throws UnknownHostException {
 
 		return getSchwergsyAccountArray(index, column).size();
 	}
@@ -777,7 +779,7 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 */
 	public static int getToFollowSize(int index) throws UnknownHostException{
-		return getSchwergsyAccountArraySize(index, "to_follow");
+		return getSchwergsyAccountArraySize(index, "toFollow");
 	}
 
 	//////End region: Get array size
