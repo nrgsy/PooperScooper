@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -225,7 +226,9 @@ public class ApprovalGUI {
 				labelPanel.add(numRemainingLabel);
 				labelPanel.setBackground(Color.GRAY);
 
+				Font font = new Font("SansSerif", Font.BOLD, 25);
 				captionTextField = new JTextField();
+				captionTextField.setFont(font);
 				captionTextField.setText(currentContent.get("caption").toString());
 				captionTextField.setPreferredSize(new Dimension(333,30));
 
@@ -278,7 +281,8 @@ public class ApprovalGUI {
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.getContentPane().add(scrPane);
 				frame.pack();
-				frame.setSize(1000, 850);
+				frame.setMinimumSize(new Dimension(300, 300));
+				frame.setSize(800, 900);
 				frame.setLocationRelativeTo(null);	
 				frame.setVisible(true);	
 			}
