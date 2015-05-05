@@ -24,34 +24,23 @@ public class Director {
 	public static HashMap<String, Boolean> runStatus; 
 
 	public static Date getNextTime(Date base, int hourOfDay) {
-	    Calendar then = Calendar.getInstance();
-	    then.setTime(base);
-	    then.set(Calendar.HOUR_OF_DAY, hourOfDay);
-	    then.set(Calendar.MINUTE, 0);
-	    then.set(Calendar.SECOND, 0);
-	    then.set(Calendar.MILLISECOND, 0);
-	    if (then.getTime().before(base)) {
-	        then.add(Calendar.DAY_OF_YEAR, 1);
-	    }
-	    return then.getTime();
+		Calendar then = Calendar.getInstance();
+		then.setTime(base);
+		then.set(Calendar.HOUR_OF_DAY, hourOfDay);
+		then.set(Calendar.MINUTE, 0);
+		then.set(Calendar.SECOND, 0);
+		then.set(Calendar.MILLISECOND, 0);
+		if (then.getTime().before(base)) {
+			then.add(Calendar.DAY_OF_YEAR, 1);
+		}
+		return then.getTime();
 	}
-	
-	
-	
-	
-	
-	
-	
-	/**
-	 * @param args
-	 * @throws UnknownHostException
-	 * @throws Exception
-	 */
-	public static void main(String[]args) throws UnknownHostException, Exception{
 
-		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
-		
-		new Timer().scheduleAtFixedRate(new TimerTask() {
+
+
+	public static TimerTask createMaintenanceTimerTask() {
+
+		return new TimerTask() {
 			@Override
 			public void run() {
 				System.out.println("maintenance started");
@@ -63,7 +52,7 @@ public class Director {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					
+
 					//look for a status that's true (indicating that something's still running)
 					boolean somethingStillRunning = false;
 					for (boolean status : runStatus.values()) {
@@ -72,24 +61,39 @@ public class Director {
 							break;
 						}
 					}
-					
+
 					if (!somethingStillRunning) {
 						activityExists = false;
 					}
 				}	
-				
+
 				//TODO the actual maintenance
-				
+
 				//Update followers
 				//old content garbage collection
 				//get big accounts (because of high api call amount)
+				
 				//call "initialize global vars" to copy variables from the global config file to Globalstuff class
+
+				
 				
 				Maintenance.flagSet = false;
 				System.out.println("maintenance complete");
-			}}, nextOccurrenceOf3am, GlobalStuff.DAY_IN_MILLISECONDS);
-		
-		
+			}};
+	}
+
+	/**
+	 * @param args
+	 * @throws UnknownHostException
+	 * @throws Exception
+	 */
+	public static void main(String[]args) throws UnknownHostException, Exception{
+
+		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
+
+		//The timer who's task fires once a day to do the maintenance tasks
+		new Timer().scheduleAtFixedRate(createMaintenanceTimerTask(), nextOccurrenceOf3am, GlobalStuff.DAY_IN_MILLISECONDS);
+
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
@@ -108,6 +112,7 @@ public class Director {
 				followtime = 203250;
 			}
 
+			
 			new Timer().scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
@@ -128,6 +133,7 @@ public class Director {
 						runStatus.put(customKey, false);
 					}
 				}},0L, posttime);
+			
 
 
 			new Timer().scheduleAtFixedRate(new TimerTask() {
