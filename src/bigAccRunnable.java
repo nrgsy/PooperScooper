@@ -16,7 +16,7 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class bigAccRunnable implements Runnable {
-	//TODO when getting new bigAccs, check that it doesn't exist already in bigAccs
+
 	private Twitter bird;
 	private int index;
 
@@ -102,7 +102,8 @@ public class bigAccRunnable implements Runnable {
 				ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
 				for(Status tweet: potentialBigAccs){
 					if(tweet.isRetweet() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
-							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()){
+							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()&&
+							!DataBaseHandler.isInBigAccounts(index, tweet.getRetweetedStatus().getUser().getId())){
 						AllCandidates.add(tweet.getRetweetedStatus().getUser().getId());
 					}
 				}
