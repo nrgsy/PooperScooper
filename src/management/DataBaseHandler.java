@@ -113,6 +113,8 @@ public class DataBaseHandler{
 					break;
 				}
 			}
+			//foundmatch will be false if the candidate content's access info didn't contain the index of
+			//the schwergs account corresponding to index
 			if (!foundMatch) {
 				//because we know this content has never been used before
 				bestContent = candidateContent;
