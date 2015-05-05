@@ -28,16 +28,9 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessToken
 	 * @param OAuthAccessTokenSecret
 	 */
-	public FollowRunnable(String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		  .setOAuthConsumerKey(OAuthConsumerKey)
-		  .setOAuthConsumerSecret(OAuthConsumerSecret)
-		  .setOAuthAccessToken(OAuthAccessToken)
-		  .setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
+	public FollowRunnable(Twitter twitter, int index){
 		this.index = index;
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		bird = tf.getInstance();
+		bird = twitter;
 	}
 	
 	//this constructor only for testing

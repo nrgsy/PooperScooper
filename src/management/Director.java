@@ -7,8 +7,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
+import twitterRunnables.bigAccRunnable;
 
 import com.mongodb.BasicDBObject;
 
@@ -34,6 +38,61 @@ public class Director {
 	        then.add(Calendar.DAY_OF_YEAR, 1);
 	    }
 	    return then.getTime();
+	}
+	
+	//TODO runstatus is not scheduled correctly. it would run immediately after runnable is instantiated, not finished.
+	private static TimerTask createTwitterRunnableTimerTask(Twitter bird, int index, String key){
+		return new TimerTask() {
+			@Override
+			public void run() {
+
+				if (!GlobalMaintenance.flagSet) {
+					runStatus.put(key, true);
+					new FollowRunnable(bird,index);
+					runStatus.put(key, false);
+				}
+
+				else {
+					runStatus.put(key, false);
+				}
+			}
+		};
+	}
+	
+	private static TimerTask createFollowRunnableTimerTask(Twitter bird, int index, String key){
+		return new TimerTask() {
+			@Override
+			public void run() {
+
+				if (!GlobalMaintenance.flagSet) {
+					runStatus.put(key, true);
+					new FollowRunnable(bird,index);
+					runStatus.put(key, false);
+				}
+
+				else {
+					runStatus.put(key, false);
+				}
+			}
+		};
+	}
+	
+	private static TimerTask createBigAccRunnableTimerTask(Twitter bird, int index, String key){
+		return new TimerTask() {
+			@Override
+			public void run() {
+
+				if (!GlobalMaintenance.flagSet) {
+					runStatus.put(key, true);
+					new bigAccRunnable(bird,index);
+					runStatus.put(key, false);
+				}
+
+				else {
+					runStatus.put(key, false);
+				}
+			}
+		};
 	}
 	
 	/**
@@ -88,7 +147,10 @@ public class Director {
 
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);
-
+			
+			String cusKey = (String) info.get("customerKey");
+			String customKey = cusKey + "twitter";
+			
 			long followtime_min = 86400L;
 			long followtime_max = 123430L;
 			long posttime_min = 900000L;
@@ -96,56 +158,28 @@ public class Director {
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
-
+			long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
+			
 			//If in incubation, follows at a rate of 425 per day
 			if((boolean) info.get("isIncubated")){
 				followtime = 203250;
 			}
+			
+			ConfigurationBuilder cb = new ConfigurationBuilder();
+			cb.setDebugEnabled(true)
+			.setOAuthConsumerKey(cusKey)
+			.setOAuthConsumerSecret(info.getString("customerSecret"))
+			.setOAuthAccessToken(info.getString("authorizationKey"))
+			.setOAuthAccessTokenSecret(info.getString("authorizationSecret"));
+			TwitterFactory tf = new TwitterFactory(cb.build());
+			Twitter twitter = tf.getInstance();
+			
+			
+			//TODO add in DateTime variable to check against to know when to run probability to post.
+			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id, cusKey), 0L, 60000L);
+			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id, cusKey), 0L, followtime);
+			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id, cusKey), 0L, bigacctime);
 
-			new Timer().scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-
-					String cusKey = (String) info.get("customerKey");
-					String customKey = cusKey + "twitter";
-					if (!GlobalMaintenance.flagSet) {
-
-						runStatus.put(customKey, true);
-						new TwitterRunnable(cusKey,
-								(String) info.get("customerSecret"),
-								(String) info.get("authorizationKey"),
-								(String) info.get("authorizationSecret"),
-								0);
-						runStatus.put(customKey, false);
-					}
-					else {
-						runStatus.put(customKey, false);
-					}
-				}},0L, posttime);
-
-
-			new Timer().scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-
-					String cusKey = (String) info.get("customerKey");
-					String customKey = cusKey + "follow";
-					if (!GlobalMaintenance.flagSet) {
-
-						runStatus.put(customKey, true);
-						new FollowRunnable(cusKey,
-								(String) info.get("customerSecret"),
-								(String) info.get("authorizationKey"),
-								(String) info.get("authorizationSecret"),
-								0);
-						runStatus.put(customKey, false);
-					}
-					else {
-						runStatus.put(customKey, false);
-					}
-
-				}}, 0L, followtime);
-		}
 
 		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
