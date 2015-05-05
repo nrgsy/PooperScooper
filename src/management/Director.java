@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
@@ -50,7 +51,7 @@ public class Director {
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		
-		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				System.out.println("maintenance started");
@@ -107,7 +108,7 @@ public class Director {
 				followtime = 203250;
 			}
 
-			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			new Timer().scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
 
@@ -129,7 +130,7 @@ public class Director {
 				}},0L, posttime);
 
 
-			new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+			new Timer().scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
 
@@ -152,7 +153,7 @@ public class Director {
 				}}, 0L, followtime);
 		}
 
-		new Timer().scheduleAtFixedRate(new java.util.TimerTask() {
+		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				new Thread(new RedditScraper()).start();
