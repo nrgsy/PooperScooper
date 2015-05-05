@@ -159,42 +159,6 @@ public class DataBaseHandler{
 		return bestContent;
 	}
 
-	/**
-	 * 
-	 * It was so nice... but not needed anymo...
-	 * 
-	 * Moves a image from some pending content collection to some actual content collections
-	 * 
-	 * @param sourceCollection
-	 * @param sourceLink
-	 * @param destinationCollection
-	 * @param destinationLink
-	 * @throws UnknownHostException 
-	 */
-	//	public static synchronized void moveImage(String sourceType, String sourceLink, 
-	//			String destinationType) throws UnknownHostException {
-	//		
-	//		MongoClient mongoClient = new MongoClient();
-	//		DB db = mongoClient.getDB("Schwergsy");
-	//		DBCollection sourceCollection = getCollection(sourceType, db);
-	//		
-	//		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
-	//
-	//		DBObject content = sourceCollection.findAndRemove(query);	
-	//		
-	//		if (content == null) {
-	//			System.err.println("Cannot move image, image not found");
-	//		}
-	//		else {
-	//			DBCollection destinationCollection = getCollection(destinationType, db);
-	//			destinationCollection.insert(content);
-	//			System.out.println("Image moved from " + sourceCollection.getName() +
-	//					" to " + destinationCollection.getName());
-	//			
-	//		}
-	//		mongoClient.close();
-	//	}
-
 	public static synchronized void removeContent(String sourceType, String sourceLink)
 			throws UnknownHostException {		
 		MongoClient mongoClient = new MongoClient();
@@ -203,6 +167,13 @@ public class DataBaseHandler{
 		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
 		sourceCollection.remove(query);
 		mongoClient.close();
+	}
+	
+	//TODO uses the given dbobject to initialize (or reinitialize the global variables in GlobalStuff)
+	public static synchronized void createGlobalVars(DBObject globalVars) {
+		// globalVars.get(arg0)
+		
+		
 	}
 
 	/**

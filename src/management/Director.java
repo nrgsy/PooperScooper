@@ -99,10 +99,10 @@ public class Director {
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++){
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);
 
-			long followtime_min = 86400L;
-			long followtime_max = 123430L;
-			long posttime_min = 900000L;
-			long posttime_max = 1500000L;
+			long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
+			long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
+			long posttime_min = GlobalStuff.POST_TIME_MIN;
+			long posttime_max = GlobalStuff.POST_TIME_MAX;
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
