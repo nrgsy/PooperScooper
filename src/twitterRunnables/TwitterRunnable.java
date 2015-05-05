@@ -29,16 +29,9 @@ public class TwitterRunnable implements Runnable {
 	 * @param OAuthAccessToken
 	 * @param OAuthAccessTokenSecret
 	 */
-	public TwitterRunnable (String OAuthConsumerKey, String OAuthConsumerSecret, String OAuthAccessToken, String OAuthAccessTokenSecret, int index){
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey(OAuthConsumerKey)
-		.setOAuthConsumerSecret(OAuthConsumerSecret)
-		.setOAuthAccessToken(OAuthAccessToken)
-		.setOAuthAccessTokenSecret(OAuthAccessTokenSecret);
-		TwitterFactory tf = new TwitterFactory(cb.build());
+	public TwitterRunnable (Twitter twitter, int index){
 		this.index = index;
-		bird = tf.getInstance();
+		bird = twitter;
 	}
 
 
