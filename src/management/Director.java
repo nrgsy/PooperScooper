@@ -35,6 +35,12 @@ public class Director {
 	    return then.getTime();
 	}
 	
+	
+	
+	
+	
+	
+	
 	/**
 	 * @param args
 	 * @throws UnknownHostException
@@ -48,7 +54,7 @@ public class Director {
 			@Override
 			public void run() {
 				System.out.println("maintenance started");
-				GlobalMaintenance.flagSet = true;				
+				Maintenance.flagSet = true;				
 				boolean activityExists = true;
 				while (activityExists) {
 					try {
@@ -78,7 +84,7 @@ public class Director {
 				//get big accounts (because of high api call amount)
 				//call "initialize global vars" to copy variables from the global config file to Globalstuff class
 				
-				GlobalMaintenance.flagSet = false;
+				Maintenance.flagSet = false;
 				System.out.println("maintenance complete");
 			}}, nextOccurrenceOf3am, GlobalStuff.DAY_IN_MILLISECONDS);
 		
@@ -107,7 +113,7 @@ public class Director {
 
 					String cusKey = (String) info.get("customerKey");
 					String customKey = cusKey + "twitter";
-					if (!GlobalMaintenance.flagSet) {
+					if (!Maintenance.flagSet) {
 
 						runStatus.put(customKey, true);
 						new TwitterRunnable(cusKey,
@@ -129,7 +135,7 @@ public class Director {
 
 					String cusKey = (String) info.get("customerKey");
 					String customKey = cusKey + "follow";
-					if (!GlobalMaintenance.flagSet) {
+					if (!Maintenance.flagSet) {
 
 						runStatus.put(customKey, true);
 						new FollowRunnable(cusKey,
