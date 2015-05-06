@@ -163,16 +163,18 @@ public class Director {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 			
 			String cusKey = (String) info.get("customerKey");
-			String customKey = cusKey + "twitter";
 			
 			long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
 			long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
+			long incubated_followtime_min = GlobalStuff.FOLLOW_TIME_INCUBATED_MIN;
+			long incubated_followtime_max = GlobalStuff.FOLLLOW_TIME_INCUBATED_MAX;
 			long posttime_min = GlobalStuff.POST_TIME_MIN;
 			long posttime_max = GlobalStuff.POST_TIME_MAX;
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
+			long incubated_followtime = incubated_followtime_min + ((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
 			long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
 
 			//If in incubation, follows at a rate of 425 per day
@@ -191,9 +193,9 @@ public class Director {
 
 
 			//TODO add in DateTime variable to check against to know when to run probability to post.
-			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id, cusKey), 0L, 60000L);
-			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id, cusKey), 0L, followtime);
-			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id, cusKey), 0L, bigacctime);
+			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id, cusKey+"twitter"), 0L, 60000L);
+			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id, cusKey+"follow"), 0L, followtime);
+			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id, cusKey+"bigacc"), 0L, bigacctime);
 
 
 			new Timer().scheduleAtFixedRate(new TimerTask() {
