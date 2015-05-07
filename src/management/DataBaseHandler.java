@@ -169,8 +169,8 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 	
-	//TODO uses the given dbobject to initialize (or reinitialize the global variables in GlobalStuff)
-	public static synchronized void createGlobalVars(DBObject globalVars) {
+	//TODO uses the given dbobject to initialize (or set) the global variables in GlobalStuff
+	public static synchronized void setGlobalVars(DBObject globalVars) {
 		// globalVars.get(arg0)
 		
 		
