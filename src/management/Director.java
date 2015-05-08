@@ -31,9 +31,6 @@ import content.RedditScraper;
  */
 public class Director {
 
-	//Can i get a comment describing this? especially what makes up the String key
-	public static HashMap<String, Boolean> runStatus; 
-
 	/**
 	 * @param base
 	 * @param hourOfDay
@@ -67,13 +64,13 @@ public class Director {
 			public void run() {
 
 				if (!Maintenance.flagSet) {
-					runStatus.put(key, true);
+					Maintenance.runStatus.put(key, true);
 					new TwitterRunnable(bird,index);
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 
 				else {
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
@@ -93,13 +90,13 @@ public class Director {
 			public void run() {
 
 				if (!Maintenance.flagSet) {
-					runStatus.put(key, true);
+					Maintenance.runStatus.put(key, true);
 					new FollowRunnable(bird,index);
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 
 				else {
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
@@ -120,13 +117,13 @@ public class Director {
 
 
 				if (!Maintenance.flagSet) {
-					runStatus.put(key, true);
+					Maintenance.runStatus.put(key, true);
 					new bigAccRunnable(bird,index);
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 
 				else {
-					runStatus.put(key, false);
+					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
@@ -138,45 +135,7 @@ public class Director {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("maintenance started");
-				Maintenance.flagSet = true;				
-				boolean activityExists = true;
-				while (activityExists) {
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-
-					//look for a status that's true (indicating that something's still running)
-					boolean somethingStillRunning = false;
-					for (boolean status : runStatus.values()) {
-						if (status) {
-							somethingStillRunning = true;
-							break;
-						}
-					}
-
-					if (!somethingStillRunning) {
-						activityExists = false;
-					}
-				}	
-
-				//TODO the actual maintenance
-				//Update followers
-				//old content garbage collection
-				//get big accounts (because of high api call amount)
-
-				//get the global variables from the GlobalVariables collection and set the ones in GlobalStuff
-				try {
-					DataBaseHandler.findAndSetGlobalVars();
-				} catch (UnknownHostException e) {
-					System.err.println("ERROR: failed to find ");
-					e.printStackTrace();
-				}
-
-				Maintenance.flagSet = false;
-				System.out.println("maintenance complete");
+				Maintenance.performMaintenance();
 			}};
 	}
 

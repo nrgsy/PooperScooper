@@ -34,7 +34,6 @@ public class TwitterRunnable implements Runnable {
 		bird = twitter;
 	}
 
-
 	/**
 	 * temp testing constructor
 	 */

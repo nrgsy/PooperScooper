@@ -199,6 +199,7 @@ public class DataBaseHandler{
 			System.err.println("ERROR: GlobalVariables had " + collection.getCount() + "entries. "
 					+ "It should only ever have one entry, or not exist at all");
 		}
+		mongoClient.close();
 	}
 	
 	/**
