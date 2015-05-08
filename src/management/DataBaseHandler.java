@@ -159,21 +159,62 @@ public class DataBaseHandler{
 		return bestContent;
 	}
 
+	
+	/**
+	 * @param sourceType the type of the content e.g. "ass", "pendingass"
+	 * @param sourceLink the link of the content to remove
+	 * @throws UnknownHostException
+	 */
 	public static synchronized void removeContent(String sourceType, String sourceLink)
 			throws UnknownHostException {		
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection sourceCollection = getCollection(sourceType, db);		
+		DBCollection sourceCollection = getCollection(sourceType, db);	
 		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
 		sourceCollection.remove(query);
 		mongoClient.close();
 	}
 	
-	//TODO uses the given dbobject to initialize (or set) the global variables in GlobalStuff
-	public static synchronized void setGlobalVars(DBObject globalVars) {
-		// globalVars.get(arg0)
-		
-		
+	
+	
+	/**
+	 * Pulls the globals from the GlobalVariables collection and uses them to initialize the globals in
+	 * GlobalStuff
+	 * 
+	 * @throws UnknownHostException
+	 */
+	public static synchronized void findAndSetGlobalVars() throws UnknownHostException {
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection collection = db.getCollection("GlobalVariables");
+		if (!db.collectionExists("GlobalVariables")) {
+			System.err.println("ERROR: cannot pull global vars. Collection GlobalVariables does not exist");
+		}
+		else if (collection.getCount() == 1) {
+			//Can use findOne() because the GlobalVariables collection will never have more than one entry
+			BasicDBObject globalVars = (BasicDBObject) collection.findOne();
+			setGlobalVars(globalVars);
+		}
+		else {
+			System.err.println("ERROR: GlobalVariables had " + collection.getCount() + "entries. "
+					+ "It should only ever have one entry, or not exist at all");
+		}
+	}
+	
+	/**
+	 * 	//TODO uses the given dbobject to set (or initialize) the global variables in GlobalStuff
+	 * 
+	 * @param globalVars the BasicDBObject containing the global variables to initialize with 
+	 * (typically pulled from the GlobalVariables collection of the database)
+	 */
+	public static synchronized void setGlobalVars(BasicDBObject globalVars) {
+	
+		GlobalStuff.FOLLOW_TIME_MIN = (long) globalVars.get("FOLLOW_TIME_MIN");
+		GlobalStuff.FOLLOW_TIME_MAX = (long) globalVars.get("FOLLOW_TIME_MAX");
+		GlobalStuff.POST_TIME_MIN = (long) globalVars.get("POST_TIME_MIN");
+		GlobalStuff.POST_TIME_MAX = (long) globalVars.get("POST_TIME_MAX");
+		GlobalStuff.FOLLOW_TIME_INCUBATED_MIN = (long) globalVars.get("FOLLOW_TIME_INCUBATED_MIN");
+		GlobalStuff.FOLLOW_TIME_INCUBATED_MAX = (long) globalVars.get("FOLLOW_TIME_INCUBATED_MAX");	
 	}
 
 	/**
@@ -201,9 +242,8 @@ public class DataBaseHandler{
 			BasicDBObject newAss = new BasicDBObject("_id", id_time);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
-			//accessInfo is a list of DBObjects, [{index : ..., timesAccessed : ..., lastAccess: ...},{...}]
+			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
 			newAss.append("accessInfo", new BasicDBList());
-
 
 			dbCollection.insert(newAss);
 			System.out.println("Successfully added new content of type " + type);
@@ -273,7 +313,7 @@ public class DataBaseHandler{
 			dbCollection = db.getCollection("SchwagSpace");
 			break;
 		default:
-			System.err.println("Tears, " + type + " is schwag");
+			System.err.println("Tears, " + type + " is schwag. Doesn't match an expected collection name");
 		}
 
 		return dbCollection;
