@@ -68,7 +68,6 @@ public class Director {
 					new TwitterRunnable(bird,index);
 					Maintenance.runStatus.put(key, false);
 				}
-
 				else {
 					Maintenance.runStatus.put(key, false);
 				}
@@ -94,7 +93,6 @@ public class Director {
 					new FollowRunnable(bird,index);
 					Maintenance.runStatus.put(key, false);
 				}
-
 				else {
 					Maintenance.runStatus.put(key, false);
 				}
@@ -121,7 +119,6 @@ public class Director {
 					new bigAccRunnable(bird,index);
 					Maintenance.runStatus.put(key, false);
 				}
-
 				else {
 					Maintenance.runStatus.put(key, false);
 				}

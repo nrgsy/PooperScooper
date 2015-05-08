@@ -9,6 +9,7 @@ public class Maintenance {
 	//Phal can i get a comment describing this? especially what makes up the String key
 	public static HashMap<String, Boolean> runStatus; 
 	
+	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
 	
 	public static void performMaintenance() {
