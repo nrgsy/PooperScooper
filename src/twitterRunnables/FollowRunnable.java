@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
-
+import management.Maintenance;
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -190,23 +190,12 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
+		Maintenance.runStatus.put(index+"follow", true);
 		try {
-			DataBaseHandler.updateFollowers(index, getFollowers());
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FuckinUpKPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//TODO stuff in here
+		}
+		finally{
+			Maintenance.runStatus.put(index+"follow", false);
 		}
 	}
 	

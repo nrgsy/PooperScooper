@@ -1,13 +1,13 @@
 package twitterRunnables;
+
 import java.io.File;
-import java.util.Map;
 
 import management.DataBaseHandler;
+import management.Maintenance;
 
 import com.mongodb.DBObject;
 
 import content.ImageManipulator;
-import twitter4j.RateLimitStatus;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -97,36 +97,19 @@ public class TwitterRunnable implements Runnable {
 		}
 	}
 
-
-
-	/**
-	 * @throws TwitterException 
-	 * 
-	 */
-	public void prettyRateLimit() throws TwitterException{
-		Map<String ,RateLimitStatus> rateLimitStatus = bird.getRateLimitStatus();
-		for (String endpoint : rateLimitStatus.keySet()) {
-		    RateLimitStatus status = rateLimitStatus.get(endpoint);
-		    System.out.println("Endpoint: " + endpoint);
-		    System.out.println(" Limit: " + status.getLimit());
-		    System.out.println(" Remaining: " + status.getRemaining());
-		    System.out.println(" ResetTimeInSeconds: " + status.getResetTimeInSeconds());
-		    System.out.println(" SecondsUntilReset: " + status.getSecondsUntilReset());
-		}
-	}
-
-
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
 	public void run(){
-		try {
-			prettyRateLimit();
-		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Maintenance.runStatus.put(index+"twitter", true);
+		try{
+			//TODO stuff in here.
 		}
+		finally{
+			Maintenance.runStatus.put(index+"twitter", false);
+		}
+
 	}
 	
 	public static void main(String[] args){

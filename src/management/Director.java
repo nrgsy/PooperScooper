@@ -51,76 +51,48 @@ public class Director {
 
 	//TODO runstatus is not scheduled correctly. it would run immediately after runnable is instantiated, not finished.
 	/**
-	 * Phal can you give a description for the parameters?
-	 * 
-	 * @param bird
-	 * @param index
-	 * @param key
+	 * @param Twitter created by Director
+	 * @param int of SchwergsAccount index
 	 * @return
 	 */
-	private static TimerTask createTwitterRunnableTimerTask(final Twitter bird, final int index, final String key){
+	private static TimerTask createTwitterRunnableTimerTask(final Twitter bird, final int index){
 		return new TimerTask() {
 			@Override
 			public void run() {
-
 				if (!Maintenance.flagSet) {
-					Maintenance.runStatus.put(key, true);
 					new TwitterRunnable(bird,index);
-					Maintenance.runStatus.put(key, false);
-				}
-				else {
-					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
 	}
 
 	/**
-	 * Phal can you give a description for the parameters?
-	 * 
-	 * @param bird
-	 * @param index
-	 * @param key
+	 * @param Twitter created by Director
+	 * @param int of SchwergsAccount index
 	 * @return
 	 */
-	private static TimerTask createFollowRunnableTimerTask(final Twitter bird, final int index, final String key){
+	private static TimerTask createFollowRunnableTimerTask(final Twitter bird, final int index){
 		return new TimerTask() {
 			@Override
 			public void run() {
-
 				if (!Maintenance.flagSet) {
-					Maintenance.runStatus.put(key, true);
 					new FollowRunnable(bird,index);
-					Maintenance.runStatus.put(key, false);
-				}
-				else {
-					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
 	}
 
 	/**
-	 * Phal can you give a description for the parameters?
-	 * 
-	 * @param bird
-	 * @param index
-	 * @param key
+	 * @param Twitter created by Director
+	 * @param int of SchwergsAccount index
 	 * @return
 	 */
-	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index, final String key){
+	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index){
 		return new TimerTask() {
 			@Override
 			public void run() {
-
-
 				if (!Maintenance.flagSet) {
-					Maintenance.runStatus.put(key, true);
 					new bigAccRunnable(bird,index);
-					Maintenance.runStatus.put(key, false);
-				}
-				else {
-					Maintenance.runStatus.put(key, false);
 				}
 			}
 		};
@@ -179,8 +151,6 @@ public class Director {
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
-			String cusKey = (String) info.get("customerKey");
-
 			long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
 			long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
 			long incubated_followtime_min = GlobalStuff.FOLLOW_TIME_INCUBATED_MIN;
@@ -190,6 +160,7 @@ public class Director {
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
+			//TODO implement new posting strategy
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
 			long incubated_followtime = incubated_followtime_min +
 					((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
@@ -197,23 +168,23 @@ public class Director {
 
 			//If in incubation, follows at a rate of 425 per day
 			if((boolean) info.get("isIncubated")){
-				followtime = 203250;
+				followtime = incubated_followtime;
 			}
 
 			ConfigurationBuilder cb = new ConfigurationBuilder();
 			cb.setDebugEnabled(true)
-			.setOAuthConsumerKey(cusKey)
-			.setOAuthConsumerSecret(info.getString("customerSecret"))
-			.setOAuthAccessToken(info.getString("authorizationKey"))
-			.setOAuthAccessTokenSecret(info.getString("authorizationSecret"));
+				.setOAuthConsumerKey(info.getString("customerKey"))
+				.setOAuthConsumerSecret(info.getString("customerSecret"))
+				.setOAuthAccessToken(info.getString("authorizationKey"))
+				.setOAuthAccessTokenSecret(info.getString("authorizationSecret"));
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			Twitter twitter = tf.getInstance();
 
 
 			//TODO add in DateTime variable to check against to know when to run probability to post.
-			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id, cusKey+"twitter"), 0L, 60000L);
-			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id, cusKey+"follow"), 0L, followtime);
-			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id, cusKey+"bigacc"), 0L, bigacctime);
+			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, 60000L);
+			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
+			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id), 0L, bigacctime);
 
 
 			new Timer().scheduleAtFixedRate(new TimerTask() {

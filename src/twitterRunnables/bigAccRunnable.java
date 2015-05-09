@@ -9,6 +9,7 @@ import java.util.Map;
 
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
+import management.Maintenance;
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
@@ -161,9 +162,6 @@ public class bigAccRunnable implements Runnable {
 				}
 			}
 		}
-		System.out.println("done");
-
-		Thread.sleep(900000);
 	}
 
 	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException, FuckinUpKPException{
@@ -234,16 +232,16 @@ public class bigAccRunnable implements Runnable {
 			return false;
 		}
 	}
-	
-	public String test() throws UnknownHostException{
-		return DataBaseHandler.getBigAccount(index, 0)+":"+
-				DataBaseHandler.getBigAccountStrikes(index, 0)+":"+
-				DataBaseHandler.getBigAccountLatestTweet(index, 0);
-	}
-	
 
 	@Override
 	public void run() {
+		Maintenance.runStatus.put(index+"bigAcc", true);
+		try{
+			//TODO stuff in here.
+		}
+		finally{
+			Maintenance.runStatus.put(index+"follow", false);
+		}
 
 	}
 
