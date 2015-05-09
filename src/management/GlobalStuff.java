@@ -6,6 +6,7 @@ package management;
 		//these do not get updated by the set globals function 
 		public static final long DAY_IN_MILLISECONDS = 86400000;
 		public static final long WEEK_IN_MILLISECONDS = 604800000;
+		public static final String DOPEST_MAN_ALIVE = "Dankey Kang";
 		
 		//Volatile globals
 		//TODO These are set/updated by the setGlobalVars function in databasehandler which reads the values
