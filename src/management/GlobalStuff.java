@@ -25,6 +25,14 @@ package management;
 		public static long POST_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
 		public static long FOLLOW_TIME_INCUBATED_MAX;
+		//Base amount of accounts to follow before applying the formula
+		public static long FOLLOWING_BASE_CAP;
+		//This is the formula to determine how many accounts to follow
+		//TODO Need to revise this formula, it's shit
+		public static int GET_NUM_TO_UNFOLLOW(int sizeFollowers, int sizeFollowing){
+			int numToUnfollow = (int)(FOLLOWING_BASE_CAP+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
+			return numToUnfollow >= 0 ? numToUnfollow : 0;
+		}
 		//*******************************NOTICE*******************************
 
 

@@ -210,12 +210,13 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void setGlobalVars(BasicDBObject globalVars) {
 	
-		GlobalStuff.FOLLOW_TIME_MIN = (long) globalVars.get("FOLLOW_TIME_MIN");
-		GlobalStuff.FOLLOW_TIME_MAX = (long) globalVars.get("FOLLOW_TIME_MAX");
-		GlobalStuff.POST_TIME_MIN = (long) globalVars.get("POST_TIME_MIN");
-		GlobalStuff.POST_TIME_MAX = (long) globalVars.get("POST_TIME_MAX");
-		GlobalStuff.FOLLOW_TIME_INCUBATED_MIN = (long) globalVars.get("FOLLOW_TIME_INCUBATED_MIN");
-		GlobalStuff.FOLLOW_TIME_INCUBATED_MAX = (long) globalVars.get("FOLLOW_TIME_INCUBATED_MAX");	
+		GlobalStuff.FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
+		GlobalStuff.FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
+		GlobalStuff.POST_TIME_MIN = globalVars.getLong("POST_TIME_MIN");
+		GlobalStuff.POST_TIME_MAX = globalVars.getLong("POST_TIME_MAX");
+		GlobalStuff.FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
+		GlobalStuff.FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
+		GlobalStuff.FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
 	}
 
 	/**

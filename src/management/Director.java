@@ -131,7 +131,8 @@ public class Director {
 			.append("POST_TIME_MIN", 900000L)
 			.append("POST_TIME_MAX", 1500000L)
 			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
-			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L);
+			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
+			.append("FOLLOWING_BASE_CAP", 1000);
 
 			collection.insert(globalVars);
 		}

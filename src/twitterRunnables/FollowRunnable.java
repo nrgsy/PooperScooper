@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
+import management.GlobalStuff;
 import management.Maintenance;
 import twitter4j.IDs;
 import twitter4j.Twitter;
@@ -81,13 +82,9 @@ public class FollowRunnable implements Runnable{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
 		//TODO get a ratio
-		int cap = 1000;
-		int diff = (int)(cap+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
-		if(diff>0){
-			Long[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, diff);
-			for(int i =0; i<unfollowArr.length; i++){
-				bird.destroyFriendship(unfollowArr[i]);
-			}
+		Long[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
+		for(int i =0; i<unfollowArr.length; i++){
+			bird.destroyFriendship(unfollowArr[i]);
 		}
 	}
 	

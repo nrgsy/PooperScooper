@@ -20,7 +20,7 @@ import twitter4j.conf.ConfigurationBuilder;
  *
  */
 public class TwitterRunnable implements Runnable {
-	private Twitter bird = null;
+	private Twitter bird;
 	private int index;
 
 	/**
@@ -58,12 +58,11 @@ public class TwitterRunnable implements Runnable {
 	 * @param twitter
 	 * @throws Exception
 	 */
-	public void uploadPicTwitter(File file, String message,Twitter twitter) throws Exception  {
-		twitter = bird;
+	public void uploadPicTwitter(File file, String message) throws Exception  {
 		try{
 			StatusUpdate status = new StatusUpdate(message);
 			status.setMedia(file);
-			twitter.updateStatus(status);}
+			bird.updateStatus(status);}
 		catch(TwitterException e){
 			System.out.println("Pic Upload error" + e.getErrorMessage());
 			throw e;
@@ -76,24 +75,25 @@ public class TwitterRunnable implements Runnable {
 	 */
 	public void uploadPic(){
 		ImageManipulator imgman = new ImageManipulator();
-		Twitter blah = null;
-		File loe = null;
+		File image = null;
 		try {
+			//TODO assContent structure may have been changed since writing this method.
 			DBObject assContent = DataBaseHandler.getRandomContent("ass", 0);
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();
 
-			//creates temp image and puts file location in loe
-			loe = new File(imgman.getImageFile(link));
-			TwitterRunnable lol = new TwitterRunnable();
+			//creates temp image and puts file location in "image"
+			image = new File(imgman.getImageFile(link));
 
-			//calls uploadPicTwitter to upload to twitter
-			lol.uploadPicTwitter(loe, caption, blah);
-			loe.delete();
+			//calls uploadPicTwitter to upload to twitter and deletes locally saved image
+			uploadPicTwitter(image, caption);
 		}
 		catch (Exception e) {
-			System.out.println("Temp download of pic failed "+loe);
+			System.out.println("Temp download of pic failed "+image);
 			e.printStackTrace();
+		}
+		finally{
+			image.delete();
 		}
 	}
 
