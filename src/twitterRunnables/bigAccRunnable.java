@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
-
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
 import management.Maintenance;
@@ -25,7 +24,6 @@ public class bigAccRunnable implements Runnable {
 	private Twitter bird;
 	private int index;
  
-
 	/**
 	 * @param OAuthConsumerKey
 	 * @param OAuthConsumerSecret
@@ -51,17 +49,18 @@ public class bigAccRunnable implements Runnable {
 
 
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
-
+		//TODO add latestTweet capability to bigAccount in DBH
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		Long[] AllCandidatesArr;
 		long latestTweet = 0;
 
+		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = bird.getUserTimeline(bird.getId());
 
 			if(OwnTweets.size()>15){
-				//sorts by most retweets near 0 index and cuts out tweets with little retweets
+				//sorts by most retweets and cuts out tweets with little retweets
 				Collections.sort(OwnTweets, new Comparator<Status>() {
 					@Override
 					public int compare(Status t1, Status t2) {
@@ -81,6 +80,7 @@ public class bigAccRunnable implements Runnable {
 			}
 
 			for(Status tweet : OwnTweets){
+				//gathers all retweeters' ids from tweets
 				if(tweet.getRetweetCount()!=0){
 					long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100, -1).getIDs();
 					for(long id : RTerIDs){
@@ -91,21 +91,27 @@ public class bigAccRunnable implements Runnable {
 			}
 
 			while(AllRTerIDs.size()>50){
+				//limits to only 50 retweeters
 				AllRTerIDs.remove(50);
 			}
 
 			for(long id : AllRTerIDs){
+				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
 				ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
 				for(Status tweet: potentialBigAccs){
 					if(tweet.isRetweet() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
 							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()){
+						//if the tweet is a retweet, is not from our own account, and the original tweeter has over
+						//5000 followers, add that account as a candidate for a bigAccount
 						AllCandidates.add(tweet.getRetweetedStatus().getUser().getId());
 					}
 				}
 			}
 		}
+		
+		//TODO make this part better
 		else{
 			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
 			int limit = 1;
@@ -135,11 +141,15 @@ public class bigAccRunnable implements Runnable {
 			int totalRTs = 0;
 			long firstTime = 0;
 			long lastTime = 0;
+			
+			//Gets only original tweets
 			for(Status tweet: timeline){
 				if(!tweet.isRetweet()){
 					noRTTimeline.add(tweet);
 				}
 			}
+			
+			//Gets the total amount of retweets
 			for(Status tweet: noRTTimeline){
 				count++;
 				totalRTs+= tweet.getRetweetCount();
@@ -153,6 +163,7 @@ public class bigAccRunnable implements Runnable {
 				}
 			}
 
+			//adds a bigaccount if it averages 30 retweets per tweet and posts daily on average.
 			if(count>0){
 				long avgTime = (lastTime-firstTime)/count;
 				int avgRTs = totalRTs/count;
@@ -169,6 +180,8 @@ public class bigAccRunnable implements Runnable {
 		Long[] toFollowSetArray;
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,0);
 		
+		//Only gets the 5 latest tweets of the bigAccount candidate. If the bigaccount was harvested 
+		//before, it only takes the tweetsafter the latest tweet used.
 		Paging querySettings = new Paging();
 		querySettings.setCount(5);
 		if(lastTweet != -1){
@@ -179,15 +192,20 @@ public class bigAccRunnable implements Runnable {
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 		
 		if(DataBaseHandler.getToFollowSize(index)<11900){
+			
+			//Makes sure the tweet is original to the bigAccount candidate
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet()){
 					NoRTTweets.add(tweet);
 				}
 			}
 			
+			//Gets ids of retweeters and puts it into toFollowSet and updates latestTweet for bigAccount
+			//By using a HashSet, you get only unique retweeter ids.
 			for(Status tweet :NoRTTweets){
+				//Makes sure it won't pass the ratelimit
 				if(isAtRateLimit("/statuses/retweets/:id")){
-					Thread.sleep(900000);
+					break;
 				}
 				long[] toFollows = bird.getRetweeterIds(tweet.getId(), 100, -1).getIDs();
 				for(long id : toFollows){
@@ -196,20 +214,24 @@ public class bigAccRunnable implements Runnable {
 				DataBaseHandler.editBigAccountLatestTweet(index, 0, tweet.getId());
 			}
 			
+			//If the retweeter is already in the whitelist, then remove that bitch
 			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
 			for(Long user_id: toFollowSetArray){
 				if(DataBaseHandler.isWhiteListed(index, user_id)){
 					toFollowSet.remove(user_id);
 				}
 			}
-			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
 			
+			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
 			if(toFollowSetArray.length==0){
 				if(DataBaseHandler.getBigAccountStrikes(index, 0)==2){
+					//if it gets 3 strikes, move it to the end of bigAccounts and reset strikes
+					//TODO put in a way to measure how many outs and remove bigaccount when too many outs
 					DataBaseHandler.editBigAccountStrikes(index, 0, 0);
 					DataBaseHandler.moveBigAccountToEnd(index, 0);
 				}
 				else{
+					//if it gets a strike, add it to what it has now.
 					DataBaseHandler.editBigAccountStrikes(index, 0, 
 							DataBaseHandler.getBigAccountStrikes(index, 0) +1);
 				}

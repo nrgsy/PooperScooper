@@ -4,13 +4,16 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
-
+import twitter4j.IDs;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -938,6 +941,28 @@ public class DataBaseHandler{
 		.append("isIncubated", isIncubated);
 
 		return authInfo;	
+	}
+	
+	
+	public static synchronized void initUpdateFollowing(Twitter bird, int index) throws TwitterException, UnknownHostException{
+		int ratecount = 0;
+		IDs IDCollection;
+		HashSet<Long> following = new HashSet<>();
+		IDCollection = bird.getFriendsIDs(-1);
+		for(long id : IDCollection.getIDs()){
+			following.add(id);
+		}
+		ratecount++;
+		while(IDCollection.getNextCursor()!=0 && ratecount<14){
+			IDCollection = (bird.getFriendsIDs(IDCollection.getNextCursor()));
+			for(long id : IDCollection.getIDs()){
+				following.add(id);
+			}
+			ratecount++;
+		}
+		
+		addFollowing(index, following.toArray(new Long[following.size()]));
+		
 	}
 
 	/**

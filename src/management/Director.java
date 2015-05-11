@@ -174,7 +174,7 @@ public class Director {
 			long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
 
 			//If in incubation, follows at a rate of 425 per day
-			if((boolean) info.get("isIncubated")){
+			if(info.getBoolean("isIncubated")){
 				followtime = incubated_followtime;
 			}
 
@@ -192,7 +192,6 @@ public class Director {
 			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, 60000L);
 			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
 			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id), 0L, bigacctime);
-
 
 			new Timer().scheduleAtFixedRate(new TimerTask() {
 				@Override
