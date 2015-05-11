@@ -3,6 +3,7 @@ package twitterRunnables;
 import java.io.File;
 
 import management.DataBaseHandler;
+import management.GlobalStuff;
 import management.Maintenance;
 
 import com.mongodb.DBObject;
@@ -103,8 +104,13 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run(){
 		Maintenance.runStatus.put(index+"twitter", true);
+		
 		try{
-			//TODO stuff in here.
+			//post if the random number is less than the alpha constant and we're allowed to post
+			//TODO implement canPost boolean using MAX_NUMER_OF_POSTS and POST_TIME_CONSTANT.
+			if (Math.random() < GlobalStuff.ALPHA && canPost == true) {
+				uploadPic();
+			}
 		}
 		finally{
 			Maintenance.runStatus.put(index+"twitter", false);

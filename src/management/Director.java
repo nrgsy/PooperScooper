@@ -132,8 +132,11 @@ public class Director {
 			.append("POST_TIME_MAX", 1500000L)
 			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
 			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
-			.append("FOLLOWING_BASE_CAP", 1000);
-
+			.append("FOLLOWING_BASE_CAP", 1000)
+			.append("ALPHA", 1/30)
+			.append("MAX_NUMER_OF_POSTS", 1L)
+			.append("POST_TIME_CONSTANT", 15L);
+			
 			collection.insert(globalVars);
 		}
 		//set the global vars bases on the current state of the GlobalVariables collection
@@ -149,6 +152,8 @@ public class Director {
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 
+		
+		
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
@@ -161,7 +166,8 @@ public class Director {
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
-			//TODO implement new posting strategy
+			
+			//TODO implement new posting strategy, this probably could be deleted
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
 			long incubated_followtime = incubated_followtime_min +
 					((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));

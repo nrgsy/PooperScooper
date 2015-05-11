@@ -217,6 +217,9 @@ public class DataBaseHandler{
 		GlobalStuff.FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
 		GlobalStuff.FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
 		GlobalStuff.FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
+		GlobalStuff.ALPHA = globalVars.getDouble("ALPHA");
+		GlobalStuff.MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");
+		GlobalStuff.POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
 	}
 
 	/**
