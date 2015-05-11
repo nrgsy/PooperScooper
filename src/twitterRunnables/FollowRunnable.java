@@ -148,11 +148,12 @@ public class FollowRunnable implements Runnable{
 		int ratecount = 0;
 		IDs blah;
 		blah = bird.getFollowersIDs(-1);
-		ArrayList<Long> followers = new ArrayList<Long>();
+		HashSet<Long> followers = new HashSet<>();
 		for(int i = 0; i < blah.getIDs().length; i++){
 		    followers.add(blah.getIDs()[i]);
 		}
 		ratecount++;
+		
 		while(blah.getNextCursor()!=0 && ratecount<14){
 			blah = (bird.getFollowersIDs(blah.getNextCursor()));
 			for(int i = 0; i < blah.getIDs().length; i++){
@@ -161,25 +162,7 @@ public class FollowRunnable implements Runnable{
 			ratecount++;
 		}
 		
-		HashSet<Long> followersSet = new HashSet<>();				
-		followersSet.addAll(followers);
-		
-		return followersSet;
-	}
-
-	/**
-	 * @throws TwitterException
-	 */
-	public void initUpdateFollowing() throws TwitterException{
-		int count = 0;
-		IDs blah;
-		blah = bird.getFriendsIDs(-1);
-		System.out.println(blah.getIDs().length);
-		while(blah.getNextCursor()!=0 && count<14){
-			blah = (bird.getFriendsIDs(blah.getNextCursor()));
-			System.out.println(blah.getIDs().length);
-			count++;
-		}
+		return followers;
 	}
 
 	/* (non-Javadoc)
