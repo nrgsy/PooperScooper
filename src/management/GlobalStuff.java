@@ -1,4 +1,6 @@
 package management;
+
+import com.mongodb.BasicDBObject;
 	
 	public class GlobalStuff{
 	
@@ -18,7 +20,7 @@ package management;
 		
 		//*******************************NOTICE*******************************
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
-		//edit DatabaseHandler's setGlobalVars method (for updating its value from the db)
+		//edit setGlobalVars method (for updating its value from the db)
 		//AND edit Director's main method (for the default value)
 		public static long FOLLOW_TIME_MIN;
 		public static long FOLLOW_TIME_MAX;
@@ -26,6 +28,8 @@ package management;
 		public static long POST_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
 		public static long FOLLOW_TIME_INCUBATED_MAX;
+		public static int BIG_ACCOUNT_STRIKES_FOR_OUT;
+		public static int BIG_ACCOUNT_OUTS_FOR_REMOVAL;
 		//Base amount of accounts to follow before applying the formula
 		public static long FOLLOWING_BASE_CAP;
 		//This is the formula to determine how many accounts to follow
@@ -33,6 +37,27 @@ package management;
 		public static int GET_NUM_TO_UNFOLLOW(int sizeFollowers, int sizeFollowing){
 			int numToUnfollow = (int)(FOLLOWING_BASE_CAP+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
 			return numToUnfollow >= 0 ? numToUnfollow : 0;
+		}
+		
+		
+		
+		/**
+		 * 	//TODO uses the given dbobject to set (or initialize) the global variables in GlobalStuff
+		 * 
+		 * @param globalVars the BasicDBObject containing the global variables to initialize with 
+		 * (typically pulled from the GlobalVariables collection of the database)
+		 */
+		public static synchronized void setGlobalVars(BasicDBObject globalVars) {
+		
+			FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
+			FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
+			POST_TIME_MIN = globalVars.getLong("POST_TIME_MIN");
+			POST_TIME_MAX = globalVars.getLong("POST_TIME_MAX");
+			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
+			FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
+			FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
+			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG+ACCOUNT_OUTS_FOR_REMOVAL");
+			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
 		}
 		//*******************************NOTICE*******************************
 
