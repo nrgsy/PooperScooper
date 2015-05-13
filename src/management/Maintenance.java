@@ -45,7 +45,7 @@ public class Maintenance {
 		 * get big accounts (because of high api call amount)
 		 */
 
-		//get the global variables from the GlobalVariables collection and set the ones in GlobalStuff
+		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 		try {
 			DataBaseHandler.findAndSetGlobalVars();
 		} catch (UnknownHostException e) {

@@ -118,7 +118,6 @@ public class Director {
 	public static void main(String[]args) throws UnknownHostException, Exception {
 		
 		DataBaseHandler.initGlobalVars();
-				
 		DataBaseHandler.findAndSetGlobalVars();
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
@@ -130,6 +129,8 @@ public class Director {
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 
+		
+		
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
@@ -142,7 +143,8 @@ public class Director {
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
-			//TODO implement new posting strategy
+			
+			//TODO implement new posting strategy, this probably could be deleted
 			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
 			long incubated_followtime = incubated_followtime_min +
 					((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
