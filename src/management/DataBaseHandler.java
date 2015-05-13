@@ -227,7 +227,9 @@ public class DataBaseHandler{
 			.append("POST_TIME_MAX", 1500000L)
 			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
 			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
-			.append("FOLLOWING_BASE_CAP", 1000);
+			.append("FOLLOWING_BASE_CAP", 1000)
+			.append("BIG_ACCOUNT_STRIKES_FOR_OUT", 3)
+			.append("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
 
 			collection.insert(globalVars);
 		}
@@ -459,30 +461,6 @@ public class DataBaseHandler{
 	}
 
 	/**
-	 * @param index
-	 * @param bigAccountElement
-	 * @throws UnknownHostException
-	 * @throws FuckinUpKPException 
-	 */
-	public static synchronized void addBigAccount(int index, long bigAccountID, long latestTweet) throws UnknownHostException, FuckinUpKPException{
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-
-		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
-		bigAccount.append("strikes", 0);
-		bigAccount.append("outs", 0);
-		bigAccount.append("latestTweet", latestTweet);
-		BasicDBObject ele = new BasicDBObject("$push", new BasicDBObject("bigAccounts",bigAccount));
-
-		dbCollection.update(query, ele);
-		System.out.println("successfully added an element to bigAccounts");
-		mongoClient.close();
-	}
-
-
-	/**
 	 * @param index The index of the Schwergsy account we want to add the statistic to
 	 * @param unFollows number of unFollows since the last Statistic was taken
 	 * @param newFollows unFollows since the last Statistic was taken
@@ -687,12 +665,10 @@ public class DataBaseHandler{
 	}
 
 	//Tested and given the Bojangles Seal of Approval
-	public static void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
+	public static synchronized void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
 		long user_id = getBigAccount(index, bigAccIndex);
-		int strikes = getBigAccountStrikes(index,bigAccIndex);
-		long latestTweet = -1;//getBigAccountLatestTweet(index,bigAccIndex);
+		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
 
-		System.out.println(user_id+":"+strikes+":"+latestTweet);
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
@@ -702,11 +678,54 @@ public class DataBaseHandler{
 		mongoClient.close();
 
 		addBigAccount(index, user_id, latestTweet);
+	}
+	
+	/**
+	 * @param index
+	 * @param bigAccountElement
+	 * @throws UnknownHostException
+	 * @throws FuckinUpKPException 
+	 */
+	public static synchronized void addBigAccount(int index, long bigAccountID, long latestTweet) throws UnknownHostException, FuckinUpKPException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
 
+		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
+		bigAccount.append("strikes", 0);
+		bigAccount.append("outs", 0);
+		bigAccount.append("latestTweet", latestTweet);
+		BasicDBObject ele = new BasicDBObject("$push", new BasicDBObject("bigAccounts",bigAccount));
 
+		dbCollection.update(query, ele);
+		System.out.println("successfully added an element to bigAccounts");
+		mongoClient.close();
+	}
+	
+	/**
+	 * @param index
+	 * @throws UnknownHostException
+	 */
+	public static synchronized void deleteBigAccount(int index, int bigAccIndex) throws UnknownHostException{
+		long user_id = getBigAccount(index, bigAccIndex);
+
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject match = new BasicDBObject("_id", index); //to match your direct app document
+		BasicDBObject update = new BasicDBObject("user_id", user_id);
+		dbCollection.update(match, new BasicDBObject("$pull", new BasicDBObject("bigAccounts", update)));
+		mongoClient.close();
 	}
 
 	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountID
+	 * @return
+	 * @throws UnknownHostException
+	 */
 	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -722,6 +741,12 @@ public class DataBaseHandler{
 	}
 
 	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param user_id
+	 * @return
+	 * @throws UnknownHostException
+	 */
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -737,13 +762,9 @@ public class DataBaseHandler{
 	}
 
 	/**
-	 * 
-	 * 
+	 *
 	 * Gets one user_id from ToFollow to follow
-	 * 
-	 * 
-	 * 
-	 * 
+	 *
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException

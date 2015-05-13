@@ -225,11 +225,17 @@ public class bigAccRunnable implements Runnable {
 			toFollowSetArray = Arrays.copyOf(toFollowSet.toArray(), toFollowSet.toArray().length, Long[].class);
 			if(toFollowSetArray.length==0){
 				if(DataBaseHandler.getBigAccountStrikes(index, 0)==2){
-					if(DataBaseHandler.getBigAccountOuts(index, 0)==3)
-					//if it gets 3 strikes, move it to the end of bigAccounts and reset strikes
-					//TODO put in a way to measure how many outs and remove bigaccount when too many outs
-					DataBaseHandler.editBigAccountStrikes(index, 0, 0);
-					DataBaseHandler.moveBigAccountToEnd(index, 0);
+					if(DataBaseHandler.getBigAccountOuts(index, 0)==2){
+						//if it gets 3 outs, it's removed from bigAccounts
+						DataBaseHandler.deleteBigAccount(index, 0);
+					}
+					else{
+						//if it gets 3 strikes, move it to the end of bigAccounts and reset strikes
+						//and adds an out
+						DataBaseHandler.editBigAccountStrikes(index, 0, 0);
+						DataBaseHandler.editBigAccountOuts(index, 0, DataBaseHandler.getBigAccountOuts(index, 0));
+						DataBaseHandler.moveBigAccountToEnd(index, 0);
+					}
 				}
 				else{
 					//if it gets a strike, add it to what it has now.
