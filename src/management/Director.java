@@ -128,8 +128,6 @@ public class Director {
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
-
-		
 		
 		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			

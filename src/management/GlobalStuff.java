@@ -20,8 +20,8 @@ import com.mongodb.BasicDBObject;
 		
 		//*******************************NOTICE*******************************
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
-		//edit setGlobalVars method (for updating its value from the db)
-		//AND edit Director's main method (for the default value)
+		//edit GlobalStuff's setGlobalVars method (for updating its value from the db)
+		//AND edit DatabaseHandler's initGlobalVars method (for the default value)
 		public static long FOLLOW_TIME_MIN;
 		public static long FOLLOW_TIME_MAX;
 		public static long POST_TIME_MIN;
@@ -65,7 +65,9 @@ import com.mongodb.BasicDBObject;
 			FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
 			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG+ACCOUNT_OUTS_FOR_REMOVAL");
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
+			ALPHA = globalVars.getDouble("ALPHA");
+			MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");
+			POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
 		}
-		//*******************************NOTICE*******************************
 
 	}

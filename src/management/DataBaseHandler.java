@@ -46,6 +46,7 @@ public class DataBaseHandler{
 
 		HashSet<DBObject> contentSample = new HashSet<>();
 
+		//TODO abstract this and the else out via globalstuff
 		//just add them all if we have less than 200 contents
 		if (size < 200) {
 			DBCursor cursor = collection.find();
@@ -180,8 +181,6 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-
-
 	/**
 	 * Pulls the globals from the GlobalVariables collection and uses them to initialize the globals in
 	 * GlobalStuff
@@ -227,7 +226,10 @@ public class DataBaseHandler{
 			.append("POST_TIME_MAX", 1500000L)
 			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
 			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
-			.append("FOLLOWING_BASE_CAP", 1000);
+			.append("FOLLOWING_BASE_CAP", 1000)
+			.append("ALPHA", 1/30)
+			.append("MAX_NUMER_OF_POSTS", 1)
+			.append("POST_TIME_CONSTANT", 15);
 
 			collection.insert(globalVars);
 		}
@@ -235,8 +237,6 @@ public class DataBaseHandler{
 
 		mongoClient.close();
 	}
-
-
 
 	/**
 	 * @param caption
