@@ -116,32 +116,9 @@ public class Director {
 	 * @throws Exception
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
-
-		//Setting the global variables in GlobalStuff
-		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection collection = db.getCollection("GlobalVariables");
-		if (!db.collectionExists("GlobalVariables")) {
-			System.out.println("Globals not found in db, initializing with defaults");
-
-			//These are the default values to set the volatile variables to
-			BasicDBObject globalVars = new BasicDBObject()
-			.append("FOLLOW_TIME_MIN", 86400L)
-			.append("FOLLOW_TIME_MAX", 123430L)
-			.append("POST_TIME_MIN", 900000L)
-			.append("POST_TIME_MAX", 1500000L)
-			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
-			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
-			.append("FOLLOWING_BASE_CAP", 1000)
-			.append("ALPHA", 1/30)
-			.append("MAX_NUMER_OF_POSTS", 1L)
-			.append("POST_TIME_CONSTANT", 15L);
-			
-			collection.insert(globalVars);
-		}
-		//set the global vars bases on the current state of the GlobalVariables collection
+		
+		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
-		mongoClient.close();
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks

@@ -11,9 +11,11 @@ import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -162,7 +164,7 @@ public class DataBaseHandler{
 		return bestContent;
 	}
 
-	
+
 	/**
 	 * @param sourceType the type of the content e.g. "ass", "pendingass"
 	 * @param sourceLink the link of the content to remove
@@ -177,9 +179,9 @@ public class DataBaseHandler{
 		sourceCollection.remove(query);
 		mongoClient.close();
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Pulls the globals from the GlobalVariables collection and uses them to initialize the globals in
 	 * GlobalStuff
@@ -196,7 +198,7 @@ public class DataBaseHandler{
 		else if (collection.getCount() == 1) {
 			//Can use findOne() because the GlobalVariables collection will never have more than one entry
 			BasicDBObject globalVars = (BasicDBObject) collection.findOne();
-			setGlobalVars(globalVars);
+			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
 			System.err.println("ERROR: GlobalVariables had " + collection.getCount() + "entries. "
@@ -204,26 +206,37 @@ public class DataBaseHandler{
 		}
 		mongoClient.close();
 	}
-	
+
 	/**
-	 * 	//TODO uses the given dbobject to set (or initialize) the global variables in GlobalStuff
-	 * 
-	 * @param globalVars the BasicDBObject containing the global variables to initialize with 
-	 * (typically pulled from the GlobalVariables collection of the database)
+	 * Initializes GlobalVars if it doesn't exist in the database.
+	 * @throws UnknownHostException
 	 */
-	public static synchronized void setGlobalVars(BasicDBObject globalVars) {
-	
-		GlobalStuff.FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
-		GlobalStuff.FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
-		GlobalStuff.POST_TIME_MIN = globalVars.getLong("POST_TIME_MIN");
-		GlobalStuff.POST_TIME_MAX = globalVars.getLong("POST_TIME_MAX");
-		GlobalStuff.FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
-		GlobalStuff.FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
-		GlobalStuff.FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
-		GlobalStuff.ALPHA = globalVars.getDouble("ALPHA");
-		GlobalStuff.MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");
-		GlobalStuff.POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
+	public static synchronized void initGlobalVars() throws UnknownHostException{
+		//Setting the global variables in GlobalStuff
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection collection = db.getCollection("GlobalVariables");
+		if (!db.collectionExists("GlobalVariables")) {
+			System.out.println("Globals not found in db, initializing with defaults");
+
+			//These are the default values to set the volatile variables to
+			BasicDBObject globalVars = new BasicDBObject()
+			.append("FOLLOW_TIME_MIN", 86400L)
+			.append("FOLLOW_TIME_MAX", 123430L)
+			.append("POST_TIME_MIN", 900000L)
+			.append("POST_TIME_MAX", 1500000L)
+			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
+			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
+			.append("FOLLOWING_BASE_CAP", 1000);
+
+			collection.insert(globalVars);
+		}
+		//set the global vars bases on the current state of the GlobalVariables collection
+
+		mongoClient.close();
 	}
+
+
 
 	/**
 	 * @param caption
@@ -231,13 +244,13 @@ public class DataBaseHandler{
 	 * @param type see getCollection below for content types
 	 * @throws UnknownHostException
 	 */
-	
-	
+
+
 	//TODO, add specialization such that content that's created depends on the type
 	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
 	//ass should have all attributes as shown belows
-	
-	
+
+
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -459,6 +472,7 @@ public class DataBaseHandler{
 
 		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
 		bigAccount.append("strikes", 0);
+		bigAccount.append("outs", 0);
 		bigAccount.append("latestTweet", latestTweet);
 		BasicDBObject ele = new BasicDBObject("$push", new BasicDBObject("bigAccounts",bigAccount));
 
@@ -623,7 +637,7 @@ public class DataBaseHandler{
 			int sliceParameters = 1;
 			find = new BasicDBObject("bigAccounts", new BasicDBObject("$slice", sliceParameters));
 		}
-		
+
 		DBCursor cursor = dbCollection.find(query, find);
 		BasicDBList answerList = (BasicDBList)cursor.next().get("bigAccounts");
 		BasicDBObject answer = (BasicDBObject)answerList.get(0);
@@ -644,6 +658,10 @@ public class DataBaseHandler{
 		return (Long)getBigAccountStuff(index, bigAccountIndex,"latestTweet");
 	}
 
+	public static synchronized int getBigAccountOuts(int index, int bigAccountIndex) throws UnknownHostException{
+		return (int)getBigAccountStuff(index,bigAccountIndex,"outs");
+	}
+
 	//Tested and given the Bojangles Seal of Approval
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
@@ -655,7 +673,7 @@ public class DataBaseHandler{
 		dbCollection.findAndModify(query, updater);
 		mongoClient.close();
 	}
-	
+
 	public static synchronized void editBigAccountStrikes(int index, int bigAccountIndex, int number) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"strikes",number);
 	}
@@ -663,13 +681,17 @@ public class DataBaseHandler{
 	public static synchronized void editBigAccountLatestTweet(int index, int bigAccountIndex, long tweetID) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
 	}
-	
+
+	public static synchronized void editBigAccountOuts(int index, int bigAccountIndex, int number) throws UnknownHostException{
+		editBigAccountStuff(index,bigAccountIndex,"outs", number);
+	}
+
 	//Tested and given the Bojangles Seal of Approval
 	public static void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
 		long user_id = getBigAccount(index, bigAccIndex);
 		int strikes = getBigAccountStrikes(index,bigAccIndex);
 		long latestTweet = -1;//getBigAccountLatestTweet(index,bigAccIndex);
-		
+
 		System.out.println(user_id+":"+strikes+":"+latestTweet);
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
@@ -678,12 +700,12 @@ public class DataBaseHandler{
 		BasicDBObject update = new BasicDBObject("user_id", user_id);
 		dbCollection.update(match, new BasicDBObject("$pull", new BasicDBObject("bigAccounts", update)));
 		mongoClient.close();
-		
+
 		addBigAccount(index, user_id, latestTweet);
-		
-		
+
+
 	}
-	
+
 	//Tested and given the Bojangles Seal of Approval
 	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
@@ -755,15 +777,15 @@ public class DataBaseHandler{
 	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
 
 		MongoClient mongoClient = new MongoClient();
-			DB db = mongoClient.getDB("Schwergsy");
-			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-			BasicDBObject query = new BasicDBObject("_id", index);
-			DBCursor cursor = dbCollection.find(query);
-			BasicDBList SchwergsList = (BasicDBList) cursor.next().get(column);
-			cursor.close();
-			mongoClient.close();
-			return SchwergsList;
-			
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		DBCursor cursor = dbCollection.find(query);
+		BasicDBList SchwergsList = (BasicDBList) cursor.next().get(column);
+		cursor.close();
+		mongoClient.close();
+		return SchwergsList;
+
 	}
 
 	////// Start region: get array size
@@ -942,8 +964,8 @@ public class DataBaseHandler{
 
 		return authInfo;	
 	}
-	
-	
+
+
 	public static synchronized void initUpdateFollowing(Twitter bird, int index) throws TwitterException, UnknownHostException{
 		int ratecount = 0;
 		IDs IDCollection;
@@ -960,9 +982,9 @@ public class DataBaseHandler{
 			}
 			ratecount++;
 		}
-		
+
 		addFollowing(index, following.toArray(new Long[following.size()]));
-		
+
 	}
 
 	/**
