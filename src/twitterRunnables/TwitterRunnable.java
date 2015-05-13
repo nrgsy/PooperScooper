@@ -70,7 +70,6 @@ public class TwitterRunnable implements Runnable {
 		}
 	}
 
-
 	/**
 	 * 	handles downloading image, updating db, and deleting image after upload
 	 */
@@ -78,7 +77,7 @@ public class TwitterRunnable implements Runnable {
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
-			//TODO assContent structure may have been changed since writing this method.
+			//TODO assContent structure may have  been changed since writing this method.
 			DBObject assContent = DataBaseHandler.getRandomContent("ass", 0);
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();
