@@ -17,7 +17,6 @@ import com.mongodb.BasicDBObject;
 		//The default values can be found in the main method of Director. They are used to initialize the
 		//GlobalVariables collection when it does not exist
 		
-		
 		//*******************************NOTICE*******************************
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
 		//edit GlobalStuff's setGlobalVars method (for updating its value from the db)
@@ -63,7 +62,7 @@ import com.mongodb.BasicDBObject;
 			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
 			FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
 			FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
-			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG+ACCOUNT_OUTS_FOR_REMOVAL");
+			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG_ACCOUNT_OUTS_FOR_REMOVAL");
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
 			ALPHA = globalVars.getDouble("ALPHA");
 			MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");

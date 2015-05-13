@@ -21,7 +21,7 @@ import twitter4j.conf.ConfigurationBuilder;
  *
  */
 public class TwitterRunnable implements Runnable {
-	private Twitter bird;
+	private Twitter bird = null;
 	private int index;
 
 	/**
@@ -103,7 +103,6 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run(){
 		Maintenance.runStatus.put(index+"twitter", true);
-		
 		try{
 			//post if the random number is less than the alpha constant and we're allowed to post
 			//TODO implement canPost boolean using MAX_NUMER_OF_POSTS and POST_TIME_CONSTANT.
@@ -116,7 +115,7 @@ public class TwitterRunnable implements Runnable {
 		}
 
 	}
-	
+
 	public static void main(String[] args){
 		new Thread(new TwitterRunnable()).start();
 	}
