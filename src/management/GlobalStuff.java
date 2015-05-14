@@ -1,5 +1,7 @@
 package management;
 
+import java.util.HashMap;
+
 import com.mongodb.BasicDBObject;
 	
 	public class GlobalStuff{
@@ -33,12 +35,20 @@ import com.mongodb.BasicDBObject;
 		public static long FOLLOWING_BASE_CAP;
 		//this is the probability of a post occurring at any given minute
 		public static double ALPHA;
+		//the minimum allowed time 
+		public static long MIN_POST_TIME_INTERVAL;
 		
-		//these two are the safeguards for posting. They ensure that MAX_NUMER_OF_POSTS + 1 posts can never 
-		//happen in a POST_TIME_CONSTANT minute interval.
-		public static long MAX_NUMER_OF_POSTS;
-		public static long MIN_POST_TIME_CONSTANT;
+		//The size of the content sample in dbahdnler's getRandomContent
+		public static long CONTENT_SAMPLE_SIZE;
+		//The min time between two accesses of the same content by the same account
+		public static long MIN_TIME_BETWEEN_ACCESSES;
+		
 		//*******************************NOTICE*******************************
+		
+		//Other globals, non changeable via the database, but still mutable by the code
+		//the map of schwergsy account index to the last time they had a post
+		public static HashMap<Integer, Long> lastPostTimeMap;
+		
 		
 		//This is the formula to determine how many accounts to follow
 		//TODO Need to revise this formula, it's shit
@@ -65,8 +75,9 @@ import com.mongodb.BasicDBObject;
 			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG_ACCOUNT_OUTS_FOR_REMOVAL");
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
 			ALPHA = globalVars.getDouble("ALPHA");
-			MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");
-			MIN_POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
+			MIN_POST_TIME_INTERVAL = globalVars.getLong("MIN_POST_TIME_INTERVAL");
+			CONTENT_SAMPLE_SIZE = globalVars.getLong("CONTENT_SAMPLE_SIZE");
+			MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
 		}
 
 	}

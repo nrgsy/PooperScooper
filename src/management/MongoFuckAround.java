@@ -3,6 +3,7 @@ package management;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.HashMap;
 
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -47,6 +48,7 @@ public class MongoFuckAround {
 		for(Status tweet : tweets){
 			System.out.println(tweet.getInReplyToScreenName());
 		}
+
 //		DataBaseHandler.newContent("dude in skirt", "http://i.imgur.com/vx3glwO.jpg", "pendingass");
 //		Thread.sleep(1);
 //		DataBaseHandler.newContent("girl in a bed", "http://i.imgur.com/x0ZSk6c.jpg", "pendingass");

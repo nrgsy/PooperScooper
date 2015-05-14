@@ -117,6 +117,8 @@ public class Director {
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
 		
+		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
+		
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
 
