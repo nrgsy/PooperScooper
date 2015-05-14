@@ -37,7 +37,7 @@ import com.mongodb.BasicDBObject;
 		//these two are the safeguards for posting. They ensure that MAX_NUMER_OF_POSTS + 1 posts can never 
 		//happen in a POST_TIME_CONSTANT minute interval.
 		public static long MAX_NUMER_OF_POSTS;
-		public static long POST_TIME_CONSTANT;
+		public static long MIN_POST_TIME_CONSTANT;
 		//*******************************NOTICE*******************************
 		
 		//This is the formula to determine how many accounts to follow
@@ -66,7 +66,7 @@ import com.mongodb.BasicDBObject;
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
 			ALPHA = globalVars.getDouble("ALPHA");
 			MAX_NUMER_OF_POSTS = globalVars.getLong("MAX_NUMER_OF_POSTS");
-			POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
+			MIN_POST_TIME_CONSTANT = globalVars.getLong("POST_TIME_CONSTANT");
 		}
 
 	}

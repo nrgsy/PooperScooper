@@ -10,9 +10,13 @@ import management.FuckinUpKPException;
 import management.GlobalStuff;
 import management.Maintenance;
 import twitter4j.IDs;
+import twitter4j.Paging;
+import twitter4j.ResponseList;
+import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
@@ -68,7 +72,21 @@ public class FollowRunnable implements Runnable{
 	 */
 	public void followAndFavoriteUsers() throws TwitterException, UnknownHostException{
 		if(DataBaseHandler.getToFollowSize(index)!=0){
-			bird.createFavorite(bird.createFriendship(DataBaseHandler.getOneToFollow(index)).getStatus().getId());
+			long id = DataBaseHandler.getOneToFollow(index);
+			
+			//Follows the person
+			bird.createFriendship(id);
+			
+			//Favorites a tweet which is unique and not a response to another tweet, if available.
+			Paging paging = new Paging();
+			paging.setCount(50);
+			ResponseList<Status> tweets = bird.getUserTimeline(id, paging);
+			for(Status tweet: tweets){
+				if(!tweet.isRetweet() && tweet.getInReplyToScreenName().equals(null)){
+					bird.createFavorite(tweet.getId());
+					break;
+				}
+			}
 		}
 	}
 	

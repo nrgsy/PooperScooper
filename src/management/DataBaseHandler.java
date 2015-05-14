@@ -231,7 +231,7 @@ public class DataBaseHandler{
 			.append("FOLLOWING_BASE_CAP", 1000)
 			.append("ALPHA", 1/30)
 			.append("MAX_NUMER_OF_POSTS", 1)
-			.append("POST_TIME_CONSTANT", 15);
+			.append("MIN_POST_TIME_CONSTANT", 15);
 
 			collection.insert(globalVars);
 		}
@@ -422,6 +422,10 @@ public class DataBaseHandler{
 		dbCollection.update(query, ele);
 		System.out.println("successfully added an element to "+ column);
 		mongoClient.close();
+	}
+	
+	public static synchronized void addBigAccWhiteList(int index, long bigAccId) throws UnknownHostException, FuckinUpKPException{
+		addElementToSchwergsArray(index,bigAccId,"bigAccountWhiteList");
 	}
 
 	/**
@@ -754,6 +758,26 @@ public class DataBaseHandler{
 		BasicDBObject query = new BasicDBObject("_id", index);
 		query.append("whiteList", new BasicDBObject("$eq", user_id));
 		BasicDBObject call = new BasicDBObject("whiteList.$", 1);
+		DBCursor cursor = dbCollection.find(query, call);
+		if(cursor.hasNext()){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * @param index
+	 * @param user_id
+	 * @return
+	 * @throws UnknownHostException
+	 */
+	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		DB db = mongoClient.getDB("Schwergsy");
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		BasicDBObject query = new BasicDBObject("_id", index);
+		query.append("bigAccountWhiteList", new BasicDBObject("$eq", bigAcc_id));
+		BasicDBObject call = new BasicDBObject("bigAccountWhiteList.$", 1);
 		DBCursor cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;

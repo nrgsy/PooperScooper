@@ -133,6 +133,10 @@ public class bigAccRunnable implements Runnable {
 		for(int i =0; i<maxCandidates; i++){
 			System.out.println("considering candidate...");
 			Long id = AllCandidatesArr[i];
+			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
+				break;
+			}
+			
 			Paging query = new Paging();
 			query.setCount(200);
 			ResponseList<Status> timeline = bird.getUserTimeline(id, query);
@@ -170,6 +174,7 @@ public class bigAccRunnable implements Runnable {
 
 				if(avgRTs>=30 && avgTime<=86400000){
 					DataBaseHandler.addBigAccount(index, id, -1);
+					DataBaseHandler.addBigAccWhiteList(index,id);
 				}
 			}
 		}
