@@ -3,6 +3,7 @@ package management;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.HashMap;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
@@ -11,21 +12,27 @@ public class MongoFuckAround {
 
 	public static void main(String[]args) throws Exception{
 
-		BasicDBList bdbl1 = new BasicDBList();
-		BasicDBList bdbl2 = new BasicDBList();
-		BasicDBList bdbl3 = new BasicDBList();
-		BasicDBList bdbl4 = new BasicDBList();
-		BasicDBList bdbl5 = new BasicDBList();
+//		BasicDBList bdbl1 = new BasicDBList();
+//		BasicDBList bdbl2 = new BasicDBList();
+//		BasicDBList bdbl3 = new BasicDBList();
+//		BasicDBList bdbl4 = new BasicDBList();
+//		BasicDBList bdbl5 = new BasicDBList();
+//
+//		bdbl2.add("following1");
+//		bdbl2.add("following2");
+//		bdbl3.add("toFollow1");
+//		bdbl3.add("toFollow2");
+//		bdbl4.add("whitelist1");
+//		bdbl4.add("whitelist2");
+//
+//		DataBaseHandler.insertSchwergsyAccount("thisIsTheID", "Thisisthename", "cussssh", "cuskey", "authshhh", "authkey", true, bdbl1, bdbl2, bdbl3, bdbl4, bdbl5, new BasicDBList());
 
-		bdbl2.add("following1");
-		bdbl2.add("following2");
-		bdbl3.add("toFollow1");
-		bdbl3.add("toFollow2");
-		bdbl4.add("whitelist1");
-		bdbl4.add("whitelist2");
-
-		DataBaseHandler.insertSchwergsyAccount("thisIsTheID", "Thisisthename", "cussssh", "cuskey", "authshhh", "authkey", true, bdbl1, bdbl2, bdbl3, bdbl4, bdbl5, new BasicDBList());
-
+		HashMap<Integer, Long> h = new HashMap<>();
+		Long l = h.get(8);
+		System.out.println(l);
+		
+		
+		
 
 //		DataBaseHandler.newContent("dude in skirt", "http://i.imgur.com/vx3glwO.jpg", "pendingass");
 //		Thread.sleep(1);

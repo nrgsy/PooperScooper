@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Map.Entry;
@@ -42,54 +43,34 @@ public class DataBaseHandler{
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection collection = getCollection(type, db);
 
-		double size = collection.count();
+		double collectionSize = collection.count();
 
 		HashSet<DBObject> contentSample = new HashSet<>();
 
-		//TODO abstract this and the else out via globalstuff
-		//just add them all if we have less than 200 contents
-		if (size < 200) {
+		if (collectionSize < GlobalStuff.CONTENT_SAMPLE_SIZE) {
+			//just add all the valid ones in this case
 			DBCursor cursor = collection.find();
 			while (cursor.hasNext()) {
 				DBObject content = cursor.next();
-				BasicDBList list = (BasicDBList) content.get("accessInfo");
-				boolean valid = true;
-				for (Object o : list) {
-					DBObject info = (DBObject) o;
-					if ((long) info.get("index") == index) {
-						long msSinceLastAccess = new Date().getTime() - (long) info.get("lastAccess");
-						//don't consider content that's been posted sooner that a week ago (on this account)
-						if (msSinceLastAccess < 604800000) {
-							valid = false;
-						}
-						break;
-					}
-				}
-				if (valid) {
+				if (hasNotBeenAccessedRecently(index, content)) {
 					contentSample.add(content);
 				}
 			}
 		}
-		else {
-			int numAttempts = 0;
-			while (contentSample.size() < 100 && numAttempts < 1000) {
-				numAttempts++;
-				int randNum = (int) (Math.random() * size);
+		else {	
+			//create a list of numbers 0 to CONTENT_SAMPLE_SIZE - 1
+			ArrayList<Integer> numberList = new ArrayList<>();
+			for (int i  = 0; i < collectionSize; i++) {
+				numberList.add(i);
+			}
+
+			for (int i = 0; i < GlobalStuff.CONTENT_SAMPLE_SIZE; i++) {
+				int randIndex = (int) (Math.random() * numberList.size());
+				//draws a rand number from numberList
+				int randNum = numberList.remove(randIndex);
+				//using the number from numberList ensures we draw randomly from content with no repeats
 				DBObject content = collection.find().limit(-1).skip(randNum).next();
-				BasicDBList list = (BasicDBList) content.get("accessInfo");
-				boolean valid = true;
-				for (Object o : list) {
-					DBObject info = (DBObject) o;
-					if ((long) info.get("index") == index) {
-						long msSinceLastAccess = new Date().getTime() - (long) info.get("lastAccess");
-						//don't consider content that's been posted sooner that a week ago (on this account)
-						if (msSinceLastAccess < 604800000) {
-							valid = false;
-						}
-						break;
-					}
-				}
-				if (valid) {
+				if (hasNotBeenAccessedRecently(index, content)) {
 					contentSample.add(content);
 				}
 			}
@@ -164,6 +145,31 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return bestContent;
 	}
+	
+	/**
+	 * determines if the content has been recently accessed by the schwergsy account corresponding to index
+	 * 
+	 * @param index the index of the Schwergsy account
+	 * @param content the access info from the db
+	 * @return
+	 */
+	public static synchronized boolean hasNotBeenAccessedRecently(long index, DBObject content) {
+		
+		BasicDBList list = (BasicDBList) content.get("accessInfo");
+		boolean valid = true;
+		for (Object o : list) {
+			DBObject info = (DBObject) o;
+			if ((long) info.get("index") == index) {
+				long msSinceLastAccess = new Date().getTime() - (long) info.get("lastAccess");
+				//don't consider content that's been posted sooner that a week ago (on this account)
+				if (msSinceLastAccess < GlobalStuff.MIN_TIME_BETWEEN_ACCESSES) {
+					valid = false;
+				}
+				break;
+			}
+		}
+		return valid;
+	}
 
 
 	/**
@@ -229,9 +235,10 @@ public class DataBaseHandler{
 			.append("BIG_ACCOUNT_STRIKES_FOR_OUT", 3)
 			.append("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3)
 			.append("FOLLOWING_BASE_CAP", 1000)
-			.append("ALPHA", 1/30)
-			.append("MAX_NUMER_OF_POSTS", 1)
-			.append("POST_TIME_CONSTANT", 15);
+			.append("ALPHA", 1/25)
+			.append("MIN_POST_TIME_INTERVAL", 900000)
+			.append("CONTENT_SAMPLE_SIZE", 100)
+			.append("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 
 			collection.insert(globalVars);
 		}
