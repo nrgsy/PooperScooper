@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
+
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
+import management.GlobalStuff;
 import management.Maintenance;
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
@@ -168,11 +170,11 @@ public class bigAccRunnable implements Runnable {
 			}
 
 			//adds a bigaccount if it averages 30 retweets per tweet and posts daily on average.
-			if(count>0){
+			if(count>0) {
 				long avgTime = (lastTime-firstTime)/count;
 				int avgRTs = totalRTs/count;
 
-				if(avgRTs>=30 && avgTime<=86400000){
+				if(avgRTs >= 30 && avgTime <= GlobalStuff.DAY_IN_MILLISECONDS){
 					DataBaseHandler.addBigAccount(index, id, -1);
 					DataBaseHandler.addBigAccWhiteList(index,id);
 				}

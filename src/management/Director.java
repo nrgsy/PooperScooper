@@ -131,21 +131,18 @@ public class Director {
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 		
-		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
+		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
 			long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
 			long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
 			long incubated_followtime_min = GlobalStuff.FOLLOW_TIME_INCUBATED_MIN;
 			long incubated_followtime_max = GlobalStuff.FOLLOW_TIME_INCUBATED_MAX;
-			long posttime_min = GlobalStuff.POST_TIME_MIN;
-			long posttime_max = GlobalStuff.POST_TIME_MAX;
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 			
 			//TODO implement new posting strategy, this probably could be deleted
-			long posttime = posttime_min+((long)(r.nextDouble()*(posttime_max-posttime_min)));
 			long incubated_followtime = incubated_followtime_min +
 					((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
 			long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
