@@ -22,7 +22,7 @@ import com.mongodb.BasicDBObject;
 		//*******************************NOTICE*******************************
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
 		//1: Edit GlobalStuff's setGlobalVars method (for updating its value from the db)
-		//2: Edit DatabaseHandler's initGlobalVars method (for the default value)
+		//2: Edit GlobalStuff's getGlobalVars method (for the default value)
 		public static long FOLLOW_TIME_MIN;
 		public static long FOLLOW_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
@@ -75,6 +75,26 @@ import com.mongodb.BasicDBObject;
 			TWITTER_RUNNABLE_INTERVAL = globalVars.getLong("TWITTER_RUNNABLE_INTERVAL");
 			CONTENT_SAMPLE_SIZE = globalVars.getLong("CONTENT_SAMPLE_SIZE");
 			MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
+		}
+		
+		public static HashMap<String,Object> getGlobalVars(){
+			HashMap<String, Object> globalVars = new HashMap<String, Object>();
+			globalVars.put("FOLLOW_TIME_MIN", 86400L);
+			globalVars.put("FOLLOW_TIME_MAX", 123430L);
+			globalVars.put("POST_TIME_MIN", 900000L);
+			globalVars.put("POST_TIME_MAX", 1500000L);
+			globalVars.put("FOLLOW_TIME_INCUBATED_MIN", 180000L);
+			globalVars.put("FOLLOW_TIME_INCUBATED_MAX", 240000L);
+			globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
+			globalVars.put("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
+			globalVars.put("FOLLOWING_BASE_CAP", 1000);
+			globalVars.put("ALPHA", 1.0/25.0);
+			globalVars.put("MIN_POST_TIME_INTERVAL", 900000L);
+			globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
+			globalVars.put("CONTENT_SAMPLE_SIZE", 100);
+			globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
+			
+			return globalVars;
 		}
 
 	}

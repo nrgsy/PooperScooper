@@ -226,21 +226,11 @@ public class DataBaseHandler{
 			System.out.println("Globals not found in db, initializing with defaults");
 
 			//These are the default values to set the volatile variables to
-			BasicDBObject globalVars = new BasicDBObject()
-			.append("FOLLOW_TIME_MIN", 86400L)
-			.append("FOLLOW_TIME_MAX", 123430L)
-			.append("POST_TIME_MIN", 900000L)
-			.append("POST_TIME_MAX", 1500000L)
-			.append("FOLLOW_TIME_INCUBATED_MIN", 180000L)
-			.append("FOLLOW_TIME_INCUBATED_MAX", 240000L)
-			.append("BIG_ACCOUNT_STRIKES_FOR_OUT", 3)
-			.append("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3)
-			.append("FOLLOWING_BASE_CAP", 1000)
-			.append("ALPHA", 1/25)
-			.append("MIN_POST_TIME_INTERVAL", 900000)
-			.append("TWITTER_RUNNABLE_INTERVAL", 60000)
-			.append("CONTENT_SAMPLE_SIZE", 100)
-			.append("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
+			BasicDBObject globalVars = new BasicDBObject();
+			
+			for(Entry<String,Object> entry : GlobalStuff.getGlobalVars().entrySet()){
+				globalVars.append(entry.getKey(),entry.getValue());
+			}
 
 			collection.insert(globalVars);
 		}
