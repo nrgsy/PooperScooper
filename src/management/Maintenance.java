@@ -3,6 +3,7 @@ package management;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -61,8 +62,7 @@ public class Maintenance {
 	public static void performMaintenance() throws Exception {
 		System.out.println("maintenance started");
 		flagSet = true;				
-		boolean activityExists = true;
-		while (activityExists) {
+		while (true) {
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
@@ -79,30 +79,32 @@ public class Maintenance {
 			}
 
 			if (!somethingStillRunning) {
-				activityExists = false;
+				break;
 			}
 		}
 		
-		//TODO start all the threads because the all commit suicide when they see maintenance flag is set
+		//TODO CRITICAL: start all the threads because the all commit suicide when they see maintenance flag is set
 
-		//TODO save current time, do all maintenance that doesn't do calls to twitter, then if 15 min
-		//has passed do maintenance that requires calls to twitter. If < 15 passed, wait until 15 has passed
-		
-		//update followers for each schwergsy account
-		long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
-		for (int i = 0; i < size; i++) {
-			DataBaseHandler.updateFollowers(i);
-		}
-		
 		/*TODO the actual maintenance, Order task such that fastest tasks are done first,
 		 * consider having a maintenance cutoff if it runs for like 4 hours
-		 * call dbhandler's updateFollowers method for each schwergsy account
 		 * old content garbage collection
 		 * sweep through links in all pending and regular content checking for validity
-		 * check for new schwergsy accounts and start their timertasks
 		 * get big accounts (because of high api call amount)
 		 */
 
+		long startTime = new Date().getTime();
+		
+		//Section that doesn't use api calls
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
+		try {
+			DataBaseHandler.findAndSetGlobalVars();
+		} catch (UnknownHostException e) {
+			System.err.println("ERROR: failed to find ");
+			e.printStackTrace();
+		}
+		
 		//cleans up and syncs bigAccounts with bigAccountsWhiteList
 		try {
 			cleanBigAccs();
@@ -119,13 +121,26 @@ public class Maintenance {
 			e.printStackTrace();
 		}
 		
-		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
-		try {
-			DataBaseHandler.findAndSetGlobalVars();
-		} catch (UnknownHostException e) {
-			System.err.println("ERROR: failed to find ");
-			e.printStackTrace();
+		///////////////////////////////////////////////////////////////////////////////////////////////
+
+		long currentTime = new Date().getTime();
+		//don't start api call section until 15 minutes from start has passed
+		while (currentTime < startTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
+			//wait 10 seconds before trying again
+			Thread.sleep(10000);
+			currentTime = new Date().getTime();
 		}
+		
+		//Section that uses api calls
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//update followers for each schwergsy account
+		long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
+		for (int i = 0; i < size; i++) {
+			DataBaseHandler.updateFollowers(i);
+		}
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		flagSet = false;
 		System.out.println("maintenance complete");

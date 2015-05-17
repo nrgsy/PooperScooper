@@ -1,6 +1,11 @@
 package management;
 
+import java.net.UnknownHostException;
+import java.util.HashSet;
+
+import twitter4j.IDs;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -23,6 +28,30 @@ public class TwitterHandler {
 		return tf.getInstance();
 	}
 	
+	/**
+	 * @param init
+	 * @throws TwitterException
+	 * @throws UnknownHostException 
+	 */
+	public static HashSet<Long> getFollowers(Twitter bird) throws TwitterException, UnknownHostException{
+		int ratecount = 0;
+		IDs blah;
+		blah = bird.getFollowersIDs(-1);
+		HashSet<Long> followers = new HashSet<>();
+		for(int i = 0; i < blah.getIDs().length; i++){
+		    followers.add(blah.getIDs()[i]);
+		}
+		ratecount++;
+		
+		while(blah.getNextCursor()!=0 && ratecount<14){
+			blah = (bird.getFollowersIDs(blah.getNextCursor()));
+			for(int i = 0; i < blah.getIDs().length; i++){
+				followers.add(blah.getIDs()[i]);
+			}
+			ratecount++;
+		}
+		return followers;
+	}
 	
 	
 

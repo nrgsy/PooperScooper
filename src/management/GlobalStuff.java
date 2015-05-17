@@ -8,6 +8,7 @@ import com.mongodb.BasicDBObject;
 	
 		//Non-volatile globals
 		//these do not get updated by the set globals function 
+		public static final long MINUTE_IN_MILLISECONDS = 60000;
 		public static final long DAY_IN_MILLISECONDS = 86400000;
 		public static final long WEEK_IN_MILLISECONDS = 604800000;
 		public static final String DOPEST_MAN_ALIVE = "BO JANG";
@@ -80,8 +81,6 @@ import com.mongodb.BasicDBObject;
 			HashMap<String, Object> globalVars = new HashMap<String, Object>();
 			globalVars.put("FOLLOW_TIME_MIN", 86400L);
 			globalVars.put("FOLLOW_TIME_MAX", 123430L);
-			globalVars.put("POST_TIME_MIN", 900000L);
-			globalVars.put("POST_TIME_MAX", 1500000L);
 			globalVars.put("FOLLOW_TIME_INCUBATED_MIN", 180000L);
 			globalVars.put("FOLLOW_TIME_INCUBATED_MAX", 240000L);
 			globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);

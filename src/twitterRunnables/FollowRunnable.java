@@ -109,32 +109,6 @@ public class FollowRunnable implements Runnable{
 		}
 	}
 
-	/**
-	 * @param init
-	 * @throws TwitterException
-	 * @throws UnknownHostException 
-	 */
-	public HashSet<Long> getFollowers() throws TwitterException, UnknownHostException{
-		int ratecount = 0;
-		IDs blah;
-		blah = bird.getFollowersIDs(-1);
-		HashSet<Long> followers = new HashSet<>();
-		for(int i = 0; i < blah.getIDs().length; i++){
-		    followers.add(blah.getIDs()[i]);
-		}
-		ratecount++;
-		
-		while(blah.getNextCursor()!=0 && ratecount<14){
-			blah = (bird.getFollowersIDs(blah.getNextCursor()));
-			for(int i = 0; i < blah.getIDs().length; i++){
-				followers.add(blah.getIDs()[i]);
-			}
-			ratecount++;
-		}
-		
-		return followers;
-	}
-
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */

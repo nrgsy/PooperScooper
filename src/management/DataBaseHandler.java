@@ -541,10 +541,10 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void updateFollowers(int index) throws Exception {
 
-		HashSet<Long> freshFollowerSet = new HashSet<>();
+		//get the current set of followers from twitter
 		BasicDBObject authInfo = DataBaseHandler.getAuthorizationInfo(index);	
-		Twitter twitter = TwitterHandler.getTwitter(authInfo);
-		//TODO use the twitter object to get freshfollower set
+		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
+		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter);
 		
 		Date now = new Date();
 		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();

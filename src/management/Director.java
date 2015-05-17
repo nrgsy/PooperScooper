@@ -162,21 +162,8 @@ public class Director {
 				followtime = incubated_followtime;
 			}
 
-<<<<<<< HEAD
-			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setDebugEnabled(true)
-				.setOAuthConsumerKey(info.getString("customerKey"))
-				.setOAuthConsumerSecret(info.getString("customerSecret"))
-				.setOAuthAccessToken(info.getString("authorizationKey"))
-				.setOAuthAccessTokenSecret(info.getString("authorizationSecret"));
-			TwitterFactory tf = new TwitterFactory(cb.build());
-			Twitter twitter = tf.getInstance();
-
-			//TODO add in DateTime variable to check against to know when to run probability to post.
-=======
 			Twitter twitter = TwitterHandler.getTwitter(info);
 
->>>>>>> d4a0cafdb150e537ecfc1a900ba893242f7c11d4
 			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, GlobalStuff.TWITTER_RUNNABLE_INTERVAL);
 			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
 			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id), 0L, bigacctime);
