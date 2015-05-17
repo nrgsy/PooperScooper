@@ -43,7 +43,6 @@ public class Director {
 		return then.getTime();
 	}
 
-	//TODO runstatus is not scheduled correctly. it would run immediately after runnable is instantiated, not finished.
 	/**
 	 * @param Twitter created by Director
 	 * @param int of SchwergsAccount index

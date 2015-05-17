@@ -1,10 +1,7 @@
 package management;
 
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -228,7 +225,7 @@ public class DataBaseHandler{
 
 			//These are the default values to set the volatile variables to
 			BasicDBObject globalVars = new BasicDBObject();
-			
+
 			for(Entry<String,Object> entry : GlobalStuff.getGlobalVars().entrySet()){
 				globalVars.append(entry.getKey(),entry.getValue());
 			}
@@ -245,6 +242,7 @@ public class DataBaseHandler{
 	 * @param imglink
 	 * @param type see getCollection below for content types (ass, pendingass, etc)
 	 * @throws UnknownHostException
+	 * @throws InterruptedException 
 	 */
 
 
@@ -253,7 +251,7 @@ public class DataBaseHandler{
 	//ass should have all attributes as shown belows
 
 
-	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
+	public static void newContent(String caption, String imglink, String type) throws UnknownHostException, InterruptedException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
 
@@ -272,20 +270,39 @@ public class DataBaseHandler{
 			baseType = type;
 		}
 
-		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
-
 		DBCollection dbCollection1 = getCollection(baseType, db);
 		DBCollection dbCollection2 = getCollection("pending" + baseType, db);
 		DBCollection dbCollection3 = getCollection("schwag" + baseType, db);
+		
 		DBCollection trueCollection = getCollection(type, db);
+		
+		long now = new Date().getTime();
+		//to ensure no two contents can have the same _id
+		//(occurs when something tries to create two contents in the same millisecond)
+		BasicDBObject creationTimeCheck = new BasicDBObject("_id", now);
+		
+		boolean timeOK = false;
+		while (!timeOK) {
+			//make sure that the image link is not in the pending, schwag, or regular collections of the base type
+			if (dbCollection1.find(creationTimeCheck).limit(1).count() == 0 &&
+					dbCollection2.find(creationTimeCheck).limit(1).count() == 0 &&
+					dbCollection3.find(creationTimeCheck).limit(1).count() == 0) {
+				timeOK = true;
+			}
+			else {
+				Thread.sleep(1);
+				now = new Date().getTime();
+				creationTimeCheck = new BasicDBObject("_id", now);
+			}
+		}
 
+		//to ensure no two contents can have the same link
+		BasicDBObject linkCheck = new BasicDBObject("imglink", imglink);
 		//make sure that the image link is not in the pending, schwag, or regular collections of the base type
-		if(dbCollection1.find(uniqueCheck).limit(1).count() == 0 &&
-				dbCollection2.find(uniqueCheck).limit(1).count() == 0 &&
-				dbCollection3.find(uniqueCheck).limit(1).count() == 0) {
-
-			long id_time = new Date().getTime();
-			BasicDBObject newAss = new BasicDBObject("_id", id_time);
+		if (dbCollection1.find(linkCheck).limit(1).count() == 0 &&
+				dbCollection2.find(linkCheck).limit(1).count() == 0 &&
+				dbCollection3.find(linkCheck).limit(1).count() == 0) {
+			BasicDBObject newAss = new BasicDBObject("_id", now);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
 			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
@@ -294,9 +311,10 @@ public class DataBaseHandler{
 			trueCollection.insert(newAss);
 			System.out.println("Successfully added new content of type " + type);
 		}
-		else{
+		else {
 			System.out.println("Image is not unique: "+ imglink);
 		}
+
 		mongoClient.close();
 	}
 
@@ -545,7 +563,7 @@ public class DataBaseHandler{
 		BasicDBObject authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter);
-		
+
 		Date now = new Date();
 		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();
 		PrintWriter writer = new PrintWriter("FollowerLists/" + fileName + ".txt", "UTF-8");
@@ -995,17 +1013,17 @@ public class DataBaseHandler{
 			.append("whiteList", whiteList)
 			.append("bigAccounts", bigAccounts)
 			.append("statistics", statistics);
-			
+
 			dbCollection.insert(basicBitch);
-			
+
 			//Makes sure that the account's following is synced in the database.
 			initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
-					  .setDebugEnabled(true)
-					  .setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
-					  .setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
-					  .setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
-					  .setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
-					  (int) getCollectionSize("SchwergsyAccounts"));
+			.setDebugEnabled(true)
+			.setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
+			.setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
+			.setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
+			.setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
+			(int) getCollectionSize("SchwergsyAccounts"));
 		}
 		mongoClient.close();
 	}
