@@ -1,14 +1,11 @@
 package twitterRunnables;
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import management.DataBaseHandler;
-import management.FuckinUpKPException;
 import management.GlobalStuff;
 import management.Maintenance;
+import management.TwitterHandler;
 import twitter4j.IDs;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
@@ -16,7 +13,6 @@ import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
@@ -26,7 +22,6 @@ import twitter4j.conf.ConfigurationBuilder;
 public class FollowRunnable implements Runnable{
 	private Twitter bird;
 	private int index;
-	private boolean hasUpdatedFollowers;
 	
 	/**
 	 * @param OAuthConsumerKey
@@ -71,23 +66,22 @@ public class FollowRunnable implements Runnable{
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
 	 */
-	public void followAndFavoriteUsers() throws TwitterException, UnknownHostException{
+	public void followAndFavoriteUsers() throws  UnknownHostException, TwitterException{
 		if(DataBaseHandler.getToFollowSize(index)!=0){
 			long id = DataBaseHandler.getOneToFollow(index);
 			
 			//Favorites a tweet which is unique and not a response to another tweet, if available.
 			Paging paging = new Paging();
 			paging.setCount(50);
-			ResponseList<Status> tweets = bird.getUserTimeline(id, paging);
+			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging);
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet() && tweet.getInReplyToScreenName().equals(null)){
-					bird.createFavorite(tweet.getId());
+					TwitterHandler.favorite(bird,tweet.getId());
 					break;
 				}
 			}
-			
 			//Follows the person
-			bird.createFriendship(id);
+			TwitterHandler.follow(bird,id);
 			
 			DataBaseHandler.addFollowing(index, new Long[]{id});
 		}
@@ -105,7 +99,7 @@ public class FollowRunnable implements Runnable{
 		//TODO get a ratio
 		Long[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
 		for(int i =0; i<unfollowArr.length; i++){
-			bird.destroyFriendship(unfollowArr[i]);
+			TwitterHandler.unfollow(bird,unfollowArr[i]);
 		}
 	}
 
