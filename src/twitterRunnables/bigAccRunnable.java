@@ -5,14 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Map;
-
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
 import management.GlobalStuff;
 import management.Maintenance;
+import management.TwitterHandler;
 import twitter4j.Paging;
-import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -54,12 +52,11 @@ public class bigAccRunnable implements Runnable {
 		//TODO add latestTweet capability to bigAccount in DBH
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		Long[] AllCandidatesArr;
-		long latestTweet = 0;
-
+		
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			ResponseList<Status> OwnTweets = bird.getUserTimeline(bird.getId());
+			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId());
 
 			if(OwnTweets.size()>15){
 				//sorts by most retweets and cuts out tweets with little retweets
@@ -84,7 +81,7 @@ public class bigAccRunnable implements Runnable {
 			for(Status tweet : OwnTweets){
 				//gathers all retweeters' ids from tweets
 				if(tweet.getRetweetCount()!=0){
-					long[] RTerIDs = bird.getRetweeterIds(tweet.getId(), 100, -1).getIDs();
+					long[] RTerIDs = TwitterHandler.getRetweeterIds(bird, tweet.getId(), 100, -1);
 					for(long id : RTerIDs){
 
 						AllRTerIDs.add(id);
@@ -101,7 +98,7 @@ public class bigAccRunnable implements Runnable {
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
-				ResponseList<Status> potentialBigAccs = bird.getUserTimeline(id, querySettings);
+				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings);
 				for(Status tweet: potentialBigAccs){
 					if(tweet.isRetweet() && tweet.getRetweetedStatus().getUser().getFollowersCount()>5000
 							&& tweet.getRetweetedStatus().getUser().getId() != bird.getId()){
@@ -141,7 +138,7 @@ public class bigAccRunnable implements Runnable {
 			
 			Paging query = new Paging();
 			query.setCount(200);
-			ResponseList<Status> timeline = bird.getUserTimeline(id, query);
+			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query);
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -161,11 +158,9 @@ public class bigAccRunnable implements Runnable {
 				totalRTs+= tweet.getRetweetCount();
 				if(count == 1){
 					firstTime += tweet.getCreatedAt().getTime();
-					latestTweet = tweet.getId();
 				}
 				if(count == noRTTimeline.size()){
 					lastTime += tweet.getCreatedAt().getTime();
-					
 				}
 			}
 
@@ -195,7 +190,7 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setSinceId(lastTweet);
 		}
 		
-		ResponseList<Status> tweets = bird.getUserTimeline(DataBaseHandler.getBigAccount(index, 0), querySettings);
+		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, 0), querySettings);
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 		
 		if(DataBaseHandler.getToFollowSize(index)<11900){
@@ -211,10 +206,10 @@ public class bigAccRunnable implements Runnable {
 			//By using a HashSet, you get only unique retweeter ids.
 			for(Status tweet :NoRTTweets){
 				//Makes sure it won't pass the ratelimit
-				if(isAtRateLimit("/statuses/retweets/:id")){
+				if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweets/:id")){
 					break;
 				}
-				long[] toFollows = bird.getRetweeterIds(tweet.getId(), 100, -1).getIDs();
+				long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1);
 				for(long id : toFollows){
 					toFollowSet.add(id);
 				}
@@ -258,16 +253,7 @@ public class bigAccRunnable implements Runnable {
 		System.out.println("done harvesting");
 	}
 
-	public boolean isAtRateLimit(String endpoint) throws TwitterException{
-		Map<String ,RateLimitStatus> rateLimitStatus = bird.getRateLimitStatus();
-		RateLimitStatus status = rateLimitStatus.get(endpoint);
-		if (status.getRemaining() == 0){
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
+	
 
 	@Override
 	public void run() {

@@ -6,6 +6,7 @@ import java.util.Date;
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
+import management.TwitterHandler;
 
 import com.mongodb.DBObject;
 
@@ -58,17 +59,13 @@ public class TwitterRunnable implements Runnable {
 	 * @param file
 	 * @param message
 	 * @param twitter
+	 * @throws TwitterException 
 	 * @throws Exception
 	 */
-	public void uploadPicTwitter(File file, String message) throws Exception  {
-		try{
+	public void uploadPicTwitter(File file, String message) throws TwitterException{
 			StatusUpdate status = new StatusUpdate(message);
 			status.setMedia(file);
-			bird.updateStatus(status);}
-		catch(TwitterException e){
-			System.out.println("Pic Upload error" + e.getErrorMessage());
-			throw e;
-		}
+			TwitterHandler.updateStatus(bird, status);
 	}
 
 	/**
