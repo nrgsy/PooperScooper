@@ -70,13 +70,13 @@ public class RedditScraper implements Runnable{
 		//If good, put into database
 		ImageManipulator reviewer = new ImageManipulator();
 		for(int i =0; i<imglinks.size();i++){
-			Thread.sleep(1);
 			if(!reviewer.isValid(imglinks.get(i))){
 				imglinks.remove(i);
 				captions.remove(i);
 			}
 			else{
 				try {
+					Thread.sleep(1);
 					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), "pendingass");
 				} catch (UnknownHostException e) {
 					System.out.println("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));

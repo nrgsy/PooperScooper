@@ -131,7 +131,7 @@ public class Director {
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 		
-		for(int id =0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
+		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
 			long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;

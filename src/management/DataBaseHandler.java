@@ -7,7 +7,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.Map.Entry;
@@ -147,7 +146,7 @@ public class DataBaseHandler{
 		mongoClient.close();
 		return bestContent;
 	}
-	
+
 	/**
 	 * determines if the content has been recently accessed by the schwergsy account corresponding to index
 	 * 
@@ -156,7 +155,7 @@ public class DataBaseHandler{
 	 * @return
 	 */
 	public static synchronized boolean hasNotBeenAccessedRecently(long index, DBObject content) {
-		
+
 		BasicDBList list = (BasicDBList) content.get("accessInfo");
 		boolean valid = true;
 		for (Object o : list) {
@@ -253,7 +252,7 @@ public class DataBaseHandler{
 	/**
 	 * @param caption
 	 * @param imglink
-	 * @param type see getCollection below for content types
+	 * @param type see getCollection below for content types (ass, pendingass, etc)
 	 * @throws UnknownHostException
 	 */
 
@@ -266,19 +265,42 @@ public class DataBaseHandler{
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
+
+		//the type without the "pending" or "schwag" prefix, e.g. schwagweed become weed
+		String baseType;
+
+		//determine whether we're dealing with a pending content, schwag content, or a regular content
+		//and set baseType accordingly
+		if (type.substring(0, 7).equals("pending")) {
+			baseType = type.substring(7);
+		}
+		else if (type.substring(0, 6).equals("schwag")) {
+			baseType = type.substring(6);
+		}
+		else {
+			baseType = type;
+		}
+
 		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
-		DBCollection dbCollection = getCollection(type, db);
 
-		if(dbCollection.find(uniqueCheck).limit(1).count() == 0) {
+		DBCollection dbCollection1 = getCollection(baseType, db);
+		DBCollection dbCollection2 = getCollection("pending" + baseType, db);
+		DBCollection dbCollection3 = getCollection("schwag" + baseType, db);
+		DBCollection trueCollection = getCollection(type, db);
+
+		//make sure that the image link is not in the pending, schwag, or regular collections of the base type
+		if(dbCollection1.find(uniqueCheck).limit(1).count() == 0 &&
+				dbCollection2.find(uniqueCheck).limit(1).count() == 0 &&
+				dbCollection3.find(uniqueCheck).limit(1).count() == 0) {
+
 			long id_time = new Date().getTime();
-
 			BasicDBObject newAss = new BasicDBObject("_id", id_time);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
 			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
 			newAss.append("accessInfo", new BasicDBList());
 
-			dbCollection.insert(newAss);
+			trueCollection.insert(newAss);
 			System.out.println("Successfully added new content of type " + type);
 		}
 		else{
@@ -433,7 +455,7 @@ public class DataBaseHandler{
 		System.out.println("successfully added an element to "+ column);
 		mongoClient.close();
 	}
-	
+
 	public static synchronized void addBigAccWhiteList(int index, long bigAccId) throws UnknownHostException, FuckinUpKPException{
 		addElementToSchwergsArray(index,bigAccId,"bigAccountsWhiteList");
 	}
@@ -774,7 +796,7 @@ public class DataBaseHandler{
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @param index
 	 * @param user_id
@@ -891,7 +913,6 @@ public class DataBaseHandler{
 	/**
 	 * Convenience method to insert a new account into the SchwergsyAccounts collection
 	 * using empty lists for the missing parameters
-	 * @param accountID
 	 * @param name
 	 * @param customerSecret
 	 * @param customerKey
@@ -902,7 +923,6 @@ public class DataBaseHandler{
 	 * @throws TwitterException 
 	 */
 	public static synchronized void insertSchwergsyAccount(
-			String accountID,
 			String name,
 			String customerSecret,
 			String customerKey,
@@ -911,7 +931,6 @@ public class DataBaseHandler{
 			boolean isIncubated) throws UnknownHostException, TwitterException {
 
 		insertSchwergsyAccount(
-				accountID,
 				name,
 				customerSecret,
 				customerKey,
@@ -929,7 +948,6 @@ public class DataBaseHandler{
 
 	/**
 	 * Insert a new account into the the SchwergsyAccounts collection
-	 * @param accountID
 	 * @param name
 	 * @param customerSecret
 	 * @param customerKey
@@ -946,7 +964,6 @@ public class DataBaseHandler{
 	 * @throws TwitterException 
 	 */
 	public static synchronized void insertSchwergsyAccount(
-			String accountID,
 			String name,
 			String customerSecret,
 			String customerKey,
@@ -960,39 +977,43 @@ public class DataBaseHandler{
 			BasicDBList bigAccounts,
 			BasicDBList statistics) throws UnknownHostException, TwitterException {
 
-		System.out.println("inserting a new Schwergsy Account");
 		MongoClient mongoClient = new MongoClient();
 		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
+		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 
-		BasicDBObject basicBitch = new BasicDBObject("_id", (int) getCollectionSize("SchwergsyAccounts"))
-		.append("accountID", accountID)
-		.append("name", name)
-		.append("customerSecret", customerSecret)
-		.append("customerKey", customerKey)
-		.append("authorizationSecret", authorizationSecret)
-		.append("authorizationKey", authorizationKey)
-		.append("isIncubated", isIncubated)
-		.append("followers", followers)
-		.append("following", following)
-		.append("toFollow", toFollow)
-		.append("whiteList", whiteList)
-		.append("bigAccounts", bigAccounts)
-		.append("statistics", statistics);
-
-		dbCollection.insert(basicBitch);
-		
-		//Makes sure that the account's following is synced in the database.
-		initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
-				  .setDebugEnabled(true)
-				  .setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
-				  .setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
-				  .setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
-				  .setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
-				  (int) getCollectionSize("SchwergsyAccounts"));
-		
-		
-
+		//check if this schwergsy account already exists in the database
+		BasicDBObject uniqueCheck = new BasicDBObject("authorizationKey", authorizationKey);
+		if (dbCollection.find(uniqueCheck).limit(1).count() != 0) {
+			System.err.println("WARNING: Schwergsy account already exists in the database, "
+					+ "will not add duplicate");
+		}
+		else {
+			System.out.println("inserting a new Schwergsy Account");
+			BasicDBObject basicBitch = new BasicDBObject("_id", (int) getCollectionSize("SchwergsyAccounts"))
+			.append("name", name)
+			.append("customerSecret", customerSecret)
+			.append("customerKey", customerKey)
+			.append("authorizationSecret", authorizationSecret)
+			.append("authorizationKey", authorizationKey)
+			.append("isIncubated", isIncubated)
+			.append("followers", followers)
+			.append("following", following)
+			.append("toFollow", toFollow)
+			.append("whiteList", whiteList)
+			.append("bigAccounts", bigAccounts)
+			.append("statistics", statistics);
+			
+			dbCollection.insert(basicBitch);
+			
+			//Makes sure that the account's following is synced in the database.
+			initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
+					  .setDebugEnabled(true)
+					  .setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
+					  .setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
+					  .setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
+					  .setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
+					  (int) getCollectionSize("SchwergsyAccounts"));
+		}
 		mongoClient.close();
 	}
 

@@ -85,7 +85,7 @@ public class Maintenance {
 
 		/*TODO the actual maintenance, Order task such that fastest tasks are done first,
 		 * consider having a maintenance cutoff if it runs for like 4 hours
-		 * Update followers
+		 * call dbhandler's updateFollowers method for each schwergsy account
 		 * old content garbage collection
 		 * sweep through links in all pending and regular content checking for validity
 		 * get big accounts (because of high api call amount)

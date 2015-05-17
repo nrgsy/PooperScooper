@@ -21,8 +21,8 @@ import com.mongodb.BasicDBObject;
 		
 		//*******************************NOTICE*******************************
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
-		//edit GlobalStuff's setGlobalVars method (for updating its value from the db)
-		//AND edit DatabaseHandler's initGlobalVars method (for the default value)
+		//1: Edit GlobalStuff's setGlobalVars method (for updating its value from the db)
+		//2: Edit DatabaseHandler's initGlobalVars method (for the default value)
 		public static long FOLLOW_TIME_MIN;
 		public static long FOLLOW_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
@@ -37,12 +37,10 @@ import com.mongodb.BasicDBObject;
 		public static long MIN_POST_TIME_INTERVAL;
 		//interval between TwitterRunnable runs
 		public static long TWITTER_RUNNABLE_INTERVAL;
-		
-		//The size of the content sample in dbahdnler's getRandomContent
+		//The size of the content sample in dbhandler's getRandomContent
 		public static long CONTENT_SAMPLE_SIZE;
 		//The min time between two accesses of the same content by the same account
 		public static long MIN_TIME_BETWEEN_ACCESSES;
-		
 		//*******************************NOTICE*******************************
 		
 		//Other globals, non changeable via the database, but still mutable by the code
