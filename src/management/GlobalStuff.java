@@ -62,7 +62,6 @@ import com.mongodb.BasicDBObject;
 		 * (typically pulled from the GlobalVariables collection of the database)
 		 */
 		public static synchronized void setGlobalVars(BasicDBObject globalVars) {
-		
 			FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
 			FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
 			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");

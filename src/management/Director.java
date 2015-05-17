@@ -1,5 +1,7 @@
 package management;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,10 +18,6 @@ import twitterRunnables.TwitterRunnable;
 import twitterRunnables.bigAccRunnable;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 import content.RedditScraper;
 
@@ -107,13 +105,16 @@ public class Director {
 		};
 	}
 
-
 	public static TimerTask createMaintenanceTimerTask() {
 
 		return new TimerTask() {
 			@Override
 			public void run() {
-				Maintenance.performMaintenance();
+				try {
+					Maintenance.performMaintenance();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}};
 	}
 
@@ -125,9 +126,9 @@ public class Director {
 	 * @throws Exception
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
-		
+
 		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
-		
+
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
 
@@ -139,7 +140,8 @@ public class Director {
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
-		
+
+		//TODO abstract this out so that it can be called from maintenance as well.
 		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
 
@@ -150,7 +152,7 @@ public class Director {
 
 			Random r = new Random();
 			long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
-			
+
 			long incubated_followtime = incubated_followtime_min +
 					((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
 			long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
@@ -160,6 +162,7 @@ public class Director {
 				followtime = incubated_followtime;
 			}
 
+<<<<<<< HEAD
 			ConfigurationBuilder cb = new ConfigurationBuilder();
 			cb.setDebugEnabled(true)
 				.setOAuthConsumerKey(info.getString("customerKey"))
@@ -170,6 +173,10 @@ public class Director {
 			Twitter twitter = tf.getInstance();
 
 			//TODO add in DateTime variable to check against to know when to run probability to post.
+=======
+			Twitter twitter = TwitterHandler.getTwitter(info);
+
+>>>>>>> d4a0cafdb150e537ecfc1a900ba893242f7c11d4
 			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, GlobalStuff.TWITTER_RUNNABLE_INTERVAL);
 			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
 			new Timer().scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id), 0L, bigacctime);
