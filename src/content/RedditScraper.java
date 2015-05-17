@@ -1,11 +1,10 @@
 package content;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
