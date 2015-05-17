@@ -276,7 +276,7 @@ public class bigAccRunnable implements Runnable {
 			//TODO stuff in here.
 		}
 		finally{
-			Maintenance.runStatus.put(index+"follow", false);
+			Maintenance.runStatus.put(index+"bigAcc", false);
 		}
 
 	}

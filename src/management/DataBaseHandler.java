@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -536,13 +537,15 @@ public class DataBaseHandler{
 	/**
 	 * This should be called once a day for each Schwergsy account.
 	 * @param index The id of the Schwergsy account
-	 * @throws FuckinUpKPException 
-	 * @throws UnknownHostException 
-	 * @throws UnsupportedEncodingException 
-	 * @throws FileNotFoundException 
+	 * @throws Exception 
 	 */
-	public static synchronized void updateFollowers(int index, HashSet<Long> freshFollowerSet)  throws UnknownHostException, FuckinUpKPException, FileNotFoundException, UnsupportedEncodingException {
+	public static synchronized void updateFollowers(int index) throws Exception {
 
+		HashSet<Long> freshFollowerSet = new HashSet<>();
+		BasicDBObject authInfo = DataBaseHandler.getAuthorizationInfo(index);	
+		Twitter twitter = TwitterHandler.getTwitter(authInfo);
+		//TODO use the twitter object to get freshfollower set
+		
 		Date now = new Date();
 		String fileName = now.getMonth() + "-" + now.getDate() + "-" + now.getHours()  + "-" + now.getMinutes()  + "-" + now.getSeconds();
 		PrintWriter writer = new PrintWriter("FollowerLists/" + fileName + ".txt", "UTF-8");

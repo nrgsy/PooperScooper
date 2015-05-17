@@ -1,5 +1,7 @@
 package management;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,13 +54,11 @@ public class Maintenance {
 					toAddToWhiteList.add(id);
 				}
 			}
-
-			DataBaseHandler.addWhitelist(index, toAddToWhiteList.toArray(new Long[toAddToWhiteList.size()]));
-			
+			DataBaseHandler.addWhitelist(index, toAddToWhiteList.toArray(new Long[toAddToWhiteList.size()]));	
 		}
 	}
 	
-	public static void performMaintenance() {
+	public static void performMaintenance() throws Exception {
 		System.out.println("maintenance started");
 		flagSet = true;				
 		boolean activityExists = true;
@@ -81,13 +81,25 @@ public class Maintenance {
 			if (!somethingStillRunning) {
 				activityExists = false;
 			}
-		}	
+		}
+		
+		//TODO start all the threads because the all commit suicide when they see maintenance flag is set
 
+		//TODO save current time, do all maintenance that doesn't do calls to twitter, then if 15 min
+		//has passed do maintenance that requires calls to twitter. If < 15 passed, wait until 15 has passed
+		
+		//update followers for each schwergsy account
+		long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
+		for (int i = 0; i < size; i++) {
+			DataBaseHandler.updateFollowers(i);
+		}
+		
 		/*TODO the actual maintenance, Order task such that fastest tasks are done first,
 		 * consider having a maintenance cutoff if it runs for like 4 hours
 		 * call dbhandler's updateFollowers method for each schwergsy account
 		 * old content garbage collection
 		 * sweep through links in all pending and regular content checking for validity
+		 * check for new schwergsy accounts and start their timertasks
 		 * get big accounts (because of high api call amount)
 		 */
 
