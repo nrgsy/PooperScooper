@@ -10,7 +10,7 @@ import com.mongodb.BasicDBObject;
 		//these do not get updated by the set globals function 
 		public static final long DAY_IN_MILLISECONDS = 86400000;
 		public static final long WEEK_IN_MILLISECONDS = 604800000;
-		public static final String DOPEST_MAN_ALIVE = "DJ TJ";
+		public static final String DOPEST_MAN_ALIVE = "BO JANG";
 		
 		//Volatile globals
 		//TODO These are set/updated by the setGlobalVars function in databasehandler which reads the values
@@ -25,8 +25,6 @@ import com.mongodb.BasicDBObject;
 		//2: Edit DatabaseHandler's initGlobalVars method (for the default value)
 		public static long FOLLOW_TIME_MIN;
 		public static long FOLLOW_TIME_MAX;
-		public static long POST_TIME_MIN;
-		public static long POST_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
 		public static long FOLLOW_TIME_INCUBATED_MAX;
 		public static int BIG_ACCOUNT_STRIKES_FOR_OUT;
@@ -37,6 +35,8 @@ import com.mongodb.BasicDBObject;
 		public static double ALPHA;
 		//the minimum allowed time 
 		public static long MIN_POST_TIME_INTERVAL;
+		//interval between TwitterRunnable runs
+		public static long TWITTER_RUNNABLE_INTERVAL;
 		//The size of the content sample in dbhandler's getRandomContent
 		public static long CONTENT_SAMPLE_SIZE;
 		//The min time between two accesses of the same content by the same account
@@ -65,8 +65,6 @@ import com.mongodb.BasicDBObject;
 		
 			FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
 			FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
-			POST_TIME_MIN = globalVars.getLong("POST_TIME_MIN");
-			POST_TIME_MAX = globalVars.getLong("POST_TIME_MAX");
 			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
 			FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
 			FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
@@ -74,6 +72,7 @@ import com.mongodb.BasicDBObject;
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
 			ALPHA = globalVars.getDouble("ALPHA");
 			MIN_POST_TIME_INTERVAL = globalVars.getLong("MIN_POST_TIME_INTERVAL");
+			TWITTER_RUNNABLE_INTERVAL = globalVars.getLong("TWITTER_RUNNABLE_INTERVAL");
 			CONTENT_SAMPLE_SIZE = globalVars.getLong("CONTENT_SAMPLE_SIZE");
 			MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
 		}
