@@ -26,6 +26,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class FollowRunnable implements Runnable{
 	private Twitter bird;
 	private int index;
+	private boolean hasUpdatedFollowers;
 	
 	/**
 	 * @param OAuthConsumerKey
@@ -147,6 +148,7 @@ public class FollowRunnable implements Runnable{
 			Maintenance.runStatus.put(index+"follow", false);
 		}
 	}
+	
 	
 	public static void main(String[] args){
 		(new Thread(new FollowRunnable(0))).start();

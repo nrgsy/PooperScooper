@@ -62,6 +62,9 @@ public class Director {
 				if (!Maintenance.flagSet) {
 					new TwitterRunnable(bird,index);
 				}
+				else{
+					this.cancel();
+				}
 			}
 		};
 	}
@@ -78,6 +81,9 @@ public class Director {
 				if (!Maintenance.flagSet) {
 					new FollowRunnable(bird,index);
 				}
+				else{
+					this.cancel();
+				}
 			}
 		};
 	}
@@ -93,6 +99,9 @@ public class Director {
 			public void run() {
 				if (!Maintenance.flagSet) {
 					new bigAccRunnable(bird,index);
+				}
+				else{
+					this.cancel();
 				}
 			}
 		};
@@ -160,7 +169,6 @@ public class Director {
 			TwitterFactory tf = new TwitterFactory(cb.build());
 			Twitter twitter = tf.getInstance();
 
-
 			//TODO add in DateTime variable to check against to know when to run probability to post.
 			new Timer().scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, GlobalStuff.TWITTER_RUNNABLE_INTERVAL);
 			new Timer().scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
@@ -169,7 +177,12 @@ public class Director {
 			new Timer().scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
-					new Thread(new RedditScraper()).start();
+					if(!Maintenance.flagSet){
+						new RedditScraper();
+					}
+					else{
+						this.cancel();
+					}
 				}},0L, scrapetime);
 		}
 	}

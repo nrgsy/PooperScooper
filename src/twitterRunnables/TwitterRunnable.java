@@ -108,11 +108,11 @@ public class TwitterRunnable implements Runnable {
 			long now = new Date().getTime();
 			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
 			boolean canPost = true;
-			
+
 			if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
 				canPost = false;
 			}
-			
+
 			//post if the random number is less than the alpha constant and we're allowed to post
 			if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
 				uploadPic();

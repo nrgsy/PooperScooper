@@ -271,14 +271,15 @@ public class bigAccRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		Maintenance.runStatus.put(index+"bigAcc", true);
-		try{
-			//TODO stuff in here.
+		if(!Maintenance.flagSet){
+			Maintenance.runStatus.put(index+"bigAcc", true);
+			try{
+				//TODO stuff in here.
+			}
+			finally{
+				Maintenance.runStatus.put(index+"follow", false);
+			}
 		}
-		finally{
-			Maintenance.runStatus.put(index+"follow", false);
-		}
-
 	}
 
 	public static void main(String[] args){
