@@ -16,6 +16,8 @@ import java.util.Set;
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -237,6 +239,7 @@ public class DataBaseHandler{
 			.append("FOLLOWING_BASE_CAP", 1000)
 			.append("ALPHA", 1/25)
 			.append("MIN_POST_TIME_INTERVAL", 900000)
+			.append("TWITTER_RUNNABLE_INTERVAL", 60000)
 			.append("CONTENT_SAMPLE_SIZE", 100)
 			.append("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 
@@ -432,7 +435,7 @@ public class DataBaseHandler{
 	}
 	
 	public static synchronized void addBigAccWhiteList(int index, long bigAccId) throws UnknownHostException, FuckinUpKPException{
-		addElementToSchwergsArray(index,bigAccId,"bigAccountWhiteList");
+		addElementToSchwergsArray(index,bigAccId,"bigAccountsWhiteList");
 	}
 
 	/**
@@ -783,8 +786,8 @@ public class DataBaseHandler{
 		DB db = mongoClient.getDB("Schwergsy");
 		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
 		BasicDBObject query = new BasicDBObject("_id", index);
-		query.append("bigAccountWhiteList", new BasicDBObject("$eq", bigAcc_id));
-		BasicDBObject call = new BasicDBObject("bigAccountWhiteList.$", 1);
+		query.append("bigAccountsWhiteList", new BasicDBObject("$eq", bigAcc_id));
+		BasicDBObject call = new BasicDBObject("bigAccountsWhiteList.$", 1);
 		DBCursor cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
@@ -896,6 +899,7 @@ public class DataBaseHandler{
 	 * @param authorizationKey
 	 * @param isIncubated
 	 * @throws UnknownHostException 
+	 * @throws TwitterException 
 	 */
 	public static synchronized void insertSchwergsyAccount(
 			String accountID,
@@ -904,7 +908,7 @@ public class DataBaseHandler{
 			String customerKey,
 			String authorizationSecret,
 			String authorizationKey,
-			boolean isIncubated) throws UnknownHostException {
+			boolean isIncubated) throws UnknownHostException, TwitterException {
 
 		insertSchwergsyAccount(
 				accountID,
@@ -939,6 +943,7 @@ public class DataBaseHandler{
 	 * @param bigAccounts
 	 * @param statistics
 	 * @throws UnknownHostException
+	 * @throws TwitterException 
 	 */
 	public static synchronized void insertSchwergsyAccount(
 			String accountID,
@@ -953,7 +958,7 @@ public class DataBaseHandler{
 			BasicDBList toFollow,
 			BasicDBList whiteList,
 			BasicDBList bigAccounts,
-			BasicDBList statistics) throws UnknownHostException {
+			BasicDBList statistics) throws UnknownHostException, TwitterException {
 
 		System.out.println("inserting a new Schwergsy Account");
 		MongoClient mongoClient = new MongoClient();
@@ -976,6 +981,17 @@ public class DataBaseHandler{
 		.append("statistics", statistics);
 
 		dbCollection.insert(basicBitch);
+		
+		//Makes sure that the account's following is synced in the database.
+		initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
+				  .setDebugEnabled(true)
+				  .setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
+				  .setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
+				  .setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
+				  .setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
+				  (int) getCollectionSize("SchwergsyAccounts"));
+		
+		
 
 		mongoClient.close();
 	}
