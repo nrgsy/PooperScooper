@@ -1,7 +1,5 @@
 package management;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,8 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
 import twitterRunnables.bigAccRunnable;
@@ -47,7 +43,6 @@ public class Director {
 		return then.getTime();
 	}
 
-	//TODO runstatus is not scheduled correctly. it would run immediately after runnable is instantiated, not finished.
 	/**
 	 * @param Twitter created by Director
 	 * @param int of SchwergsAccount index
