@@ -101,24 +101,20 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.runStatus.put(index+"twitter", true);
-		try {
-			long now = new Date().getTime();
-			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
-			boolean canPost = true;
+		long now = new Date().getTime();
+		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
+		boolean canPost = true;
 
-			if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
-				canPost = false;
-			}
+		if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
+			canPost = false;
+		}
 
-			//post if the random number is less than the alpha constant and we're allowed to post
-			if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
-				uploadPic();
-				GlobalStuff.lastPostTimeMap.put(index, now);
-			}
+		//post if the random number is less than the alpha constant and we're allowed to post
+		if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
+			uploadPic();
+			GlobalStuff.lastPostTimeMap.put(index, now);
 		}
-		finally {
-			Maintenance.runStatus.put(index+"twitter", false);
-		}
+
 	}
 
 	public static void main(String[] args){

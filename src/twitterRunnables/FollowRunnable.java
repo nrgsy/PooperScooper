@@ -107,12 +107,8 @@ public class FollowRunnable implements Runnable{
 	@Override
 	public void run() {
 		Maintenance.runStatus.put(index+"follow", true);
-		try {
-			//TODO stuff in here
-		}
-		finally{
-			Maintenance.runStatus.put(index+"follow", false);
-		}
+		//TODO stuff in here
+
 	}
 	
 	

@@ -1,7 +1,5 @@
 package management;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,8 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import twitter4j.Twitter;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
 import twitterRunnables.bigAccRunnable;
@@ -57,6 +53,7 @@ public class Director {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.runStatus.put(index+"twitter", false);
 				if (!Maintenance.flagSet) {
 					new TwitterRunnable(bird,index);
 				}
@@ -76,6 +73,7 @@ public class Director {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.runStatus.put(index+"follow", false);
 				if (!Maintenance.flagSet) {
 					new FollowRunnable(bird,index);
 				}
@@ -95,12 +93,14 @@ public class Director {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.runStatus.put(index+"bigAcc", false);
 				if (!Maintenance.flagSet) {
 					new bigAccRunnable(bird,index);
 				}
 				else{
 					this.cancel();
 				}
+				
 			}
 		};
 	}
