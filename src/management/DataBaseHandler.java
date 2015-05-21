@@ -13,6 +13,8 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.bson.Document;
+
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -20,10 +22,10 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
@@ -42,18 +44,19 @@ public class DataBaseHandler{
 	public static synchronized DBObject getRandomContent(String type, long index) throws UnknownHostException {
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection collection = getCollection(type, db);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> collection = getCollection(type, db);
 
 		double collectionSize = collection.count();
 
-		HashSet<DBObject> contentSample = new HashSet<>();
+		HashSet<Document> contentSample = new HashSet<>();
 
 		if (collectionSize < GlobalStuff.CONTENT_SAMPLE_SIZE) {
 			//just add all the valid ones in this case
-			DBCursor cursor = collection.find();
+			FindIterable<Document> findIter = collection.find();
+			MongoCursor<Document> cursor = findIter.iterator();
 			while (cursor.hasNext()) {
-				DBObject content = cursor.next();
+				Document content = cursor.next();
 				if (hasNotBeenAccessedRecently(index, content)) {
 					contentSample.add(content);
 				}
@@ -71,7 +74,7 @@ public class DataBaseHandler{
 				//draws a rand number from numberList
 				int randNum = numberList.remove(randIndex);
 				//using the number from numberList ensures we draw randomly from content with no repeats
-				DBObject content = collection.find().limit(-1).skip(randNum).next();
+				Document content = collection.find().limit(-1).skip(randNum).iterator().next();
 				if (hasNotBeenAccessedRecently(index, content)) {
 					contentSample.add(content);
 				}
@@ -114,12 +117,12 @@ public class DataBaseHandler{
 
 		if (bestContent != null) {
 			BasicDBList list = (BasicDBList) bestContent.get("accessInfo");
-			DBObject info = null;
+			Document info = null;
 			for (Object o : list) {
-				info = (DBObject) o;
+				info = (Document) o;
 				if ((long) info.get("index") == index) {
-					long timesAccessed = (long) info.removeField("timesAccessed");
-					info.removeField("lastAccess");
+					long timesAccessed = (long) info.remove("timesAccessed");
+					info.remove("lastAccess");
 					info.put("timesAccessed", timesAccessed + 1);
 					info.put("lastAccess", new Date().getTime());
 					break;
@@ -128,7 +131,7 @@ public class DataBaseHandler{
 			}
 
 			if (info == null) {
-				info = new BasicDBObject()
+				info = new Document()
 				.append("index", index)
 				.append("timesAccessed", 1L)
 				.append("lastAccess", new Date().getTime());
@@ -139,7 +142,7 @@ public class DataBaseHandler{
 			bestContent.put("accessInfo", list);
 
 			long id = (long) bestContent.get("_id");
-			BasicDBObject query = new BasicDBObject("_id", id);
+			Document query = new Document("_id", id);
 
 			collection.findAndModify(query, bestContent);
 		}
@@ -182,9 +185,9 @@ public class DataBaseHandler{
 	public static synchronized void removeContent(String sourceType, String sourceLink)
 			throws UnknownHostException {		
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection sourceCollection = getCollection(sourceType, db);	
-		BasicDBObject query = new BasicDBObject("imglink", sourceLink);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> sourceCollection = getCollection(sourceType, db);	
+		Document query = new Document("imglink", sourceLink);
 		sourceCollection.remove(query);
 		mongoClient.close();
 	}
@@ -197,18 +200,18 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void findAndSetGlobalVars() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection collection = db.getCollection("GlobalVariables");
-		if (!db.collectionExists("GlobalVariables")) {
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
+		if (db.getCollection("GlobalVariables")==null) {
 			System.err.println("ERROR: cannot pull global vars. Collection GlobalVariables does not exist");
 		}
-		else if (collection.getCount() == 1) {
+		else if (collection.count() == 1) {
 			//Can use findOne() because the GlobalVariables collection will never have more than one entry
-			BasicDBObject globalVars = (BasicDBObject) collection.findOne();
+			Document globalVars = (Document) collection.find();
 			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
-			System.err.println("ERROR: GlobalVariables had " + collection.getCount() + "entries. "
+			System.err.println("ERROR: GlobalVariables had " + collection.count() + "entries. "
 					+ "It should only ever have one entry, or not exist at all");
 		}
 		mongoClient.close();
@@ -221,13 +224,13 @@ public class DataBaseHandler{
 	public static synchronized void initGlobalVars() throws UnknownHostException{
 		//Setting the global variables in GlobalStuff
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection collection = db.getCollection("GlobalVariables");
-		if (!db.collectionExists("GlobalVariables")) {
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
+		if (db.getCollection("GlobalVariables")==null) {
 			System.out.println("Globals not found in db, initializing with defaults");
 
 			//These are the default values to set the volatile variables to
-			BasicDBObject globalVars = new BasicDBObject();
+			Document globalVars = new Document();
 			
 			for(Entry<String,Object> entry : GlobalStuff.getGlobalVars().entrySet()){
 				globalVars.append(entry.getKey(),entry.getValue());
@@ -255,7 +258,7 @@ public class DataBaseHandler{
 
 	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
 		//the type without the "pending" or "schwag" prefix, e.g. schwagweed become weed
 		String baseType;
@@ -272,12 +275,12 @@ public class DataBaseHandler{
 			baseType = type;
 		}
 
-		BasicDBObject uniqueCheck = new BasicDBObject("imglink", imglink);
+		Document uniqueCheck = new Document("imglink", imglink);
 
-		DBCollection dbCollection1 = getCollection(baseType, db);
-		DBCollection dbCollection2 = getCollection("pending" + baseType, db);
-		DBCollection dbCollection3 = getCollection("schwag" + baseType, db);
-		DBCollection trueCollection = getCollection(type, db);
+		MongoCollection<Document> dbCollection1 = getCollection(baseType, db);
+		MongoCollection<Document> dbCollection2 = getCollection("pending" + baseType, db);
+		MongoCollection<Document> dbCollection3 = getCollection("schwag" + baseType, db);
+		MongoCollection<Document> trueCollection = getCollection(type, db);
 
 		//make sure that the image link is not in the pending, schwag, or regular collections of the base type
 		if(dbCollection1.find(uniqueCheck).limit(1).count() == 0 &&
@@ -285,7 +288,7 @@ public class DataBaseHandler{
 				dbCollection3.find(uniqueCheck).limit(1).count() == 0) {
 
 			long id_time = new Date().getTime();
-			BasicDBObject newAss = new BasicDBObject("_id", id_time);
+			Document newAss = new Document("_id", id_time);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
 			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
@@ -300,9 +303,9 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-	public static DBCollection getCollection(String type, DB db) {
+	public static MongoCollection<Document> getCollection(String type, MongoDatabase db) {
 
-		DBCollection dbCollection = null;
+		MongoCollection<Document> dbCollection = null;
 		switch (type.toLowerCase()) {
 		case "ass" :
 			dbCollection = db.getCollection("AssContent");
@@ -375,13 +378,13 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void addArrayToSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 
-		BasicDBObject query = new BasicDBObject("_id", index);
+		Document query = new Document("_id", index);
 
-		BasicDBObject arr = new BasicDBObject("$addToSet", new BasicDBObject(column, new BasicDBObject("$each", StringArr)));
+		Document arr = new Document("$addToSet", new Document(column, new Document("$each", StringArr)));
 
 		dbCollection.update(query, arr);
 		System.out.println("successfully added an array of size "+StringArr.length+" to "+column);
@@ -403,11 +406,11 @@ public class DataBaseHandler{
 		freshList.addAll(Set);
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");		
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");		
 		dbCollection.update(
-				new BasicDBObject("_id", index),
-				new BasicDBObject("$set", new BasicDBObject("followers", freshList)));
+				new Document("_id", index),
+				new Document("$set", new Document("followers", freshList)));
 		mongoClient.close();
 
 		System.out.println("successfully replaced array: " + column);
@@ -416,7 +419,7 @@ public class DataBaseHandler{
 	/**
 	 * Adds the given object to the given list in the a particular schwergsy account
 	 * @param index The index (databse id) of the schwergsy account
-	 * @param element The object that should be a String (a twitter id) or a BasicDBObject (a statistic) 
+	 * @param element The object that should be a String (a twitter id) or a Document (a statistic) 
 	 * that will be added to the list 
 	 * @param column The list to add to (e.g. followers, toFollow, whiteList, statistics, etc)
 	 * @throws UnknownHostException
@@ -425,17 +428,17 @@ public class DataBaseHandler{
 	public static synchronized void addElementToSchwergsArray(int index, Object element, String column) throws UnknownHostException, FuckinUpKPException{
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
 
-		BasicDBObject ele = null;
+		Document ele = null;
 
 		if (element instanceof String) { 
-			ele = new BasicDBObject("$addToSet", new BasicDBObject(column, (String) element));
+			ele = new Document("$addToSet", new Document(column, (String) element));
 		}
-		else if (element instanceof BasicDBObject) { 
-			ele = new BasicDBObject("$addToSet", new BasicDBObject(column, (BasicDBObject) element));
+		else if (element instanceof Document) { 
+			ele = new Document("$addToSet", new Document(column, (Document) element));
 		}
 		else {
 			System.out.println();
@@ -504,16 +507,17 @@ public class DataBaseHandler{
 
 		try {
 			mongoClient = new MongoClient();
-			DB db = mongoClient.getDB("Schwergsy");
-			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-			BasicDBObject query = new BasicDBObject("_id", index);
-			DBCursor cursor = dbCollection.find(query);
+			MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+			MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+			Document query = new Document("_id", index);
+			FindIterable<Document> findIter = dbCollection.find(query);
+			MongoCursor<Document> cursor = findIter.iterator();
 			BasicDBList statList = (BasicDBList) cursor.next().get("statistics");
 			cursor.close();
 			mongoClient.close();
 			//get time of creation of the last statistic is statList, which should be the most recent stat
 			if (statList.size() > 0) {
-				oldStatCreationTime = ((BasicDBObject) statList.get(statList.size() -1)).getLong("creationDate");
+				oldStatCreationTime = ((Document) statList.get(statList.size() -1)).getLong("creationDate");
 			}
 		} 		
 		catch (UnknownHostException e) {
@@ -521,7 +525,7 @@ public class DataBaseHandler{
 			e.printStackTrace();
 		}
 
-		BasicDBObject stat = new BasicDBObject()
+		Document stat = new Document()
 		.append("creationDate", now)
 		.append("timeSinceLastStat", now - oldStatCreationTime)
 		.append("unFollows", unfollows)
@@ -542,7 +546,7 @@ public class DataBaseHandler{
 	public static synchronized void updateFollowers(int index) throws Exception {
 
 		//get the current set of followers from twitter
-		BasicDBObject authInfo = DataBaseHandler.getAuthorizationInfo(index);	
+		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter);
 		
@@ -610,13 +614,13 @@ public class DataBaseHandler{
 	 */
 	public static synchronized Long[] popMultipleFollowing(int index, int amount) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		Long[] toUnfollowArr = null;
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-		BasicDBObject slice = new BasicDBObject("following", new BasicDBObject("$slice", amount));
-		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("following", -1));
-		DBCursor cursor = dbCollection.find(query, slice);
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
+		Document slice = new Document("following", new Document("$slice", amount));
+		Document pop = new Document("$pop", new Document("following", -1));
+		MongoCursor<Document> cursor = dbCollection.find(query, slice);
 		BasicDBList toUnfollowList = (BasicDBList) cursor.next().get("following");
 		cursor.close();
 		toUnfollowArr = Arrays.copyOf(toUnfollowList.toArray(), toUnfollowList.toArray().length, Long[].class);
@@ -630,24 +634,24 @@ public class DataBaseHandler{
 	//Tested and given the Bojangles Seal of Approval
 	private static synchronized Object getBigAccountStuff(int index, int bigAccountIndex, String property)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id",index);
-		BasicDBObject find;
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id",index);
+		Document find;
 		if(bigAccountIndex != 0){		
 			BasicDBList sliceParameters = new BasicDBList();
 			sliceParameters.add(bigAccountIndex-1);
 			sliceParameters.add(1);
-			find = new BasicDBObject("bigAccounts", new BasicDBObject("$slice", sliceParameters));
+			find = new Document("bigAccounts", new Document("$slice", sliceParameters));
 		}
 		else{
 			int sliceParameters = 1;
-			find = new BasicDBObject("bigAccounts", new BasicDBObject("$slice", sliceParameters));
+			find = new Document("bigAccounts", new Document("$slice", sliceParameters));
 		}
 
-		DBCursor cursor = dbCollection.find(query, find);
+		MongoCursor<Document> cursor = dbCollection.find(query, find);
 		BasicDBList answerList = (BasicDBList)cursor.next().get("bigAccounts");
-		BasicDBObject answer = (BasicDBObject)answerList.get(0);
+		Document answer = (Document)answerList.get(0);
 		cursor.close();
 		mongoClient.close();
 		return answer.get(property);
@@ -672,10 +676,10 @@ public class DataBaseHandler{
 	//Tested and given the Bojangles Seal of Approval
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id",index);
-		BasicDBObject updater = new BasicDBObject("$set", new BasicDBObject("bigAccounts."+bigAccountIndex+"."+property,
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id",index);
+		Document updater = new Document("$set", new Document("bigAccounts."+bigAccountIndex+"."+property,
 				change));
 		dbCollection.findAndModify(query, updater);
 		mongoClient.close();
@@ -699,11 +703,11 @@ public class DataBaseHandler{
 		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject match = new BasicDBObject("_id", index); //to match your direct app document
-		BasicDBObject update = new BasicDBObject("user_id", user_id);
-		dbCollection.update(match, new BasicDBObject("$pull", new BasicDBObject("bigAccounts", update)));
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document match = new Document("_id", index); //to match your direct app document
+		Document update = new Document("user_id", user_id);
+		dbCollection.update(match, new Document("$pull", new Document("bigAccounts", update)));
 		mongoClient.close();
 
 		addBigAccount(index, user_id, latestTweet);
@@ -717,15 +721,15 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void addBigAccount(int index, long bigAccountID, long latestTweet) throws UnknownHostException, FuckinUpKPException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
 
-		BasicDBObject bigAccount = new BasicDBObject("user_id", bigAccountID);
+		Document bigAccount = new Document("user_id", bigAccountID);
 		bigAccount.append("strikes", 0);
 		bigAccount.append("outs", 0);
 		bigAccount.append("latestTweet", latestTweet);
-		BasicDBObject ele = new BasicDBObject("$push", new BasicDBObject("bigAccounts",bigAccount));
+		Document ele = new Document("$push", new Document("bigAccounts",bigAccount));
 
 		dbCollection.update(query, ele);
 		System.out.println("successfully added an element to bigAccounts");
@@ -740,11 +744,11 @@ public class DataBaseHandler{
 		long user_id = getBigAccount(index, bigAccIndex);
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject match = new BasicDBObject("_id", index); //to match your direct app document
-		BasicDBObject update = new BasicDBObject("user_id", user_id);
-		dbCollection.update(match, new BasicDBObject("$pull", new BasicDBObject("bigAccounts", update)));
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document match = new Document("_id", index); //to match your direct app document
+		Document update = new Document("user_id", user_id);
+		dbCollection.update(match, new Document("$pull", new Document("bigAccounts", update)));
 		mongoClient.close();
 	}
 
@@ -757,12 +761,12 @@ public class DataBaseHandler{
 	 */
 	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-		query.append("bigAccounts",new BasicDBObject("$elemMatch", new BasicDBObject("user_id", bigAccountID)));
-		BasicDBObject call = new BasicDBObject("bigAccounts.$",1);
-		DBCursor cursor = dbCollection.find(query, call);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
+		query.append("bigAccounts",new Document("$elemMatch", new Document("user_id", bigAccountID)));
+		Document call = new Document("bigAccounts.$",1);
+		MongoCursor<Document> cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
 		}
@@ -778,12 +782,12 @@ public class DataBaseHandler{
 	 */
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-		query.append("whiteList", new BasicDBObject("$eq", user_id));
-		BasicDBObject call = new BasicDBObject("whiteList.$", 1);
-		DBCursor cursor = dbCollection.find(query, call);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
+		query.append("whiteList", new Document("$eq", user_id));
+		Document call = new Document("whiteList.$", 1);
+		MongoCursor<Document> cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
 		}
@@ -798,12 +802,12 @@ public class DataBaseHandler{
 	 */
 	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-		query.append("bigAccountsWhiteList", new BasicDBObject("$eq", bigAcc_id));
-		BasicDBObject call = new BasicDBObject("bigAccountsWhiteList.$", 1);
-		DBCursor cursor = dbCollection.find(query, call);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
+		query.append("bigAccountsWhiteList", new Document("$eq", bigAcc_id));
+		Document call = new Document("bigAccountsWhiteList.$", 1);
+		MongoCursor<Document> cursor = dbCollection.find(query, call);
 		if(cursor.hasNext()){
 			return true;
 		}
@@ -820,13 +824,13 @@ public class DataBaseHandler{
 	 */
 	public static synchronized Long getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Long[] toFollowArr = null;
-		BasicDBObject query = new BasicDBObject("_id", index);
-		BasicDBObject pop = new BasicDBObject("$pop", new BasicDBObject("toFollow", -1));
-		BasicDBObject slice = new BasicDBObject("toFollow", new BasicDBObject("$slice", 1));
-		DBCursor cursor = dbCollection.find(query,slice);
+		Document query = new Document("_id", index);
+		Document pop = new Document("$pop", new Document("toFollow", -1));
+		Document slice = new Document("toFollow", new Document("$slice", 1));
+		MongoCursor<Document> cursor = dbCollection.find(query,slice);
 		BasicDBList toFollowList = (BasicDBList) cursor.next().get("toFollow");
 		cursor.close();
 		//added so we don't have to call toArray() twice
@@ -847,10 +851,11 @@ public class DataBaseHandler{
 	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-		BasicDBObject query = new BasicDBObject("_id", index);
-		DBCursor cursor = dbCollection.find(query);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", index);
+		FindIterable<Document> findIter = dbCollection.find(query);
+		MongoCursor<Document> cursor = findIter.iterator();
 		BasicDBList SchwergsList = (BasicDBList) cursor.next().get(column);
 		cursor.close();
 		mongoClient.close();
@@ -971,18 +976,18 @@ public class DataBaseHandler{
 			BasicDBList statistics) throws UnknownHostException, TwitterException {
 
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 
 		//check if this schwergsy account already exists in the database
-		BasicDBObject uniqueCheck = new BasicDBObject("authorizationKey", authorizationKey);
+		Document uniqueCheck = new Document("authorizationKey", authorizationKey);
 		if (dbCollection.find(uniqueCheck).limit(1).count() != 0) {
 			System.err.println("WARNING: Schwergsy account already exists in the database, "
 					+ "will not add duplicate");
 		}
 		else {
 			System.out.println("inserting a new Schwergsy Account");
-			BasicDBObject basicBitch = new BasicDBObject("_id", (int) getCollectionSize("SchwergsyAccounts"))
+			Document basicBitch = new Document("_id", (int) getCollectionSize("SchwergsyAccounts"))
 			.append("name", name)
 			.append("customerSecret", customerSecret)
 			.append("customerKey", customerKey)
@@ -1012,21 +1017,22 @@ public class DataBaseHandler{
 
 	/**
 	 * @param index the id of the Schwergsy account
-	 * @return a BasicDBObject containing the customerSecret, customerKey, authorizationSecret, authorizationKey,
+	 * @return a Document containing the customerSecret, customerKey, authorizationSecret, authorizationKey,
 	 * and isIncubated info from the Schwergsy account
 	 * @throws Exception
 	 */
-	public static synchronized BasicDBObject getAuthorizationInfo(int index) throws Exception {
+	public static synchronized Document getAuthorizationInfo(int index) throws Exception {
 
 		System.out.println("scooping authInfo at index " + index);
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 
-		BasicDBObject query = new BasicDBObject("_id", index);
-		DBCursor cursor = dbCollection.find(query);
+		Document query = new Document("_id", index);
+		FindIterable<Document> findIter = dbCollection.find(query);
+		MongoCursor<Document> cursor = findIter.iterator();
 
-		DBObject schwergsyAccount = cursor.next();
+		Document schwergsyAccount = cursor.next();
 
 		mongoClient.close();
 		cursor.close();
@@ -1037,7 +1043,7 @@ public class DataBaseHandler{
 		String authorizationKey = (String) schwergsyAccount.get("authorizationKey");
 		boolean isIncubated = (boolean) schwergsyAccount.get("isIncubated");
 
-		BasicDBObject authInfo = new BasicDBObject()
+		Document authInfo = new Document()
 		.append("customerSecret", customerSecret)
 		.append("customerKey", customerKey)
 		.append("authorizationSecret", authorizationSecret)
@@ -1076,8 +1082,8 @@ public class DataBaseHandler{
 	 */
 	public static synchronized long getCollectionSize(String collectionName) throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient();
-		DB db = mongoClient.getDB("Schwergsy");
-		DBCollection dbCollection = db.getCollection(collectionName);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection(collectionName);
 		long count = dbCollection.count();
 		mongoClient.close();
 		return count;
@@ -1092,11 +1098,12 @@ public class DataBaseHandler{
 
 		try {
 			mongoClient = new MongoClient();
-			DB db = mongoClient.getDB("Schwergsy");
-			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-			BasicDBObject query = new BasicDBObject("name", schwergsyAccountName);
-			DBCursor cursor = dbCollection.find(query);
-			BasicDBObject account = (BasicDBObject) cursor.next();
+			MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+			MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+			Document query = new Document("name", schwergsyAccountName);
+			FindIterable<Document> findIter = dbCollection.find(query);
+			MongoCursor<Document> cursor = findIter.iterator();
+			Document account = (Document) cursor.next();
 			cursor.close();
 			Set<Entry<String, Object>> entrySet = account.entrySet();
 
@@ -1123,18 +1130,19 @@ public class DataBaseHandler{
 
 		try {
 			mongoClient = new MongoClient();
-			DB db = mongoClient.getDB("Schwergsy");
-			DBCollection dbCollection = db.getCollection("SchwergsyAccounts");
-			BasicDBObject query = new BasicDBObject("name", schwergsyAccountName);
-			DBCursor cursor = dbCollection.find(query);
-			BasicDBObject account = (BasicDBObject) cursor.next();
+			MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+			MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+			Document query = new Document("name", schwergsyAccountName);
+			FindIterable<Document> findIter = dbCollection.find(query);
+			MongoCursor<Document> cursor = findIter.iterator();
+			Document account = (Document) cursor.next();
 			cursor.close();
 			BasicDBList statList = (BasicDBList) account.get("statistics");
 
 			if (statList.size() > 0) {
 
 				System.out.println("Statistics for account " + account.get("name") + ":\n");
-				Set<Entry<String, Object>> entrySet = ((BasicDBObject) statList.get(0)).entrySet();
+				Set<Entry<String, Object>> entrySet = ((Document) statList.get(0)).entrySet();
 				int columnWidth = 32;
 
 				//print the stat names
@@ -1165,7 +1173,7 @@ public class DataBaseHandler{
 				//print the values for each stat
 				for (Object obj : statList) {
 
-					BasicDBObject stat = (BasicDBObject) obj;
+					Document stat = (Document) obj;
 					entrySet = stat.entrySet();
 					boolean isDate = true;
 					boolean isTime = true;
