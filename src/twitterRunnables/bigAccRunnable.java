@@ -33,6 +33,7 @@ public class bigAccRunnable implements Runnable {
 	public bigAccRunnable(Twitter twitter, int index){
 		this.index = index;
 		bird = twitter;
+		Maintenance.runStatus.put(index+"bigAcc", true);
 	}
 
 	public bigAccRunnable(){
@@ -45,6 +46,7 @@ public class bigAccRunnable implements Runnable {
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
 		this.index = 0;
+		Maintenance.runStatus.put(index+"bigAcc", true);
 	}
 
 
@@ -257,7 +259,6 @@ public class bigAccRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		Maintenance.runStatus.put(index+"bigAcc", true);
 		//TODO stuff in here.
 
 

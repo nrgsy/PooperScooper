@@ -28,8 +28,10 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessTokenSecret
 	 */
 	public FollowRunnable(Twitter twitter, int index){
+		super();
 		this.index = index;
 		bird = twitter;
+		Maintenance.runStatus.put(index+"follow", true);
 	}
 	
 	//this constructor only for testing
@@ -47,6 +49,7 @@ public class FollowRunnable implements Runnable{
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
 		index = 0;
+		Maintenance.runStatus.put(index+"follow", true);
 		}
 		else{
 			ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -106,7 +109,6 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
-		Maintenance.runStatus.put(index+"follow", true);
 		//TODO stuff in here
 
 	}

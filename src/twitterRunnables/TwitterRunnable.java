@@ -33,8 +33,10 @@ public class TwitterRunnable implements Runnable {
 	 * @param OAuthAccessTokenSecret
 	 */
 	public TwitterRunnable (Twitter twitter, int index){
+		super();
 		this.index = index;
 		bird = twitter;
+		Maintenance.runStatus.put(index+"twitter", true);
 	}
 
 	/**
@@ -50,6 +52,7 @@ public class TwitterRunnable implements Runnable {
 		TwitterFactory tf = new TwitterFactory(cb.build());
 		bird = tf.getInstance();
 		this.index = 0;
+		Maintenance.runStatus.put(index+"twitter", true);
 	}
 
 
@@ -100,7 +103,6 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run() {
-		Maintenance.runStatus.put(index+"twitter", true);
 		long now = new Date().getTime();
 		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
 		boolean canPost = true;

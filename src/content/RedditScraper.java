@@ -3,8 +3,11 @@ package content;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
+import management.Maintenance;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,6 +23,11 @@ import org.jsoup.select.Elements;
 public class RedditScraper implements Runnable{
 
 
+	public RedditScraper() {
+		super();
+		Maintenance.runStatus.put("reddit", true);
+	}
+	
 	/**
 	 * @param init
 	 * @throws FuckinUpKPException
