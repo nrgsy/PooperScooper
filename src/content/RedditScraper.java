@@ -45,7 +45,6 @@ public class RedditScraper implements Runnable{
 			pages = 35;
 		}
 		
-		
 		//Loop through reddit and gathers title + image link
 		for(int j = 0; j<pages; j++){
 			Document document = null;
@@ -84,7 +83,6 @@ public class RedditScraper implements Runnable{
 			}
 			else{
 				try {
-					Thread.sleep(1);
 					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), "pendingass");
 				} catch (UnknownHostException e) {
 					System.out.println("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));

@@ -255,10 +255,9 @@ public class DataBaseHandler{
 	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
 	//ass should have all attributes as shown belows
 
-
-	public static synchronized void newContent(String caption, String imglink, String type) throws UnknownHostException{
+	public static void newContent(String caption, String imglink, String type) throws UnknownHostException, InterruptedException{
 		MongoClient mongoClient = new MongoClient();
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		DB db = mongoClient.getDB("Schwergsy");
 
 		//the type without the "pending" or "schwag" prefix, e.g. schwagweed become weed
 		String baseType;
@@ -275,20 +274,39 @@ public class DataBaseHandler{
 			baseType = type;
 		}
 
-		Document uniqueCheck = new Document("imglink", imglink);
+		DBCollection dbCollection1 = getCollection(baseType, db);
+		DBCollection dbCollection2 = getCollection("pending" + baseType, db);
+		DBCollection dbCollection3 = getCollection("schwag" + baseType, db);
+		
+		DBCollection trueCollection = getCollection(type, db);
+		
+		long now = new Date().getTime();
+		//to ensure no two contents can have the same _id
+		//(occurs when something tries to create two contents in the same millisecond)
+		BasicDBObject creationTimeCheck = new BasicDBObject("_id", now);
+		
+		boolean timeOK = false;
+		while (!timeOK) {
+			//make sure that the image link is not in the pending, schwag, or regular collections of the base type
+			if (dbCollection1.find(creationTimeCheck).limit(1).count() == 0 &&
+					dbCollection2.find(creationTimeCheck).limit(1).count() == 0 &&
+					dbCollection3.find(creationTimeCheck).limit(1).count() == 0) {
+				timeOK = true;
+			}
+			else {
+				Thread.sleep(1);
+				now = new Date().getTime();
+				creationTimeCheck = new BasicDBObject("_id", now);
+			}
+		}
 
-		MongoCollection<Document> dbCollection1 = getCollection(baseType, db);
-		MongoCollection<Document> dbCollection2 = getCollection("pending" + baseType, db);
-		MongoCollection<Document> dbCollection3 = getCollection("schwag" + baseType, db);
-		MongoCollection<Document> trueCollection = getCollection(type, db);
-
+		//to ensure no two contents can have the same link
+		BasicDBObject linkCheck = new BasicDBObject("imglink", imglink);
 		//make sure that the image link is not in the pending, schwag, or regular collections of the base type
-		if(dbCollection1.find(uniqueCheck).limit(1).count() == 0 &&
-				dbCollection2.find(uniqueCheck).limit(1).count() == 0 &&
-				dbCollection3.find(uniqueCheck).limit(1).count() == 0) {
-
-			long id_time = new Date().getTime();
-			Document newAss = new Document("_id", id_time);
+		if (dbCollection1.find(linkCheck).limit(1).count() == 0 &&
+				dbCollection2.find(linkCheck).limit(1).count() == 0 &&
+				dbCollection3.find(linkCheck).limit(1).count() == 0) {
+			BasicDBObject newAss = new BasicDBObject("_id", now);
 			newAss.append("caption", caption);
 			newAss.append("imglink", imglink);
 			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
@@ -297,11 +315,13 @@ public class DataBaseHandler{
 			trueCollection.insert(newAss);
 			System.out.println("Successfully added new content of type " + type);
 		}
-		else{
+		else {
 			System.out.println("Image is not unique: "+ imglink);
 		}
+
 		mongoClient.close();
 	}
+	
 
 	public static MongoCollection<Document> getCollection(String type, MongoDatabase db) {
 
@@ -364,7 +384,6 @@ public class DataBaseHandler{
 		default:
 			System.err.println("Tears, " + type + " is schwag. Doesn't match an expected collection name");
 		}
-
 		return dbCollection;
 	}
 

@@ -30,6 +30,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.bson.Document;
+
 import management.DataBaseHandler;
 
 import com.mongodb.DB;
@@ -37,6 +39,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 //NOTICE: for this to work, you must pass in the content type (ass, workout, weed, etc)
 public class ApprovalGUI {
@@ -198,10 +202,11 @@ public class ApprovalGUI {
 			schwagLinks = new LinkedList<>();
 
 			mongoClient = new MongoClient();
-			DB db = mongoClient.getDB("Schwergsy");
+			MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
-			DBCollection collection = DataBaseHandler.getCollection("pending" + kind, db);
-			numRemaining = (int) DataBaseHandler.getCollectionSize(collection.getName()) - 1;
+			MongoCollection<Document> collection = DataBaseHandler.getCollection("pending" + kind, db);
+			numRemaining = (int) DataBaseHandler.getCollectionSize(
+					collection.getNamespace().getCollectionName()) - 1;
 
 			cursor = collection.find();
 
