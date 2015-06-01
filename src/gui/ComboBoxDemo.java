@@ -48,9 +48,7 @@ public class ComboBoxDemo extends JPanel
  
     /** Listens to the combo box. */
     public void actionPerformed(ActionEvent e) {
-        JComboBox cb = (JComboBox)e.getSource();
-        String petName = (String)cb.getSelectedItem();
-        updateLabel(petName);
+       
     }
  
     protected void updateLabel(String name) {
