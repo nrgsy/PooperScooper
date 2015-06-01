@@ -23,10 +23,12 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -186,147 +188,155 @@ public class ApprovalGUI {
 	private static class ContentListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
+
+
+			//Create and set up the window.
 			frame.setVisible(false);
 			frame.dispose();
-			
-			//TODO figure out how to use JComboBoxes (use it for selecting a type a content; ass, workout, etc)
-			JComboBox<JButton> contentTypeList = new JComboBox<JButton>();
-			//contentTypeList.setSelectedIndex(0);
-			contentTypeList.add(new JButton("ass"));
-			contentTypeList.add(new JButton("workout"));
-			contentTypeList.addActionListener(new SelectionListener());
-			
-			JPanel panel = new JPanel();
-			panel.add(contentTypeList);
-			panel.setBackground(Color.GRAY);
 
+			//Create and set up the content pane.
+
+			//JComponent newContentPane = new ComboBoxDemo();
+			JComponent panel = new JPanel();
+			String[] contentTypes = { "ass", "workout", "weed", "college", "canimals", "space"};
+			JComboBox petList = new JComboBox(contentTypes);
+			petList.setSelectedIndex(0);
+			petList.addActionListener(new ListSelectListener());
+			panel.add(petList, BorderLayout.PAGE_START);
+			panel.setBackground(Color.GRAY);
+			panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));    
+			panel.setOpaque(true); //content panes must be opaque
 			JFrame frame = new JFrame("Select Content Type");
-			frame.add(panel);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setContentPane(panel);
+			//Display the window.
 			frame.setSize(300, 100);
 			frame.setLocationRelativeTo(null);	
 			frame.setVisible(true);
-		
-			//TODO implement the below code (it creates the image GUI) in an action listener for the 
-			//user selected content
-			
-			//			if (args.length == 0) {
-			//				System.err.println("must pass in the type of images as an argument");
-			//			}
-			//
-			//			kind = args[0];
-			//
-			//			if (!kind.equals("ass") &&
-			//					!kind.equals("workout") &&
-			//					!kind.equals("weed") &&
-			//					!kind.equals("college") &&
-			//					!kind.equals("canimals") &&
-			//					!kind.equals("space")) {
-			//				System.err.println("invalid argument, must be ass, workout, etc");
-			//			}
-			//			else {
-			//				lastWasApproved = null;
-			//				undoClicked = false;
-			//				approvedContent = new HashMap<>();
-			//				schwagLinks = new LinkedList<>();
-			//
-			//				mongoClient = new MongoClient();
-			//				MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-			//
-			//				MongoCollection<Document> collection = DataBaseHandler.getCollection("pending" + kind, db);
-			//				numRemaining = (int) DataBaseHandler.getCollectionSize(
-			//						collection.getNamespace().getCollectionName()) - 1;
-			//
-			//				FindIterable<Document> findIter = collection.find();
-			//				cursor = findIter.iterator();
-			//
-			//				if (cursor.hasNext()) {
-			//
-			//					currentContent = cursor.next();
-			//
-			//					picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			//					picPanel.add(getPicLabel());
-			//					picPanel.setBackground(Color.GRAY);
-			//
-			//					String labelText = "number of pending " + kind +
-			//							" images remaining: " + numRemaining;			
-			//					JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
-			//					labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			//					labelPanel.add(numRemainingLabel);
-			//					labelPanel.setBackground(Color.GRAY);
-			//
-			//					Font font = new Font("SansSerif", Font.BOLD, 25);
-			//					captionTextField = new JTextField();
-			//					captionTextField.setFont(font);
-			//					captionTextField.setText(currentContent.get("caption").toString());
-			//					captionTextField.setPreferredSize(new Dimension(333,30));
-			//
-			//					JButton addButton = new JButton("Add");
-			//					addButton.addActionListener(new AddListener());	
-			//					JButton trashButton = new JButton("Trash");
-			//					trashButton.addActionListener(new TrashListener());	
-			//					JButton undoButton = new JButton("Undo");
-			//					undoButton.addActionListener(new UndoListener());	
-			//					JButton doneButton = new JButton("Done");
-			//					doneButton.addActionListener(new DoneListener());		
-			//
-			//					buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			//					buttonPanel.add(addButton);
-			//					buttonPanel.add(trashButton);
-			//					buttonPanel.add(undoButton);
-			//					buttonPanel.add(doneButton);
-			//					buttonPanel.setBackground(Color.GRAY);
-			//
-			//					topPanel = new JPanel();
-			//					topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-			//					topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
-			//					topPanel.add(labelPanel);
-			//					topPanel.add(buttonPanel);
-			//					topPanel.add(captionTextField);
-			//					topPanel.add(picPanel);
-			//					topPanel.setPreferredSize(new Dimension(333, 780));
-			//					topPanel.setBackground(Color.GRAY);
-			//
-			//					JPanel bottomPanel = new JPanel();
-			//					bottomPanel.setBackground(Color.GRAY);
-			//
-			//					JPanel containerPanel = new JPanel();
-			//					containerPanel.setLayout(new BorderLayout());	
-			//					containerPanel.add(topPanel, BorderLayout.NORTH);
-			//					containerPanel.add(bottomPanel, BorderLayout.CENTER);
-			//
-			//					JScrollPane scrPane = new JScrollPane(containerPanel);	
-			//
-			//					frame = new JFrame("Content Reviewer");			
-			//					//So that these things close when we end the program
-			//					frame.addWindowListener(new WindowAdapter()
-			//					{
-			//						public void windowClosing(WindowEvent e)
-			//						{
-			//							cursor.close();
-			//							mongoClient.close();			        
-			//						}
-			//					});			
-			//					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			//					frame.getContentPane().add(scrPane);
-			//					frame.pack();
-			//					frame.setMinimumSize(new Dimension(300, 300));
-			//					frame.setSize(800, 900);
-			//					frame.setLocationRelativeTo(null);	
-			//					frame.setVisible(true);	
-			//				}
-			//				else {
-			//					System.out.println("No content found in pending" + kind);
-			//				}
-			//			}
+
 		}		
 	}
-	
-	private static class SelectionListener implements ActionListener {
+
+	private static class ListSelectListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("implement SchwergsListener");
+
+			JComboBox cb = (JComboBox)e.getSource();
+			kind = (String)cb.getSelectedItem();
+
+			if (!kind.equals("ass") &&
+					!kind.equals("workout") &&
+					!kind.equals("weed") &&
+					!kind.equals("college") &&
+					!kind.equals("canimals") &&
+					!kind.equals("space")) {
+				System.err.println("invalid argument, must be ass, workout, etc");
+			}
+			else {
+				lastWasApproved = null;
+				undoClicked = false;
+				approvedContent = new HashMap<>();
+				schwagLinks = new LinkedList<>();
+
+				mongoClient = new MongoClient();
+				MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+
+				MongoCollection<Document> collection = DataBaseHandler.getCollection("pending" + kind, db);
+				try {
+					numRemaining = (int) DataBaseHandler.getCollectionSize(
+							collection.getNamespace().getCollectionName()) - 1;
+				} catch (UnknownHostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				FindIterable<Document> findIter = collection.find();
+				cursor = findIter.iterator();
+
+				if (cursor.hasNext()) {
+
+					currentContent = cursor.next();
+
+					picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+					try {
+						picPanel.add(getPicLabel());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					picPanel.setBackground(Color.GRAY);
+
+					String labelText = "number of pending " + kind +
+							" images remaining: " + numRemaining;			
+					JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
+					labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+					labelPanel.add(numRemainingLabel);
+					labelPanel.setBackground(Color.GRAY);
+
+					Font font = new Font("SansSerif", Font.BOLD, 25);
+					captionTextField = new JTextField();
+					captionTextField.setFont(font);
+					captionTextField.setText(currentContent.get("caption").toString());
+					captionTextField.setPreferredSize(new Dimension(333,30));
+
+					JButton addButton = new JButton("Add");
+					addButton.addActionListener(new AddListener());	
+					JButton trashButton = new JButton("Trash");
+					trashButton.addActionListener(new TrashListener());	
+					JButton undoButton = new JButton("Undo");
+					undoButton.addActionListener(new UndoListener());	
+					JButton doneButton = new JButton("Done");
+					doneButton.addActionListener(new DoneListener());		
+
+					buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+					buttonPanel.add(addButton);
+					buttonPanel.add(trashButton);
+					buttonPanel.add(undoButton);
+					buttonPanel.add(doneButton);
+					buttonPanel.setBackground(Color.GRAY);
+
+					topPanel = new JPanel();
+					topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+					topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
+					topPanel.add(labelPanel);
+					topPanel.add(buttonPanel);
+					topPanel.add(captionTextField);
+					topPanel.add(picPanel);
+					topPanel.setPreferredSize(new Dimension(333, 780));
+					topPanel.setBackground(Color.GRAY);
+
+					JPanel bottomPanel = new JPanel();
+					bottomPanel.setBackground(Color.GRAY);
+
+					JPanel containerPanel = new JPanel();
+					containerPanel.setLayout(new BorderLayout());	
+					containerPanel.add(topPanel, BorderLayout.NORTH);
+					containerPanel.add(bottomPanel, BorderLayout.CENTER);
+
+					JScrollPane scrPane = new JScrollPane(containerPanel);	
+
+					frame = new JFrame("Content Reviewer");			
+					//So that these things close when we end the program
+					frame.addWindowListener(new WindowAdapter()
+					{
+						public void windowClosing(WindowEvent e)
+						{
+							cursor.close();
+							mongoClient.close();			        
+						}
+					});			
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					frame.getContentPane().add(scrPane);
+					frame.pack();
+					frame.setMinimumSize(new Dimension(300, 300));
+					frame.setSize(800, 900);
+					frame.setLocationRelativeTo(null);	
+					frame.setVisible(true);	
+				}
+				else {
+					System.out.println("No content found in pending" + kind);
+				}
+			}
 		}		
 	}
 
