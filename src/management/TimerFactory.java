@@ -1,11 +1,12 @@
 package management;
 
+
 import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
 
 import content.RedditScraper;
 import twitter4j.Twitter;
@@ -126,7 +127,7 @@ public class TimerFactory {
 	 * @throws Exception 
 	 */
 	public static void createTimers(int id) throws Exception {
-		final BasicDBObject info = DataBaseHandler.getAuthorizationInfo(id);			
+		final Document info = DataBaseHandler.getAuthorizationInfo(id);			
 
 		long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
 		long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;

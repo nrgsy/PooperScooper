@@ -1,5 +1,6 @@
 package management;
 
+
 import java.util.HashMap;
 
 import com.mongodb.BasicDBObject;
@@ -14,13 +15,12 @@ import com.mongodb.BasicDBObject;
 		public static final String DOPEST_MAN_ALIVE = "BO JANG";
 		
 		//Volatile globals
-		//TODO These are set/updated by the setGlobalVars function in databasehandler which reads the values
+		//These are set/updated by the findAndSetGlobalVars function in databasehandler which reads the values
 		//from the GlobalVariables collection (which we can manually edit to tweak the values) and sets the
 		//values of these to match those.
 		//The default values can be found in the main method of Director. They are used to initialize the
-		//GlobalVariables collection when it does not exist
-		
-		//*******************************NOTICE*******************************
+		//GlobalVariables collection when it does not exist	
+		//NOTICE****************************************NOTICE***************************************NOTICE
 		//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
 		//1: Edit GlobalStuff's setGlobalVars method (for updating its value from the db)
 		//2: Edit GlobalStuff's getGlobalVars method (for the default value)
@@ -42,7 +42,9 @@ import com.mongodb.BasicDBObject;
 		public static long CONTENT_SAMPLE_SIZE;
 		//The min time between two accesses of the same content by the same account
 		public static long MIN_TIME_BETWEEN_ACCESSES;
-		//*******************************NOTICE*******************************
+		//The max width and height of an image in the Approval GUI
+		public static long MAX_IMAGE_DIMENSION;
+		//NOTICE****************************************NOTICE***************************************NOTICE
 		
 		//Other globals, non changeable via the database, but still mutable by the code
 		//the map of schwergsy account index to the last time they had a post
@@ -52,7 +54,8 @@ import com.mongodb.BasicDBObject;
 		//This is the formula to determine how many accounts to follow
 		//TODO Need to revise this formula, it's shit
 		public static int GET_NUM_TO_UNFOLLOW(int sizeFollowers, int sizeFollowing){
-			int numToUnfollow = (int)(FOLLOWING_BASE_CAP+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
+			int numToUnfollow =
+					(int)(FOLLOWING_BASE_CAP+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
 			return numToUnfollow >= 0 ? numToUnfollow : 0;
 		}
 		
@@ -75,6 +78,7 @@ import com.mongodb.BasicDBObject;
 			TWITTER_RUNNABLE_INTERVAL = globalVars.getLong("TWITTER_RUNNABLE_INTERVAL");
 			CONTENT_SAMPLE_SIZE = globalVars.getLong("CONTENT_SAMPLE_SIZE");
 			MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
+			MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
 		}
 		
 		public static HashMap<String,Object> getGlobalVars(){
@@ -91,6 +95,7 @@ import com.mongodb.BasicDBObject;
 			globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
 			globalVars.put("CONTENT_SAMPLE_SIZE", 100);
 			globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
+			globalVars.put("MAX_IMAGE_DIMENSION", 700);
 			
 			return globalVars;
 		}

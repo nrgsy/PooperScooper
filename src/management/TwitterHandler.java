@@ -1,9 +1,15 @@
 package management;
 
+
 import java.net.UnknownHostException;
 import java.util.HashSet;
+
 import twitter4j.IDs;
+
 import java.util.Map;
+
+import org.bson.Document;
+
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
@@ -22,7 +28,7 @@ public class TwitterHandler {
 	 * @param info the authorization info from the account in the schwergsyAccounts collection
 	 * @return
 	 */
-	public static Twitter getTwitter(BasicDBObject info) {	
+	public static Twitter getTwitter(Document info) {	
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		.setOAuthConsumerKey(info.getString("customerKey"))

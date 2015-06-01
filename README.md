@@ -1,2 +1,0 @@
-# PooperScooper
-ass content scooper

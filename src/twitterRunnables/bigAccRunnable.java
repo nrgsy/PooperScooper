@@ -1,10 +1,12 @@
 package twitterRunnables;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
 import management.GlobalStuff;
