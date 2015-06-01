@@ -246,18 +246,6 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-	/**
-	 * @param caption
-	 * @param imglink
-	 * @param type see getCollection below for content types (ass, pendingass, etc)
-	 * @throws UnknownHostException
-	 */
-
-
-	//TODO, add specialization such that content that's created depends on the type
-	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
-	//ass should have all attributes as shown belows
-
 	//TODO Bojang Test
 	/**
 	 * @param caption
