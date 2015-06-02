@@ -44,13 +44,5 @@ public class MongoFuckAround {
 		DataBaseHandler.newContent("lawn", "http://i.imgur.com/gg0gBej.jpg", "pendingass");
 
 		
-		
-//		DBObject o = DataBaseHandler.getRandomContent("ass", 0);
-//		if (o != null) {
-//			System.out.println(o.toString());
-//		}
-//		else {
-//			System.out.println("tis null");
-//		}
 	}
 }

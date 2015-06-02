@@ -207,10 +207,9 @@ public class DataBaseHandler{
 			System.err.println("ERROR: cannot pull global vars. Collection GlobalVariables does not exist");
 		}
 		else if (collection.count() == 1) {
-			//Can use findOne() because the GlobalVariables collection will never have more than one entry
-			Document globalVars = (Document) collection.find();
-			//uncomment this out
-			//GlobalStuff.setGlobalVars(globalVars);
+			MongoCursor<Document> globalVarsCursor = collection.find().iterator();
+			Document globalVars = globalVarsCursor.next();
+			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
 			System.err.println("ERROR: GlobalVariables had " + collection.count() + "entries. "
@@ -245,18 +244,6 @@ public class DataBaseHandler{
 
 		mongoClient.close();
 	}
-
-	/**
-	 * @param caption
-	 * @param imglink
-	 * @param type see getCollection below for content types (ass, pendingass, etc)
-	 * @throws UnknownHostException
-	 */
-
-
-	//TODO, add specialization such that content that's created depends on the type
-	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
-	//ass should have all attributes as shown belows
 
 	//TODO Bojang Test
 	/**
@@ -403,7 +390,6 @@ public class DataBaseHandler{
 		return dbCollection;
 	}
 
-	//////Start region: add to array
 	/**
 	 * Adds the given an array of strings to the given list in the a particular schwergsy account
 	 * @param index The index (database id) of the schwergsy account
@@ -592,8 +578,6 @@ public class DataBaseHandler{
 		addElementToSchwergsArray(index, stat, "statistics");
 	}
 
-	//////End region: Add to array
-
 	/**
 	 * This should be called once a day for each Schwergsy account.
 	 * @param index The id of the Schwergsy account
@@ -729,7 +713,6 @@ public class DataBaseHandler{
 		return (int)getBigAccountStuff(index,bigAccountIndex,"outs");
 	}
 	
-	/*
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -737,7 +720,7 @@ public class DataBaseHandler{
 		Document query = new Document("_id",index);
 		Document updater = new Document("$set", new Document("bigAccounts."+bigAccountIndex+"."+property,
 				change));
-		dbCollection.findAndModify(query, updater);
+		dbCollection.findOneAndUpdate(query, updater);
 		mongoClient.close();
 	}
 
@@ -754,7 +737,6 @@ public class DataBaseHandler{
 	}
 
 
-	//Tested and given the Bojangles Seal of Approval
 	public static synchronized void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
 		long user_id = getBigAccount(index, bigAccIndex);
 		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
@@ -770,7 +752,7 @@ public class DataBaseHandler{
 		addBigAccount(index, user_id, latestTweet);
 	}
 
-	*//**
+	/**
 	 * @param index
 	 * @param bigAccountElement
 	 * @throws UnknownHostException
@@ -799,7 +781,7 @@ public class DataBaseHandler{
 	/**
 	 * @param index
 	 * @throws UnknownHostException
-	 *//*
+	 */
 	public static synchronized void deleteBigAccount(int index, int bigAccIndex) throws UnknownHostException{
 		long user_id = getBigAccount(index, bigAccIndex);
 
@@ -812,13 +794,13 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-	//Tested and given the Bojangles Seal of Approval
-	*//**
+	
+	/**
 	 * @param index
 	 * @param bigAccountID
 	 * @return
 	 * @throws UnknownHostException
-	 *//*
+	 */
 	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -833,13 +815,13 @@ public class DataBaseHandler{
 		return false;
 	}
 
-	//Tested and given the Bojangles Seal of Approval
-	*//**
+	
+	/**
 	 * @param index
 	 * @param user_id
 	 * @return
 	 * @throws UnknownHostException
-	 *//*
+	 */
 	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -854,12 +836,12 @@ public class DataBaseHandler{
 		return false;
 	}
 
-	*//**
+	/**
 	 * @param index
 	 * @param user_id
 	 * @return
 	 * @throws UnknownHostException
-	 *//*
+	 */
 	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -874,7 +856,7 @@ public class DataBaseHandler{
 		return false;
 	}
 
-	*//**
+	/**
 	 *
 	 * Gets one user_id from ToFollow to follow
 	 *
@@ -923,7 +905,6 @@ public class DataBaseHandler{
 
 	}
 
-	////// Start region: get array size
 	/**
 	 * @param index
 	 * @param column
