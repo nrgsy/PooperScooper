@@ -987,7 +987,8 @@ public class DataBaseHandler{
 			String customerKey,
 			String authorizationSecret,
 			String authorizationKey,
-			boolean isIncubated) throws UnknownHostException, TwitterException {
+			boolean isIncubated,
+			boolean isSuspended) throws UnknownHostException, TwitterException {
 
 		insertSchwergsyAccount(
 				name,
@@ -996,6 +997,7 @@ public class DataBaseHandler{
 				authorizationSecret,
 				authorizationKey,
 				isIncubated,
+				isSuspended,
 				new BasicDBList(),
 				new BasicDBList(),
 				new BasicDBList(),
@@ -1030,6 +1032,7 @@ public class DataBaseHandler{
 			String authorizationSecret,
 			String authorizationKey,
 			boolean isIncubated,
+			boolean isSuspended,
 			BasicDBList followers,
 			BasicDBList following,
 			BasicDBList toFollow,
