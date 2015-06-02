@@ -3,6 +3,8 @@ package management;
 
 import java.util.HashMap;
 
+import org.bson.Document;
+
 import com.mongodb.BasicDBObject;
 	
 	public class GlobalStuff{
@@ -65,14 +67,14 @@ import com.mongodb.BasicDBObject;
 		 * @param globalVars the BasicDBObject containing the global variables to initialize with 
 		 * (typically pulled from the GlobalVariables collection of the database)
 		 */
-		public static synchronized void setGlobalVars(BasicDBObject globalVars) {
+		public static synchronized void setGlobalVars(Document globalVars) {
 			FOLLOW_TIME_MIN = globalVars.getLong("FOLLOW_TIME_MIN");
 			FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
 			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
 			FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
-			FOLLOWING_BASE_CAP = globalVars.getInt("FOLLOWING_BASE_CAP");
-			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInt("BIG_ACCOUNT_OUTS_FOR_REMOVAL");
-			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInt("BIG_ACCOUNT_STRIKES_FOR_OUT");
+			FOLLOWING_BASE_CAP = globalVars.getInteger("FOLLOWING_BASE_CAP");
+			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInteger("BIG_ACCOUNT_OUTS_FOR_REMOVAL");
+			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInteger("BIG_ACCOUNT_STRIKES_FOR_OUT");
 			ALPHA = globalVars.getDouble("ALPHA");
 			MIN_POST_TIME_INTERVAL = globalVars.getLong("MIN_POST_TIME_INTERVAL");
 			TWITTER_RUNNABLE_INTERVAL = globalVars.getLong("TWITTER_RUNNABLE_INTERVAL");
@@ -93,9 +95,9 @@ import com.mongodb.BasicDBObject;
 			globalVars.put("ALPHA", 1.0/25.0);
 			globalVars.put("MIN_POST_TIME_INTERVAL", 900000L);
 			globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
-			globalVars.put("CONTENT_SAMPLE_SIZE", 100);
+			globalVars.put("CONTENT_SAMPLE_SIZE", 100L);
 			globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
-			globalVars.put("MAX_IMAGE_DIMENSION", 700);
+			globalVars.put("MAX_IMAGE_DIMENSION", 700L);
 			
 			return globalVars;
 		}
