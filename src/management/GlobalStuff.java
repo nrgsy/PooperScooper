@@ -83,7 +83,7 @@ import com.mongodb.BasicDBObject;
 			MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
 		}
 		
-		public static HashMap<String,Object> getGlobalVars(){
+		public static HashMap<String,Object> getDefaultGlobalVars(){
 			HashMap<String, Object> globalVars = new HashMap<String, Object>();
 			globalVars.put("FOLLOW_TIME_MIN", 86400L);
 			globalVars.put("FOLLOW_TIME_MAX", 123430L);

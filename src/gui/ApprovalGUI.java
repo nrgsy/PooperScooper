@@ -116,7 +116,7 @@ public class ApprovalGUI {
 			frame.repaint();		
 		}
 		else {
-			System.out.println("No content remaining");
+			System.out.println("Cannot load next. No content remaining");
 		}
 	}
 
@@ -171,16 +171,16 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 			for (Entry<String, String> entry : approvedContent.entrySet()) {
 				try {
-					DataBaseHandler.newContent(entry.getValue(), entry.getKey(), kind);
 					DataBaseHandler.removeContent("pending" + kind, entry.getKey());
+					DataBaseHandler.newContent(entry.getValue(), entry.getKey(), kind);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 			for (String link : schwagLinks) {
 				try {
-					DataBaseHandler.newContent(null, link, "schwagass");
 					DataBaseHandler.removeContent("pending" + kind, link);
+					DataBaseHandler.newContent(null, link, "schwagass");
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -264,7 +264,7 @@ public class ApprovalGUI {
 			panel.setBackground(Color.GRAY);
 			panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));    
 			panel.setOpaque(true); //content panes must be opaque
-			JFrame frame = new JFrame("Select Content Type");
+			frame = new JFrame("Select Content Type");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setContentPane(panel);
 			//Display the window.
@@ -375,6 +375,8 @@ public class ApprovalGUI {
 
 					JScrollPane scrPane = new JScrollPane(containerPanel);	
 
+					frame.setVisible(false);
+					frame.dispose();
 					frame = new JFrame("Content Reviewer");			
 					//So that these things close when we end the program
 					frame.addWindowListener(new WindowAdapter()
@@ -430,9 +432,8 @@ public class ApprovalGUI {
 
 	public static void main(String[] args) throws IOException {
 
-		//TODO uncomment
-//		DataBaseHandler.initGlobalVars();
-//		DataBaseHandler.findAndSetGlobalVars();
+		DataBaseHandler.initGlobalVars();
+		DataBaseHandler.findAndSetGlobalVars();
 
 		//initialize these
 		nameField = new JTextField();
