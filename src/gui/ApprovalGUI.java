@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -162,7 +163,9 @@ public class ApprovalGUI {
 					schwagLinks.removeLast();
 				}
 				undoClicked = true;
+
 				Maintenance.writeLog("Undo completed");
+
 			}
 		}
 	}

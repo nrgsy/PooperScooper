@@ -157,7 +157,7 @@ public class Maintenance {
 	}
 
 	//TODO add parameters indicating which schwergsy account the message is associated with
-	public static void writeLog(String message) throws FileNotFoundException {
+	public static void writeLog(String message) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		Date now = new Date();
@@ -168,10 +168,17 @@ public class Maintenance {
 		//implement that ass mo
 		System.out.println(output);
 		
-		PrintWriter out = new PrintWriter("filename.txt");
+		PrintWriter out;
+		try {
+			out = new PrintWriter("filename.txt");
+		} catch (FileNotFoundException e) {
+			System.out.println("WARNING: Failed to write to log file");
+			e.printStackTrace();
+			return;
+		}
 		out.println(output);
 		out.close();
 	}
 
-	public static void writeLog() throws FileNotFoundException { writeLog(""); }
+	public static void writeLog() { writeLog(""); }
 }
