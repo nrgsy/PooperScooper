@@ -13,6 +13,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import management.FuckinUpKPException;
+import management.Maintenance;
 
 
 /**
@@ -42,7 +43,7 @@ public class ImageManipulator {
 			ImageIO.write(bi, "jpg", img);
 			//Checks to see img size is less than ~3MB
 			if(img.length()<3000000){
-				System.out.println("image is less than 3MB #"+inc);
+				Maintenance.writeLog("image is less than 3MB #"+inc);
 				return true;
 			}
 			
@@ -56,7 +57,7 @@ public class ImageManipulator {
 		finally{
 			img.delete();
 		}
-		System.out.println("Image size of "+URI+"is larger than 3MB");
+		Maintenance.writeLog("Image size of "+URI+"is larger than 3MB");
 		return false;
 	}
 

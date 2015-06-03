@@ -91,7 +91,7 @@ public class TwitterRunnable implements Runnable {
 			uploadPicTwitter(image, caption);
 		}
 		catch (Exception e) {
-			System.out.println("Temp download of pic failed "+image);
+			Maintenance.writeLog("Temp download of pic failed "+image);
 			e.printStackTrace();
 		}
 		finally{

@@ -134,7 +134,7 @@ public class bigAccRunnable implements Runnable {
 		}
 
 		for(int i =0; i<maxCandidates; i++){
-			System.out.println("considering candidate...");
+			Maintenance.writeLog("considering candidate...");
 			Long id = AllCandidatesArr[i];
 			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
 				break;
@@ -254,7 +254,7 @@ public class bigAccRunnable implements Runnable {
 				DataBaseHandler.addWhitelist(index, toFollowSetArray);
 			}
 		}
-		System.out.println("done harvesting");
+		Maintenance.writeLog("done harvesting");
 	}
 
 	

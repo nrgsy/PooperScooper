@@ -38,6 +38,7 @@ import javax.swing.SwingConstants;
 
 import management.DataBaseHandler;
 import management.GlobalStuff;
+import management.Maintenance;
 
 import org.bson.Document;
 
@@ -116,7 +117,7 @@ public class ApprovalGUI {
 			frame.repaint();		
 		}
 		else {
-			System.out.println("Cannot load next. No content remaining");
+			Maintenance.writeLog("Cannot load next. No content remaining");
 		}
 	}
 
@@ -161,7 +162,7 @@ public class ApprovalGUI {
 					schwagLinks.removeLast();
 				}
 				undoClicked = true;
-				System.out.println("Undo completed");
+				Maintenance.writeLog("Undo completed");
 			}
 		}
 	}
@@ -237,7 +238,7 @@ public class ApprovalGUI {
 			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
 			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
 
-			System.out.println("yo" + isIncubated + isSuspended);
+			Maintenance.writeLog("yo" + isIncubated + isSuspended);
 			
 			try {
 				DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
@@ -396,7 +397,7 @@ public class ApprovalGUI {
 					frame.setVisible(true);	
 				}
 				else {
-					System.out.println("No content found in pending" + kind);
+					Maintenance.writeLog("No content found in pending" + kind);
 				}
 			}
 		}		

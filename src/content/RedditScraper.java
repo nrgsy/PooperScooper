@@ -86,7 +86,7 @@ public class RedditScraper implements Runnable{
 				try {
 					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), "pendingass");
 				} catch (UnknownHostException e) {
-					System.out.println("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));
+					Maintenance.writeLog("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));
 					e.printStackTrace();
 				}
 			}

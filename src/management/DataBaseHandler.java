@@ -229,7 +229,7 @@ public class DataBaseHandler{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
 		if (db.getCollection("GlobalVariables").find().first()==null) {
-			System.out.println("Globals not found in db, initializing with defaults");
+			Maintenance.writeLog("Globals not found in db, initializing with defaults");
 
 			//These are the default values to set the volatile variables to
 			Document globalVars = new Document();
@@ -316,10 +316,10 @@ public class DataBaseHandler{
 			newAss.append("accessInfo", new BasicDBList());
 
 			trueCollection.insertOne(newAss);
-			System.out.println("Successfully added new content of type " + type);
+			Maintenance.writeLog("Successfully added new content of type " + type);
 		}
 		else {
-			System.out.println("Image is not unique: "+ imglink);
+			Maintenance.writeLog("Image is not unique: "+ imglink);
 		}
 
 		mongoClient.close();
@@ -416,7 +416,7 @@ public class DataBaseHandler{
 		Document arr = new Document("$each", dblist);
 
 		dbCollection.updateOne(query, new Document("$addToSet", new Document(column,arr)));
-		System.out.println("successfully added an array of size "+StringArr.length+" to "+column);
+		Maintenance.writeLog("successfully added an array of size "+StringArr.length+" to "+column);
 		mongoClient.close();
 		
 	}
@@ -444,7 +444,7 @@ public class DataBaseHandler{
 				new Document("$set", new Document(column, freshList)));
 		mongoClient.close();
 
-		System.out.println("successfully replaced array: " + column);
+		Maintenance.writeLog("successfully replaced array: " + column);
 	}
 
 	/**
@@ -477,13 +477,13 @@ public class DataBaseHandler{
 
 		}
 		else {
-			System.out.println();
+			Maintenance.writeLog();
 			mongoClient.close();
 			throw new FuckinUpKPException("method addElementToSchwergsArray is not a trash can.\nYou can't just be throwin' whatever you please in.");
 		}
 
 		dbCollection.findOneAndUpdate(query, ele);
-		System.out.println("successfully added an element to "+ column);
+		Maintenance.writeLog("successfully added an element to "+ column);
 		mongoClient.close();
 	}
 
@@ -628,17 +628,17 @@ public class DataBaseHandler{
 		HashSet<Long> OGFreshFollowerSet = (HashSet<Long>) freshFollowerSet.clone();
 
 		if (!retainedFollowerSet.retainAll(storedFollowerSet)) {
-			System.out.println("FYI: freshFollowerSet doesn't have any elements that weren't already in storedFollowerSet");
+			Maintenance.writeLog("FYI: freshFollowerSet doesn't have any elements that weren't already in storedFollowerSet");
 		}
 		int retainedFollowers = retainedFollowerSet.size();
 
 		if (!freshFollowerSet.removeAll(retainedFollowerSet)) {
-			System.out.println("FYI: freshFollowerSet doesn't have any common elements with retainedFollowerSet");
+			Maintenance.writeLog("FYI: freshFollowerSet doesn't have any common elements with retainedFollowerSet");
 		}
 		int newFollows = freshFollowerSet.size();
 
 		if (!storedFollowerSet.removeAll(retainedFollowerSet)) {
-			System.out.println("FYI: storedFollowerSet doesn't have any common elements with retainedFollowerSet");
+			Maintenance.writeLog("FYI: storedFollowerSet doesn't have any common elements with retainedFollowerSet");
 		}
 		int unfollows = storedFollowerSet.size();
 
@@ -774,7 +774,7 @@ public class DataBaseHandler{
 		Document ele = new Document("$addToSet", new Document("bigAccounts",bigAccount));
 
 		dbCollection.findOneAndUpdate(query, ele);
-		System.out.println("successfully added an element to bigAccounts");
+		Maintenance.writeLog("successfully added an element to bigAccounts");
 		mongoClient.close();
 	}
 
@@ -1032,7 +1032,7 @@ public class DataBaseHandler{
 					+ "will not add duplicate");
 		}
 		else {
-			System.out.println("inserting a new Schwergsy Account");
+			Maintenance.writeLog("inserting a new Schwergsy Account");
 			Document basicBitch = new Document("_id", (int) getCollectionSize("SchwergsyAccounts"))
 			.append("name", name)
 			.append("customerSecret", customerSecret)
@@ -1070,7 +1070,7 @@ public class DataBaseHandler{
 	 */
 	public static synchronized Document getAuthorizationInfo(int index) throws Exception {
 
-		System.out.println("scooping authInfo at index " + index);
+		Maintenance.writeLog("scooping authInfo at index " + index);
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
@@ -1157,11 +1157,11 @@ public class DataBaseHandler{
 			Set<Entry<String, Object>> entrySet = account.entrySet();
 
 			for (Entry<String, Object> e : entrySet) {
-				System.out.println(e.getKey() + " = " + e.getValue() + "\n");
+				Maintenance.writeLog(e.getKey() + " = " + e.getValue() + "\n");
 			}
 		} 		
 		catch (Exception e) {
-			System.out.println("Error printing");
+			Maintenance.writeLog("Error printing");
 			e.printStackTrace();
 		}
 		finally{
@@ -1190,7 +1190,7 @@ public class DataBaseHandler{
 
 			if (statList.size() > 0) {
 
-				System.out.println("Statistics for account " + account.get("name") + ":\n");
+				Maintenance.writeLog("Statistics for account " + account.get("name") + ":\n");
 				Set<Entry<String, Object>> entrySet = ((Document) statList.get(0)).entrySet();
 				int columnWidth = 32;
 
@@ -1204,7 +1204,7 @@ public class DataBaseHandler{
 					int padding = (columnWidth - textWidth)/2;
 
 					if (padding < 0) {
-						System.out.println("String to large for column");
+						Maintenance.writeLog("String to large for column");
 					}
 
 					printNSpaces(padding);
@@ -1217,7 +1217,7 @@ public class DataBaseHandler{
 					System.out.print("|");
 
 				}
-				System.out.println("\n");
+				Maintenance.writeLog("\n");
 
 				//print the values for each stat
 				for (Object obj : statList) {
@@ -1256,7 +1256,7 @@ public class DataBaseHandler{
 						int padding = (columnWidth - textWidth)/2;
 
 						if (padding < 0) {
-							System.out.println("String to large for column");
+							Maintenance.writeLog("String to large for column");
 						}
 
 						printNSpaces(padding);
@@ -1269,15 +1269,15 @@ public class DataBaseHandler{
 							printNSpaces(padding);
 						System.out.print("|");
 					}
-					System.out.println();
+					Maintenance.writeLog();
 				}
 			}
 			else {
-				System.out.println("No stats have been entered yet");
+				Maintenance.writeLog("No stats have been entered yet");
 			}
 		} 		
 		catch (Exception e) {
-			System.out.println("Error printing");
+			Maintenance.writeLog("Error printing");
 			e.printStackTrace();
 		}
 
