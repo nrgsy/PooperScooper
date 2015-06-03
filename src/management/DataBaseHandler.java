@@ -198,6 +198,7 @@ public class DataBaseHandler{
 	 * GlobalStuff
 	 * 
 	 * @throws UnknownHostException
+	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void findAndSetGlobalVars() throws UnknownHostException {
 		MongoClient mongoClient = new MongoClient();
@@ -713,6 +714,7 @@ public class DataBaseHandler{
 		return (int)getBigAccountStuff(index,bigAccountIndex,"outs");
 	}
 	
+	//Tested and given the Bojangles Seal of Approval
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -724,33 +726,38 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	public static synchronized void editBigAccountStrikes(int index, int bigAccountIndex, int number) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"strikes",number);
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	public static synchronized void editBigAccountLatestTweet(int index, int bigAccountIndex, long tweetID) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
 	}
 
+	//Tested and given the Bojangles Seal of Approval
 	public static synchronized void editBigAccountOuts(int index, int bigAccountIndex, int number) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"outs", number);
 	}
 
 
-//	public static synchronized void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
-//		long user_id = getBigAccount(index, bigAccIndex);
-//		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
-//
-//		MongoClient mongoClient = new MongoClient();
-//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-//		Document match = new Document("_id", index); //to match your direct app document
-//		Document update = new Document("user_id", user_id);
-//		dbCollection.update(match, new Document("$pull", new Document("bigAccounts", update)));
-//		mongoClient.close();
-//
-//		addBigAccount(index, user_id, latestTweet);
-//	}
+	/**
+	 * @param index
+	 * @param bigAccIndex
+	 * @throws UnknownHostException
+	 * @throws FuckinUpKPException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
+	public static synchronized void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
+		long user_id = getBigAccount(index, bigAccIndex);
+		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
+
+		deleteBigAccount(index, bigAccIndex);
+		addBigAccount(index, user_id, latestTweet);
+	}
+
 
 	/**
 	 * @param index
@@ -781,18 +788,22 @@ public class DataBaseHandler{
 	/**
 	 * @param index
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
-//	public static synchronized void deleteBigAccount(int index, int bigAccIndex) throws UnknownHostException{
-//		long user_id = getBigAccount(index, bigAccIndex);
-//
-//		MongoClient mongoClient = new MongoClient();
-//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-//		Document match = new Document("_id", index); //to match your direct app document
-//		Document update = new Document("user_id", user_id);
-//		dbCollection.update(match, new Document("$pull", new Document("bigAccounts", update)));
-//		mongoClient.close();
-//	}
+
+	public static synchronized void deleteBigAccount(int index, int bigAccIndex) throws UnknownHostException{
+		long user_id = getBigAccount(index, bigAccIndex);
+
+		MongoClient mongoClient = new MongoClient();
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document match = new Document("_id", index); //to match your direct app document
+		Document update = new Document("user_id", user_id);
+		dbCollection.findOneAndUpdate(match, new Document("$pull", new Document("bigAccounts", update)));
+		mongoClient.close();
+	}
+
 
 	
 	/**
@@ -863,26 +874,23 @@ public class DataBaseHandler{
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException
-	 *//*
+	 */
 	public static synchronized long getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-		long[] toFollowArr = null;
 		Document query = new Document("_id", index);
 		Document pop = new Document("$pop", new Document("toFollow", -1));
-		Document slice = new Document("toFollow", new Document("$slice", 1));
-		MongoCursor<Document> cursor = dbCollection.find(query,slice);
-		BasicDBList toFollowList = (BasicDBList) cursor.next().get("toFollow");
-		cursor.close();
+		Document slice = new Document("$slice", new Document("toFollow", 1));
+		Document sliceResult = dbCollection.findOneAndUpdate(query,slice);
+		BasicDBList toFollowList = (BasicDBList) sliceResult.get("toFollow");
 		//added so we don't have to call toArray() twice
-		Object[] toFollowArray = toFollowList.toArray();
-		toFollowArr = Arrays.copyOf(toFollowArray, toFollowArray.length, long[].class);
-		addWhitelist(index, toFollowArr);
-		dbCollection.update(query, pop);
+		Long[] toFollowArray = (Long[])toFollowList.toArray();
+		addWhitelist(index, toFollowArray);
+		dbCollection.findOneAndUpdate(query, pop);
 		mongoClient.close();
-		return toFollowArr[0];
-	}*/
+		return toFollowArray[0];
+	}
 
 	/**
 	 * @param index the Schwergsy Account to get the list from
