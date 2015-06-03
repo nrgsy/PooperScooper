@@ -41,6 +41,8 @@ import management.GlobalStuff;
 
 import org.bson.Document;
 
+import twitter4j.TwitterException;
+
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -73,6 +75,15 @@ public class ApprovalGUI {
 	private static HashMap<String, String> approvedContent;
 	private static LinkedList<String> schwagLinks;
 
+	//The text fields for the Schwergsy account adder
+	private static JTextField nameField;
+	private static JTextField cusSecField;
+	private static JTextField cusKeyField;
+	private static JTextField authSecField;
+	private static JTextField authKeyField;
+	private static JTextField incubatedField;
+	private static JTextField suspendedField;
+
 	public static void loadNext() throws IOException {
 
 		if (cursor.hasNext()) {
@@ -87,7 +98,6 @@ public class ApprovalGUI {
 			labelPanel.removeAll();
 			labelPanel.add(numRemainingLabel);
 			labelPanel.setBackground(Color.GRAY);
-
 
 			picPanel.removeAll();
 			picPanel.add(getPicLabel());
@@ -106,7 +116,7 @@ public class ApprovalGUI {
 			frame.repaint();		
 		}
 		else {
-			System.out.println("No content remaining");
+			System.out.println("Cannot load next. No content remaining");
 		}
 	}
 
@@ -161,16 +171,16 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 			for (Entry<String, String> entry : approvedContent.entrySet()) {
 				try {
-					DataBaseHandler.newContent(entry.getValue(), entry.getKey(), kind);
 					DataBaseHandler.removeContent("pending" + kind, entry.getKey());
+					DataBaseHandler.newContent(entry.getValue(), entry.getKey(), kind);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 			for (String link : schwagLinks) {
 				try {
-					DataBaseHandler.newContent(null, link, "schwagass");
 					DataBaseHandler.removeContent("pending" + kind, link);
+					DataBaseHandler.newContent(null, link, "schwagass");
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -181,7 +191,60 @@ public class ApprovalGUI {
 	private static class SchwergsListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("implement SchwergsListener");
+
+			frame.setVisible(false);
+			frame.dispose();
+
+			JPanel mainPanel = new JPanel(new GridLayout(8, 2));
+			mainPanel.add(new JLabel("Name"));
+			mainPanel.add(nameField);
+			mainPanel.add(new JLabel("Customer Secret"));
+			mainPanel.add(cusSecField);
+			mainPanel.add(new JLabel("Customer Key"));
+			mainPanel.add(cusKeyField);
+			mainPanel.add(new JLabel("Authorization Secret"));
+			mainPanel.add(authSecField);
+			mainPanel.add(new JLabel("Authorization Key"));
+			mainPanel.add(authKeyField);
+			mainPanel.add(new JLabel("Is Incubated? (True/False)"));
+			mainPanel.add(incubatedField);
+			mainPanel.add(new JLabel("Is Suspended? (True/False)"));
+			mainPanel.add(suspendedField);
+			JButton addButton = new JButton("Add");
+			addButton.addActionListener(new AddAccountListener());
+			mainPanel.add(addButton);
+			mainPanel.setBackground(Color.GRAY);
+
+			JFrame frame = new JFrame("Enter Schwergsy Account Info");
+			frame.setContentPane(mainPanel);
+
+			frame.setSize(400, 500);
+			frame.setLocationRelativeTo(null);	
+			frame.setVisible(true);
+		}		
+	}
+
+	//the listener for the add button in Schwergsy account adding interface
+	private static class AddAccountListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			String name = nameField.getText();
+			String customerSecret = cusSecField.getText();
+			String customerKey = cusKeyField.getText();
+			String authorizationSecret = authSecField.getText();
+			String authorizationKey = authKeyField.getText();
+			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
+			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
+
+			System.out.println("yo" + isIncubated + isSuspended);
+			
+			try {
+				DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
+						authorizationSecret, authorizationKey, isIncubated, isSuspended);
+			} catch (UnknownHostException | TwitterException e1) {
+				e1.printStackTrace();
+			}
 		}		
 	}
 
@@ -189,24 +252,19 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-
-			//Create and set up the window.
 			frame.setVisible(false);
 			frame.dispose();
 
-			//Create and set up the content pane.
-
-			//JComponent newContentPane = new ComboBoxDemo();
 			JComponent panel = new JPanel();
 			String[] contentTypes = { "ass", "workout", "weed", "college", "canimals", "space"};
-			JComboBox petList = new JComboBox(contentTypes);
+			JComboBox<Object> petList = new JComboBox<Object>(contentTypes);
 			petList.setSelectedIndex(0);
 			petList.addActionListener(new ListSelectListener());
 			panel.add(petList, BorderLayout.PAGE_START);
 			panel.setBackground(Color.GRAY);
 			panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));    
 			panel.setOpaque(true); //content panes must be opaque
-			JFrame frame = new JFrame("Select Content Type");
+			frame = new JFrame("Select Content Type");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setContentPane(panel);
 			//Display the window.
@@ -221,7 +279,9 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			JComboBox cb = (JComboBox)e.getSource();
+			@SuppressWarnings("unchecked")
+			JComboBox<Object> cb = (JComboBox<Object>)e.getSource();
+
 			kind = (String)cb.getSelectedItem();
 
 			if (!kind.equals("ass") &&
@@ -315,6 +375,8 @@ public class ApprovalGUI {
 
 					JScrollPane scrPane = new JScrollPane(containerPanel);	
 
+					frame.setVisible(false);
+					frame.dispose();
 					frame = new JFrame("Content Reviewer");			
 					//So that these things close when we end the program
 					frame.addWindowListener(new WindowAdapter()
@@ -350,15 +412,15 @@ public class ApprovalGUI {
 
 		URL url = new URL(currentContent.get("imglink").toString());			
 		BufferedImage bufferedImage = ImageIO.read(url);
-		double newHeight = GlobalStuff.MAX_IMAGE_DIMENSION;
-		double ratio = newHeight/bufferedImage.getHeight();
-		double newWidth = bufferedImage.getWidth() * ratio;
+		double newHeight = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
+		double ratio = newHeight/((double) bufferedImage.getHeight());
+		double newWidth = ((double)bufferedImage.getWidth()) * ratio;
 
 		//to guarantee really wide images will be fully contained by the window
-		if (newWidth > GlobalStuff.MAX_IMAGE_DIMENSION) {
-			newWidth = GlobalStuff.MAX_IMAGE_DIMENSION;
-			ratio = newWidth/bufferedImage.getWidth();
-			newHeight = bufferedImage.getWidth() * ratio;
+		if (newWidth > (double)GlobalStuff.MAX_IMAGE_DIMENSION) {
+			newWidth = (double)GlobalStuff.MAX_IMAGE_DIMENSION;
+			ratio = newWidth/((double)bufferedImage.getWidth());
+			newHeight = ((double)bufferedImage.getWidth()) * ratio;
 		}
 
 		Image scaledImage =
@@ -369,6 +431,18 @@ public class ApprovalGUI {
 	}
 
 	public static void main(String[] args) throws IOException {
+
+		DataBaseHandler.initGlobalVars();
+		DataBaseHandler.findAndSetGlobalVars();
+
+		//initialize these
+		nameField = new JTextField();
+		cusSecField  = new JTextField();
+		cusKeyField = new JTextField();
+		authSecField = new JTextField();
+		authKeyField = new JTextField();
+		incubatedField = new JTextField();
+		suspendedField = new JTextField();
 
 		//for opening the gui that adds or removes schwergsy accounts from the database
 		JButton schwergsButton = new JButton("Add or Remove Schwergsy Accounts");

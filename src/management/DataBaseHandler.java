@@ -235,7 +235,7 @@ public class DataBaseHandler{
 			//These are the default values to set the volatile variables to
 			Document globalVars = new Document();
 			
-			for(Entry<String,Object> entry : GlobalStuff.getGlobalVars().entrySet()){
+			for(Entry<String,Object> entry : GlobalStuff.getDefaultGlobalVars().entrySet()){
 				globalVars.append(entry.getKey(),entry.getValue());
 			}
 
@@ -268,11 +268,11 @@ public class DataBaseHandler{
 
 		//determine whether we're dealing with a pending content, schwag content, or a regular content
 		//and set baseType accordingly
-		if (type.substring(0, 7).equals("pending")) {
-			baseType = type.substring(7);
-		}
-		else if (type.substring(0, 6).equals("schwag")) {
+		if (type.length() >= 6 && type.substring(0, 6).equals("schwag")) {
 			baseType = type.substring(6);
+		}
+		else if (type.length() >= 7 && type.substring(0, 7).equals("pending")) {
+			baseType = type.substring(7);
 		}
 		else {
 			baseType = type;
@@ -758,6 +758,7 @@ public class DataBaseHandler{
 		addBigAccount(index, user_id, latestTweet);
 	}
 
+
 	/**
 	 * @param index
 	 * @param bigAccountElement
@@ -790,6 +791,7 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
+
 	public static synchronized void deleteBigAccount(int index, int bigAccIndex) throws UnknownHostException{
 		long user_id = getBigAccount(index, bigAccIndex);
 
@@ -802,6 +804,7 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
+
 	
 	/**
 	 * @param index
@@ -809,19 +812,19 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
-		MongoClient mongoClient = new MongoClient();
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-		Document query = new Document("_id", index);
-		query.append("bigAccounts",new Document("$elemMatch", new Document("user_id", bigAccountID)));
-		Document call = new Document("bigAccounts.$",1);
-		MongoCursor<Document> cursor = dbCollection.find(query, call);
-		if(cursor.hasNext()){
-			return true;
-		}
-		return false;
-	}
+//	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
+//		MongoClient mongoClient = new MongoClient();
+//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+//		Document query = new Document("_id", index);
+//		query.append("bigAccounts",new Document("$elemMatch", new Document("user_id", bigAccountID)));
+//		Document call = new Document("bigAccounts.$",1);
+//		MongoCursor<Document> cursor = dbCollection.find(query, call);
+//		if(cursor.hasNext()){
+//			return true;
+//		}
+//		return false;
+//	}
 
 	
 	/**
@@ -830,19 +833,19 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
-		MongoClient mongoClient = new MongoClient();
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-		Document query = new Document("_id", index);
-		query.append("whiteList", new Document("$eq", user_id));
-		Document call = new Document("whiteList.$", 1);
-		MongoCursor<Document> cursor = dbCollection.find(query, call);
-		if(cursor.hasNext()){
-			return true;
-		}
-		return false;
-	}
+//	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
+//		MongoClient mongoClient = new MongoClient();
+//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+//		Document query = new Document("_id", index);
+//		query.append("whiteList", new Document("$eq", user_id));
+//		Document call = new Document("whiteList.$", 1);
+//		MongoCursor<Document> cursor = dbCollection.find(query, call);
+//		if(cursor.hasNext()){
+//			return true;
+//		}
+//		return false;
+//	}
 
 	/**
 	 * @param index
@@ -850,19 +853,19 @@ public class DataBaseHandler{
 	 * @return
 	 * @throws UnknownHostException
 	 */
-	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
-		MongoClient mongoClient = new MongoClient();
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-		Document query = new Document("_id", index);
-		query.append("bigAccountsWhiteList", new Document("$eq", bigAcc_id));
-		Document call = new Document("bigAccountsWhiteList.$", 1);
-		MongoCursor<Document> cursor = dbCollection.find(query, call);
-		if(cursor.hasNext()){
-			return true;
-		}
-		return false;
-	}
+//	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
+//		MongoClient mongoClient = new MongoClient();
+//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+//		Document query = new Document("_id", index);
+//		query.append("bigAccountsWhiteList", new Document("$eq", bigAcc_id));
+//		Document call = new Document("bigAccountsWhiteList.$", 1);
+//		MongoCursor<Document> cursor = dbCollection.find(query, call);
+//		if(cursor.hasNext()){
+//			return true;
+//		}
+//		return false;
+//	}
 
 	/**
 	 *
@@ -973,7 +976,8 @@ public class DataBaseHandler{
 			String customerKey,
 			String authorizationSecret,
 			String authorizationKey,
-			boolean isIncubated) throws UnknownHostException, TwitterException {
+			boolean isIncubated,
+			boolean isSuspended) throws UnknownHostException, TwitterException {
 
 		insertSchwergsyAccount(
 				name,
@@ -982,6 +986,7 @@ public class DataBaseHandler{
 				authorizationSecret,
 				authorizationKey,
 				isIncubated,
+				isSuspended,
 				new BasicDBList(),
 				new BasicDBList(),
 				new BasicDBList(),
@@ -1016,6 +1021,7 @@ public class DataBaseHandler{
 			String authorizationSecret,
 			String authorizationKey,
 			boolean isIncubated,
+			boolean isSuspended,
 			BasicDBList followers,
 			BasicDBList following,
 			BasicDBList toFollow,
