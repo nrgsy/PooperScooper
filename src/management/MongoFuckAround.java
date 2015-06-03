@@ -18,8 +18,9 @@ import com.mongodb.DBObject;
 public class MongoFuckAround {
 
 	public static void main(String[]args) throws Exception{
-		DataBaseHandler.initGlobalVars();
-		DataBaseHandler.findAndSetGlobalVars();
+		
+		
+		System.out.println(DataBaseHandler.getOneToFollow(0));
 		
 	}
 }
