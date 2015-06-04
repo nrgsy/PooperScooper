@@ -1,10 +1,14 @@
 package management;
 
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,7 +108,7 @@ public class Maintenance {
 		try {
 			DataBaseHandler.findAndSetGlobalVars();
 		} catch (UnknownHostException e) {
-			System.err.println("ERROR: failed to find ");
+			Maintenance.writeLog("***ERROR*** failed to find ***ERROR***");
 			e.printStackTrace();
 		}
 
@@ -112,7 +116,7 @@ public class Maintenance {
 		try {
 			cleanBigAccs();
 		} catch (UnknownHostException | FuckinUpKPException e) {
-			System.err.println("ERROR: failed to clean BigAccs ");
+			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***");
 			e.printStackTrace();
 		}
 
@@ -120,7 +124,7 @@ public class Maintenance {
 		try {
 			cleanToFollows();
 		} catch (UnknownHostException | FuckinUpKPException e) {
-			System.err.println("ERROR: failed to clean ToFollows ");
+			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***");
 			e.printStackTrace();
 		}
 
@@ -157,28 +161,41 @@ public class Maintenance {
 	}
 
 	//TODO add parameters indicating which schwergsy account the message is associated with
-	public static void writeLog(String message) {
+	public static void writeLog(String message, String subDir) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		Date now = new Date();
 		String strDate = sdf.format(now);
-
-		String output = strDate + " ------ " + message;
-		
-		//implement that ass mo
+		String output = strDate + " ----- " + message;
 		System.out.println(output);
 		
-		PrintWriter out;
+		if (subDir == null) {
+			subDir = "default"; 
+		}
+		
+		String dir = "logs/" + subDir + "/";
+		
+		if (!new File(dir).exists()) {
+			new File(dir).mkdirs();
+		}
+		Calendar cal = Calendar.getInstance();
+				
+		//name the file the current date
+		String fileName = dir + (cal.get(Calendar.MONTH) + 1) +  "-" + cal.get(Calendar.DAY_OF_MONTH) +
+				 "-" + cal.get(Calendar.YEAR);
+		
 		try {
-			out = new PrintWriter("filename.txt");
-		} catch (FileNotFoundException e) {
-			System.out.println("WARNING: Failed to write to log file");
+		    FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
+		    fw.write(output + "\n"); //appends the string to the file
+		    fw.close();
+		} catch (IOException e) {
+			System.out.println("***ERROR*** Failed to write to log file ***ERROR***");
 			e.printStackTrace();
 			return;
 		}
-		out.println(output);
-		out.close();
 	}
+
+	public static void writeLog(String message) { writeLog(message, null); }
 
 	public static void writeLog() { writeLog(""); }
 }

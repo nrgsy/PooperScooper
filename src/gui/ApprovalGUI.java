@@ -294,7 +294,7 @@ public class ApprovalGUI {
 					!kind.equals("college") &&
 					!kind.equals("canimals") &&
 					!kind.equals("space")) {
-				System.err.println("invalid argument, must be ass, workout, etc");
+				Maintenance.writeLog("***ERROR*** invalid argument, must be ass, workout, etc ***ERROR***");
 			}
 			else {
 				lastWasApproved = null;

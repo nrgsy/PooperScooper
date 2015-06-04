@@ -205,7 +205,8 @@ public class DataBaseHandler{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
 		if (db.getCollection("GlobalVariables")==null) {
-			System.err.println("ERROR: cannot pull global vars. Collection GlobalVariables does not exist");
+			Maintenance.writeLog("***ERROR*** cannot pull global vars. "
+					+ "Collection GlobalVariables does not exist ***ERROR***");
 		}
 		else if (collection.count() == 1) {
 			MongoCursor<Document> globalVarsCursor = collection.find().iterator();
@@ -213,8 +214,8 @@ public class DataBaseHandler{
 			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
-			System.err.println("ERROR: GlobalVariables had " + collection.count() + "entries. "
-					+ "It should only ever have one entry, or not exist at all");
+			Maintenance.writeLog("***ERROR*** GlobalVariables had " + collection.count() + "entries. "
+					+ "It should only ever have one entry, or not exist at all ***ERROR***");
 		}
 		mongoClient.close();
 	}
@@ -385,7 +386,8 @@ public class DataBaseHandler{
 			dbCollection = db.getCollection("SchwagSpace");
 			break;
 		default:
-			System.err.println("Tears, " + type + " is schwag. Doesn't match an expected collection name");
+			Maintenance.writeLog("***ERROR*** Tears, " + type + " is schwag. Doesn't match an "
+					+ "expected collection name ***ERROR***");
 		}
 
 		return dbCollection;
@@ -1036,7 +1038,7 @@ public class DataBaseHandler{
 		//check if this schwergsy account already exists in the database
 		Document uniqueCheck = new Document("authorizationKey", authorizationKey);
 		if (dbCollection.find(uniqueCheck).limit(1).first() != null) {
-			System.err.println("WARNING: Schwergsy account already exists in the database, "
+			Maintenance.writeLog("WARNING: Schwergsy account already exists in the database, "
 					+ "will not add duplicate");
 		}
 		else {
@@ -1198,7 +1200,9 @@ public class DataBaseHandler{
 
 			if (statList.size() > 0) {
 
-				Maintenance.writeLog("Statistics for account " + account.get("name") + ":\n");
+				Maintenance.writeLog("Creating Statistic");
+				
+				System.out.println("Statistics for account " + account.get("name") + ":\n");
 				Set<Entry<String, Object>> entrySet = ((Document) statList.get(0)).entrySet();
 				int columnWidth = 32;
 
@@ -1212,7 +1216,7 @@ public class DataBaseHandler{
 					int padding = (columnWidth - textWidth)/2;
 
 					if (padding < 0) {
-						Maintenance.writeLog("String to large for column");
+						System.out.println("String to large for column");
 					}
 
 					printNSpaces(padding);
@@ -1225,7 +1229,7 @@ public class DataBaseHandler{
 					System.out.print("|");
 
 				}
-				Maintenance.writeLog("\n");
+				System.out.println("\n");
 
 				//print the values for each stat
 				for (Object obj : statList) {
@@ -1264,7 +1268,7 @@ public class DataBaseHandler{
 						int padding = (columnWidth - textWidth)/2;
 
 						if (padding < 0) {
-							Maintenance.writeLog("String to large for column");
+							System.out.println("String to large for column");
 						}
 
 						printNSpaces(padding);
@@ -1277,15 +1281,15 @@ public class DataBaseHandler{
 							printNSpaces(padding);
 						System.out.print("|");
 					}
-					Maintenance.writeLog();
+					System.out.println();
 				}
 			}
 			else {
-				Maintenance.writeLog("No stats have been entered yet");
+				Maintenance.writeLog("Cannot print stats. No stats have been entered yet");
 			}
 		} 		
 		catch (Exception e) {
-			Maintenance.writeLog("Error printing");
+			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***");
 			e.printStackTrace();
 		}
 
