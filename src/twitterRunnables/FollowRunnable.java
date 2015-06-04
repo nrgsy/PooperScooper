@@ -1,6 +1,7 @@
 package twitterRunnables;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import management.DataBaseHandler;
 import management.GlobalStuff;
@@ -99,9 +100,9 @@ public class FollowRunnable implements Runnable{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
 		//TODO get a ratio
-		Long[] unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
-		for(int i =0; i<unfollowArr.length; i++){
-			TwitterHandler.unfollow(bird,unfollowArr[i]);
+		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
+		for(Long id : unfollowArr){
+			TwitterHandler.unfollow(bird,id);
 		}
 	}
 

@@ -4,6 +4,8 @@ package twitterRunnables;
 import java.io.File;
 import java.util.Date;
 
+import org.bson.Document;
+
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
@@ -80,7 +82,7 @@ public class TwitterRunnable implements Runnable {
 		File image = null;
 		try {
 			//TODO assContent structure may have  been changed since writing this method.
-			DBObject assContent = DataBaseHandler.getRandomContent("ass", 0);
+			Document assContent = DataBaseHandler.getRandomContent("ass", 0);
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();
 

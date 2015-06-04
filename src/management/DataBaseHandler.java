@@ -138,14 +138,14 @@ public class DataBaseHandler{
 				.append("lastAccess", new Date().getTime());
 				list.add(info);
 			}
-//uncomment this out
-/*			bestContent.removeField("accessInfo");
+
+			bestContent.removeField("accessInfo");
 			bestContent.put("accessInfo", list);
 
 			long id = (long) bestContent.get("_id");
 			Document query = new Document("_id", id);
 
-			collection.findAndModify(query, bestContent);*/
+			collection.findAndModify(query, bestContent);
 		}
 
 		mongoClient.close();
@@ -198,6 +198,7 @@ public class DataBaseHandler{
 	 * GlobalStuff
 	 * 
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void findAndSetGlobalVars() throws UnknownHostException {
@@ -222,6 +223,7 @@ public class DataBaseHandler{
 	/**
 	 * Initializes GlobalVars if it doesn't exist in the database.
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void initGlobalVars() throws UnknownHostException{
@@ -397,9 +399,10 @@ public class DataBaseHandler{
 	 * @param StringArr	The Strings to add to the list (should be twitter id's)
 	 * @param column The list to add to (e.g. followers, toFollow, whiteList, etc)
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static synchronized void addArrayToSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
+	private static synchronized void addArrayToSchwergsArray(int index, Long[] StringArr, String column) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
@@ -429,6 +432,7 @@ public class DataBaseHandler{
 	 * @param StringArr
 	 * @param column
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void replaceSchwergsArray(int index, HashSet<Long> Set, String column) throws UnknownHostException{
@@ -456,9 +460,10 @@ public class DataBaseHandler{
 	 * @param column The list to add to (e.g. followers, toFollow, whiteList, statistics, etc)
 	 * @throws UnknownHostException
 	 * @throws FuckinUpKPException 
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static synchronized void addElementToSchwergsArray(int index, Object element, String column) throws UnknownHostException, FuckinUpKPException{
+	private static synchronized void addElementToSchwergsArray(int index, Object element, String column) throws UnknownHostException, FuckinUpKPException{
 
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -493,6 +498,7 @@ public class DataBaseHandler{
 	 * @param bigAccId
 	 * @throws UnknownHostException
 	 * @throws FuckinUpKPException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void addBigAccWhiteList(int index, long bigAccId) throws UnknownHostException, FuckinUpKPException{
@@ -503,6 +509,7 @@ public class DataBaseHandler{
 	 * @param index
 	 * @param followersArr
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void addFollowers(int index, Long[] followersArr) throws UnknownHostException{
@@ -513,6 +520,7 @@ public class DataBaseHandler{
 	 * @param index
 	 * @param followingArr
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void addFollowing(int index, Long[]followingArr) throws UnknownHostException{
@@ -523,6 +531,7 @@ public class DataBaseHandler{
 	 * @param index
 	 * @param toFollowArr
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void addToFollow(int index, Long[]toFollowArr) throws UnknownHostException{
@@ -533,13 +542,14 @@ public class DataBaseHandler{
 	 * @param index
 	 * @param whitelistArr
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void addWhitelist(int index, Long[]whitelistArr) throws UnknownHostException{
 		addArrayToSchwergsArray(index,whitelistArr,"whiteList");
 	}
 
-	/**
+	/**TODO Bojang Test
 	 * @param index The index of the Schwergsy account we want to add the statistic to
 	 * @param unFollows number of unFollows since the last Statistic was taken
 	 * @param newFollows unFollows since the last Statistic was taken
@@ -579,7 +589,7 @@ public class DataBaseHandler{
 		addElementToSchwergsArray(index, stat, "statistics");
 	}
 
-	/**
+	/**TODO Bojang Test
 	 * This should be called once a day for each Schwergsy account.
 	 * @param index The id of the Schwergsy account
 	 * @throws Exception 
@@ -614,11 +624,10 @@ public class DataBaseHandler{
 
 		HashSet<Long> storedFollowerSet = new HashSet<>();
 
-		BasicDBList tmpList = getSchwergsyAccountArray(index, "followers");
-		ListIterator<Object> iter = tmpList.listIterator();
+		ArrayList<Object> tmpList = getSchwergsyAccountArray(index, "followers");
 
-		while (iter.hasNext()) {
-			storedFollowerSet.add((long) iter.next());
+		for(Object id : tmpList) {
+			storedFollowerSet.add((long) id);
 		}
 
 		//getting the number of cool new followers and unfollowing bastards.
@@ -679,7 +688,15 @@ public class DataBaseHandler{
 		return unfollowed;
 	}
 	
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @param property
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	private static synchronized Object getBigAccountStuff(int index, int bigAccountIndex, String property)throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -694,27 +711,63 @@ public class DataBaseHandler{
 		return answer.get(property);
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized long getBigAccount(int index, int bigAccountIndex)throws UnknownHostException{
 		return  (long)getBigAccountStuff(index, bigAccountIndex,"user_id");
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized int getBigAccountStrikes(int index, int bigAccountIndex) throws UnknownHostException{
 		return (int)getBigAccountStuff(index, bigAccountIndex,"strikes");
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized long getBigAccountLatestTweet(int index, int bigAccountIndex) throws UnknownHostException{
 		return (long)getBigAccountStuff(index, bigAccountIndex,"latestTweet");
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized int getBigAccountOuts(int index, int bigAccountIndex) throws UnknownHostException{
 		return (int)getBigAccountStuff(index,bigAccountIndex,"outs");
 	}
 	
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @param property
+	 * @param change
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	private static synchronized void editBigAccountStuff(int index, int bigAccountIndex, String property, Object change) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -726,17 +779,38 @@ public class DataBaseHandler{
 		mongoClient.close();
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @param number
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized void editBigAccountStrikes(int index, int bigAccountIndex, int number) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"strikes",number);
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @param tweetID
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized void editBigAccountLatestTweet(int index, int bigAccountIndex, long tweetID) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"latestTweet",tweetID);
 	}
 
-	//Tested and given the Bojangles Seal of Approval
+	/**
+	 * @param index
+	 * @param bigAccountIndex
+	 * @param number
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static synchronized void editBigAccountOuts(int index, int bigAccountIndex, int number) throws UnknownHostException{
 		editBigAccountStuff(index,bigAccountIndex,"outs", number);
 	}
@@ -811,20 +885,30 @@ public class DataBaseHandler{
 	 * @param bigAccountID
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
-//	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
-//		MongoClient mongoClient = new MongoClient();
-//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-//		Document query = new Document("_id", index);
-//		query.append("bigAccounts",new Document("$elemMatch", new Document("user_id", bigAccountID)));
-//		Document call = new Document("bigAccounts.$",1);
-//		MongoCursor<Document> cursor = dbCollection.find(query, call);
-//		if(cursor.hasNext()){
-//			return true;
-//		}
-//		return false;
-//	}
+	public static boolean isInBigAccounts(int index, long bigAccountID) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		boolean result;
+		
+		Document query = new Document("_id", index);
+		query.append("bigAccounts", new Document("$elemMatch", new Document("user_id", bigAccountID)));
+		MongoCursor<Document> cursor = dbCollection.find(query).iterator();
+
+		if(cursor.hasNext()){
+				result = true;
+		}
+		else{
+			result = false;
+		}
+
+		cursor.close();
+		mongoClient.close();
+		return result;
+	}
 
 	
 	/**
@@ -832,48 +916,69 @@ public class DataBaseHandler{
 	 * @param user_id
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
-//	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
-//		MongoClient mongoClient = new MongoClient();
-//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-//		Document query = new Document("_id", index);
-//		query.append("whiteList", new Document("$eq", user_id));
-//		Document call = new Document("whiteList.$", 1);
-//		MongoCursor<Document> cursor = dbCollection.find(query, call);
-//		if(cursor.hasNext()){
-//			return true;
-//		}
-//		return false;
-//	}
+	public static synchronized boolean isWhiteListed(int index, long user_id) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");		
+		boolean result;
+		
+		Document query = new Document("_id", index);
+		query.append("whiteList", new Document("$eq", user_id));
+		MongoCursor<Document> cursor = dbCollection.find(query).iterator();
+		
+		if(cursor.hasNext()){
+			result = true;
+		}
+		else{
+			result = false;
+		}
+		
+		cursor.close();
+		mongoClient.close();
+		return result;
+	}
 
 	/**
 	 * @param index
 	 * @param user_id
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
-//	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
-//		MongoClient mongoClient = new MongoClient();
-//		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-//		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-//		Document query = new Document("_id", index);
-//		query.append("bigAccountsWhiteList", new Document("$eq", bigAcc_id));
-//		Document call = new Document("bigAccountsWhiteList.$", 1);
-//		MongoCursor<Document> cursor = dbCollection.find(query, call);
-//		if(cursor.hasNext()){
-//			return true;
-//		}
-//		return false;
-//	}
+	public static synchronized boolean isBigAccWhiteListed(int index, long bigAcc_id) throws UnknownHostException{
+		MongoClient mongoClient = new MongoClient();
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		boolean result;
+		
+		Document query = new Document("_id", index);
+		query.append("bigAccountsWhiteList", new Document("$eq", bigAcc_id));
+		MongoCursor<Document> cursor = dbCollection.find(query).iterator();
+		
+		if(cursor.hasNext()){
+			result = true;
+		}
+		else{
+			result = false;
+		}
+		
+		cursor.close();
+		mongoClient.close();
+		return result;
+	}
 
 	/**
-	 *
 	 * Gets one user_id from ToFollow to follow
 	 *
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized long getOneToFollow(int index) throws UnknownHostException{
 		MongoClient mongoClient = new MongoClient();
@@ -881,24 +986,19 @@ public class DataBaseHandler{
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Document query = new Document("_id", index);
 		Document pop = new Document("$pop", new Document("toFollow", -1));
-		Document slice = new Document("$slice", new Document("toFollow", 1));
-		Document sliceResult = dbCollection.findOneAndUpdate(query,slice);
-		BasicDBList toFollowList = (BasicDBList) sliceResult.get("toFollow");
-		//added so we don't have to call toArray() twice
-		Long[] toFollowArray = (Long[])toFollowList.toArray();
-		addWhitelist(index, toFollowArray);
-		dbCollection.findOneAndUpdate(query, pop);
+		Document popResult = dbCollection.findOneAndUpdate(query,pop);
+		ArrayList<Long> toFollowList = (ArrayList<Long>) popResult.get("toFollow");
 		mongoClient.close();
-		return toFollowArray[0];
+		return toFollowList.get(0);
 	}
 
-	/**
+	/**TODO Bojang Test
 	 * @param index the Schwergsy Account to get the list from
 	 * @param column the specific list to return
 	 * @return
 	 * @throws UnknownHostException 
 	 */
-	public static synchronized BasicDBList getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
+	public static synchronized ArrayList<Object> getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
 
 		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
@@ -906,7 +1006,7 @@ public class DataBaseHandler{
 		Document query = new Document("_id", index);
 		FindIterable<Document> findIter = dbCollection.find(query);
 		MongoCursor<Document> cursor = findIter.iterator();
-		BasicDBList SchwergsList = (BasicDBList) cursor.next().get(column);
+		ArrayList<Object> SchwergsList = (ArrayList<Object>) cursor.next().get(column);
 		cursor.close();
 		mongoClient.close();
 		return SchwergsList;
@@ -918,8 +1018,10 @@ public class DataBaseHandler{
 	 * @param column
 	 * @return
 	 * @throws UnknownHostException 
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static synchronized int getSchwergsyAccountArraySize(int index, String column) throws UnknownHostException {
+	private static synchronized int getSchwergsyAccountArraySize(int index, String column) throws UnknownHostException {
 
 		return getSchwergsyAccountArray(index, column).size();
 	}
@@ -928,11 +1030,20 @@ public class DataBaseHandler{
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static int getFollowersSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "followers");
 	}
 
+	/**
+	 * @param index
+	 * @return
+	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
+	 */
 	public static int getBigAccountsSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "bigAccounts");
 	}
@@ -941,6 +1052,8 @@ public class DataBaseHandler{
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static int getFollowingSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "following");
@@ -950,12 +1063,12 @@ public class DataBaseHandler{
 	 * @param index
 	 * @return
 	 * @throws UnknownHostException
+	 * 
+	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static int getToFollowSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "toFollow");
 	}
-
-	//////End region: Get array size
 
 	/**
 	 * Convenience method to insert a new account into the SchwergsyAccounts collection
@@ -968,6 +1081,7 @@ public class DataBaseHandler{
 	 * @param isIncubated
 	 * @throws UnknownHostException 
 	 * @throws TwitterException 
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void insertSchwergsyAccount(
@@ -1012,6 +1126,7 @@ public class DataBaseHandler{
 	 * @param statistics
 	 * @throws UnknownHostException
 	 * @throws TwitterException 
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void insertSchwergsyAccount(
@@ -1074,6 +1189,7 @@ public class DataBaseHandler{
 	 * @return a Document containing the customerSecret, customerKey, authorizationSecret, authorizationKey,
 	 * and isIncubated info from the Schwergsy account
 	 * @throws Exception
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized Document getAuthorizationInfo(int index) throws Exception {
@@ -1109,6 +1225,12 @@ public class DataBaseHandler{
 	}
 
 
+	/**TODO Bojang Test
+	 * @param bird
+	 * @param index
+	 * @throws TwitterException
+	 * @throws UnknownHostException
+	 */
 	public static synchronized void initUpdateFollowing(Twitter bird, int index) throws TwitterException, UnknownHostException{
 		int ratecount = 0;
 		IDs IDCollection;
@@ -1134,6 +1256,7 @@ public class DataBaseHandler{
 	 * @param collectionName
 	 * @return The size of the given collection
 	 * @throws UnknownHostException
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized long getCollectionSize(String collectionName) throws UnknownHostException {
@@ -1148,6 +1271,7 @@ public class DataBaseHandler{
 	/**
 	 * Print all the elements of Schwergsy account nicely to the console
 	 * @param schwergsyAccountName
+	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void prettyPrintAccount(String schwergsyAccountName) {		
@@ -1177,7 +1301,7 @@ public class DataBaseHandler{
 		}		
 	}
 
-	/**
+	/** TODO Bojang Test
 	 * print the statistics from the given account real nicely
 	 * @param schwergsyAccountName
 	 */
