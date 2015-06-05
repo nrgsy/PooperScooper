@@ -44,6 +44,7 @@ public class Director {
 
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
+		Maintenance.runStatus = new HashMap<>();
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks

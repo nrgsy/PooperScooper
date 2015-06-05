@@ -17,7 +17,7 @@ import java.util.HashSet;
 public class Maintenance {
 
 	//The key is index + runnable type
-	public static HashMap<String, Boolean> runStatus; 
+	public static HashMap<String, Boolean> runStatus;
 
 	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
@@ -160,7 +160,12 @@ public class Maintenance {
 				(new Date().getTime() - ogStartTime) + " ms");
 	}
 
-	//TODO add parameters indicating which schwergsy account the message is associated with
+	/**
+	 * Prints the message to console and writes it to the appropriate log
+	 * 
+	 * @param message the message to print
+	 * @param subDir
+	 */
 	public static void writeLog(String message, String subDir) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -182,7 +187,7 @@ public class Maintenance {
 				
 		//name the file the current date
 		String fileName = dir + (cal.get(Calendar.MONTH) + 1) +  "-" + cal.get(Calendar.DAY_OF_MONTH) +
-				 "-" + cal.get(Calendar.YEAR);
+				 "-" + cal.get(Calendar.YEAR) + ".txt";
 		
 		try {
 		    FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
