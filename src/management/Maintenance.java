@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.net.UnknownHostException;
 import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,10 +42,8 @@ public class Maintenance {
 					toAddToBigAccWhiteList.add(id);
 				}
 			}
-
-			for(Long id : toAddToBigAccWhiteList){
-				DataBaseHandler.addBigAccWhiteList(index, id);
-			}
+			
+			DataBaseHandler.addBigAccountsWhiteList(index, new ArrayList<Long>(toAddToBigAccWhiteList));
 		}
 	}
 
@@ -64,7 +63,7 @@ public class Maintenance {
 					toAddToWhiteList.add(id);
 				}
 			}
-			DataBaseHandler.addWhitelist(index, toAddToWhiteList.toArray(new Long[toAddToWhiteList.size()]));	
+			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toAddToWhiteList));	
 		}
 	}
 

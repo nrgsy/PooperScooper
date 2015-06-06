@@ -138,13 +138,13 @@ public class DataBaseHandler{
 				list.add(info);
 			}
 
-			bestContent.removeField("accessInfo");
+			bestContent.remove("accessInfo");
 			bestContent.put("accessInfo", list);
 
 			long id = (long) bestContent.get("_id");
 			Document query = new Document("_id", id);
 
-			collection.findAndModify(query, bestContent);
+			collection.findOneAndUpdate(query, bestContent);
 		}
 
 		return bestContent;
@@ -174,7 +174,6 @@ public class DataBaseHandler{
 		}
 		return valid;
 	}
-
 
 	/**TODO BOJANG TEST
 	 * @param sourceType the type of the content e.g. "ass", "pendingass"
