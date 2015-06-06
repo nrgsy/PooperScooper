@@ -834,7 +834,7 @@ public class DataBaseHandler{
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountsArray
-	 * @throws UnknownHostException 
+	 * @throws UnknownHostException  
 	 */
 	public static synchronized void addBigAccounts(int index, ArrayList<Long> bigAccountsArray) throws UnknownHostException{
 		ArrayList<Document> bigAccountDocuments = new ArrayList<Document>();
