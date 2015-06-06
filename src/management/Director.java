@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 
+import com.mongodb.MongoClient;
+
 /**
  * @author Bojangles and McChrpchrp
  *
@@ -41,9 +43,10 @@ public class Director {
 	public static void main(String[]args) throws UnknownHostException, Exception {
 
 		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
-
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
+		Maintenance.runStatus = new HashMap<>();
+		DataBaseHandler.mongoClient = new MongoClient();
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks

@@ -135,7 +135,8 @@ public class bigAccRunnable implements Runnable {
 		}
 
 		for(long id : AllCandidates){
-			Maintenance.writeLog("considering candidate...");
+			Maintenance.writeLog("considering candidate...", index);
+
 			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
 				break;
 			}
@@ -267,7 +268,7 @@ public class bigAccRunnable implements Runnable {
 				DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
 			}
 		}
-		Maintenance.writeLog("done harvesting");
+		Maintenance.writeLog("done harvesting", index);
 	}
 
 

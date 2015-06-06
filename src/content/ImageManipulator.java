@@ -43,7 +43,7 @@ public class ImageManipulator {
 			ImageIO.write(bi, "jpg", img);
 			//Checks to see img size is less than ~3MB
 			if(img.length()<3000000){
-				Maintenance.writeLog("image is less than 3MB #"+inc);
+				Maintenance.writeLog("image is less than 3MB #" + inc, "content");
 				return true;
 			}
 			
@@ -57,7 +57,7 @@ public class ImageManipulator {
 		finally{
 			img.delete();
 		}
-		Maintenance.writeLog("Image size of "+URI+"is larger than 3MB");
+		Maintenance.writeLog("Image size of " + URI + " is larger than 3MB", "content");
 		return false;
 	}
 

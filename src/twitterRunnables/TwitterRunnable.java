@@ -78,6 +78,9 @@ public class TwitterRunnable implements Runnable {
 	 * 	handles downloading image, updating db, and deleting image after upload
 	 */
 	public void uploadPic(){
+
+		Maintenance.writeLog("uploading pic", index);
+		
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
@@ -93,7 +96,7 @@ public class TwitterRunnable implements Runnable {
 			uploadPicTwitter(image, caption);
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("Temp download of pic failed "+image);
+			Maintenance.writeLog("Temp download of pic failed " + image, index);
 			e.printStackTrace();
 		}
 		finally{

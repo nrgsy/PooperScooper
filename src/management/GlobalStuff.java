@@ -83,6 +83,8 @@ import org.bson.Document;
 		
 		public static HashMap<String,Object> getDefaultGlobalVars(){
 			HashMap<String, Object> globalVars = new HashMap<String, Object>();
+			//to prevent exceeding the limit of following more than 1000 people per day, make sure that
+			//FOLLOW_TIME_MIN never goes below 1.44 minutes (86400 seconds)
 			globalVars.put("FOLLOW_TIME_MIN", 86400L);
 			globalVars.put("FOLLOW_TIME_MAX", 123430L);
 			globalVars.put("FOLLOW_TIME_INCUBATED_MIN", 180000L);
