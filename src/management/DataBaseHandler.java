@@ -1151,7 +1151,7 @@ public class DataBaseHandler{
 	 */
 	public static synchronized void removeSchwergsyAccount(String authorizationKey) {
 		
-		Maintenance.writeLog("Removing Schwergsy account with authorizationKey " + authorizationKey);
+		Maintenance.writeLog("Removing Schwergsy account with authorizationKey: " + authorizationKey);
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("SchwergsyAccounts");	
 		Document query = new Document("authorizationKey", authorizationKey);

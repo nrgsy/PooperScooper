@@ -32,7 +32,7 @@ public class MongoFuckAround {
 		
 		
 		
-		Maintenance.writeLog("test", "maintenance");
+		Maintenance.writeLog("that ass be trflin", "phal's a triflin ass");
 		
 		
 		
