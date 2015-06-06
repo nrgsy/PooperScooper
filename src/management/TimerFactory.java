@@ -81,7 +81,7 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				if (!Maintenance.flagSet) {
-					new bigAccRunnable(bird,index);
+					new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index));
 				}
 				else{
 					Maintenance.runStatus.put(index+"bigAcc", false);

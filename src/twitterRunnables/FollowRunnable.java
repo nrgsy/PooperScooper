@@ -85,8 +85,10 @@ public class FollowRunnable implements Runnable{
 			}
 			//Follows the person
 			TwitterHandler.follow(bird,id);
+			ArrayList<Long> followed = new ArrayList<Long>();
+			followed.add(id);
 			
-			DataBaseHandler.addFollowing(index, new Long[]{id});
+			DataBaseHandler.addFollowing(index, followed);
 		}
 	}
 	

@@ -24,8 +24,8 @@ public class Maintenance {
 
 	public static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
-			Long[] bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts").toArray(new Long[DataBaseHandler.getSchwergsyAccountArraySize(index, "bigAccounts")]);
-			Long[] bigAccWhiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getSchwergsyAccountArraySize(index, "bigAccountsWhiteList")]);
+			Long[] bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts").toArray(new Long[DataBaseHandler.getBigAccountsSize(index)]);
+			Long[] bigAccWhiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getBigAccountsWhiteListSize(index)]);
 			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
 			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
 
@@ -48,7 +48,7 @@ public class Maintenance {
 	public static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
 			Long[] toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow").toArray(new Long[DataBaseHandler.getToFollowSize(index)]);
-			Long[] whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getSchwergsyAccountArraySize(index, "whiteList")]);
+			Long[] whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getWhiteListSize(index)]);
 			HashSet<Long> toAddToWhiteList = new HashSet<Long>();
 			HashSet<Long> whiteListSet = new HashSet<Long>();
 
