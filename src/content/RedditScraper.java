@@ -28,7 +28,7 @@ public class RedditScraper implements Runnable{
 		super();
 		Maintenance.runStatus.put("reddit", true);
 	}
-	
+
 	/**
 	 * @param init
 	 * @throws FuckinUpKPException
@@ -45,7 +45,7 @@ public class RedditScraper implements Runnable{
 		if(init){
 			pages = 35;
 		}
-		
+
 		//Loop through reddit and gathers title + image link
 		for(int j = 0; j<pages; j++){
 			Document document = null;
@@ -86,7 +86,8 @@ public class RedditScraper implements Runnable{
 				try {
 					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), "pendingass");
 				} catch (UnknownHostException e) {
-					Maintenance.writeLog("Could not insert content:\n"+captions.get(i)+"\n"+imglinks.get(i));
+					Maintenance.writeLog("Could not insert content:\n" + 
+							captions.get(i)+"\n"+imglinks.get(i), "content");
 					e.printStackTrace();
 				}
 			}

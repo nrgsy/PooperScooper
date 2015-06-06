@@ -118,7 +118,7 @@ public class ApprovalGUI {
 			frame.repaint();		
 		}
 		else {
-			Maintenance.writeLog("Cannot load next. No content remaining");
+			Maintenance.writeLog("Cannot load next. No content remaining", "gui");
 		}
 	}
 
@@ -164,7 +164,7 @@ public class ApprovalGUI {
 				}
 				undoClicked = true;
 
-				Maintenance.writeLog("Undo completed");
+				Maintenance.writeLog("Undo completed", "gui");
 
 			}
 		}
@@ -240,8 +240,6 @@ public class ApprovalGUI {
 			String authorizationKey = authKeyField.getText();
 			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
 			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
-
-			Maintenance.writeLog("yo" + isIncubated + isSuspended);
 			
 			try {
 				DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
@@ -401,7 +399,7 @@ public class ApprovalGUI {
 					frame.setVisible(true);	
 				}
 				else {
-					Maintenance.writeLog("No content found in pending" + kind);
+					Maintenance.writeLog("No content found in pending" + kind, "gui");
 				}
 			}
 		}		

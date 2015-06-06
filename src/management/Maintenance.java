@@ -7,11 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import javax.xml.crypto.Data;
 
 //sets the global maintenance flag for director
 public class Maintenance {
@@ -66,7 +69,7 @@ public class Maintenance {
 	}
 
 	public static void performMaintenance() throws Exception {
-		Maintenance.writeLog("Maintenance Started");
+		Maintenance.writeLog("Maintenance Started", "maintenance");
 		long ogStartTime = new Date().getTime();
 		flagSet = true;
 
@@ -91,7 +94,7 @@ public class Maintenance {
 		}
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
-				+ " ms for all the timers to die");
+				+ " ms for all the timers to die", "maintenance");
 
 		/*TODO the actual maintenance, Order task such that fastest tasks are done first,
 		 * consider having a maintenance cutoff if it runs for like 4 hours
@@ -108,7 +111,7 @@ public class Maintenance {
 		try {
 			DataBaseHandler.findAndSetGlobalVars();
 		} catch (UnknownHostException e) {
-			Maintenance.writeLog("***ERROR*** failed to find ***ERROR***");
+			Maintenance.writeLog("***ERROR*** failed to find ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
 
@@ -116,7 +119,7 @@ public class Maintenance {
 		try {
 			cleanBigAccs();
 		} catch (UnknownHostException | FuckinUpKPException e) {
-			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***");
+			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
 
@@ -124,12 +127,12 @@ public class Maintenance {
 		try {
 			cleanToFollows();
 		} catch (UnknownHostException | FuckinUpKPException e) {
-			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***");
+			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - nonAPIstartTime)
-				+ " ms for the non-API-calling section to complete");
+				+ " ms for the non-API-calling section to complete", "maintenance");
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		//don't start api call section until 15 minutes from start has passed
@@ -152,12 +155,12 @@ public class Maintenance {
 		TimerFactory.createTimers();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
-				+ " ms for the API-calling section to complete");
+				+ " ms for the API-calling section to complete", "maintenance");
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		flagSet = false;
 		Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
-				(new Date().getTime() - ogStartTime) + " ms");
+				(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 	}
 
 	/**
@@ -173,32 +176,41 @@ public class Maintenance {
 		String strDate = sdf.format(now);
 		String output = strDate + " ----- " + message;
 		System.out.println(output);
-		
+
 		if (subDir == null) {
 			subDir = "default"; 
 		}
-		
+
 		String dir = "logs/" + subDir + "/";
-		
+
 		if (!new File(dir).exists()) {
 			new File(dir).mkdirs();
 		}
 		Calendar cal = Calendar.getInstance();
-				
+
 		//name the file the current date
 		String fileName = dir + (cal.get(Calendar.MONTH) + 1) +  "-" + cal.get(Calendar.DAY_OF_MONTH) +
-				 "-" + cal.get(Calendar.YEAR) + ".txt";
-		
+				"-" + cal.get(Calendar.YEAR) + ".txt";
+
 		try {
-		    FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
-		    fw.write(output + "\n"); //appends the string to the file
-		    fw.close();
+			FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
+			fw.write(output + "\n"); //appends the string to the file
+			fw.close();
 		} catch (IOException e) {
 			System.out.println("***ERROR*** Failed to write to log file ***ERROR***");
 			e.printStackTrace();
 			return;
 		}
 	}
+
+	/**
+	 * @param index The index of the schwergsy account
+	 */
+	public static void writeLog(String message, int index) { 
+		String name = (String) DataBaseHandler.getSchwergsyAccount(index).get("name");
+		writeLog(message, name);
+	}
+
 
 	public static void writeLog(String message) { writeLog(message, null); }
 
