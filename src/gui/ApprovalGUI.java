@@ -247,6 +247,9 @@ public class ApprovalGUI {
 			} catch (UnknownHostException | TwitterException e1) {
 				e1.printStackTrace();
 			}
+			
+			
+			
 		}		
 	}
 

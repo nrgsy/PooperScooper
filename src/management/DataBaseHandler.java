@@ -224,6 +224,12 @@ public class DataBaseHandler{
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void initGlobalVars() throws UnknownHostException{
+		
+		//because this may not be initialized if called from gui the 
+		if (mongoClient == null) {
+			mongoClient = new MongoClient();
+		}
+		
 		//Setting the global variables in GlobalStuff
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
@@ -1102,7 +1108,10 @@ public class DataBaseHandler{
 		}
 		else {
 			Maintenance.writeLog("inserting a new Schwergsy Account");
-			Document basicBitch = new Document("_id", (int) getCollectionSize("SchwergsyAccounts"))
+			
+			int collectionSize = (int) getCollectionSize("SchwergsyAccounts");
+			
+			Document basicBitch = new Document("_id", collectionSize)
 			.append("name", name)
 			.append("customerSecret", customerSecret)
 			.append("customerKey", customerKey)
@@ -1118,15 +1127,35 @@ public class DataBaseHandler{
 
 			dbCollection.insertOne(basicBitch);
 
+			try {
 			//Makes sure that the account's following is synced in the database.
 			initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
 			.setDebugEnabled(true)
-			.setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
-			.setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
-			.setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
-			.setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4").build()).getInstance(),
-			(int) getCollectionSize("SchwergsyAccounts"));
+			.setOAuthConsumerKey(customerKey)
+			.setOAuthConsumerSecret(customerSecret)
+			.setOAuthAccessToken(authorizationKey)
+			.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance(),
+			collectionSize);
+			}
+			catch (Exception e) {
+				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate, removing from db");		
+				removeSchwergsyAccount(authorizationKey);				
+			}
 		}
+	}
+	
+	/**
+	 * Delete a Schwergsy account from the database
+	 * 
+	 * @param authorizationKey
+	 */
+	public static synchronized void removeSchwergsyAccount(String authorizationKey) {
+		
+		Maintenance.writeLog("Removing Schwergsy account with authorizationKey " + authorizationKey);
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> collection = db.getCollection("SchwergsyAccounts");	
+		Document query = new Document("authorizationKey", authorizationKey);
+		collection.deleteOne(query);
 	}
 
 	/**
