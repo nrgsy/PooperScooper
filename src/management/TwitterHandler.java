@@ -78,11 +78,23 @@ public class TwitterHandler {
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id) throws TwitterException{
-		return twitter.getUserTimeline(id);
+		if(isAtRateLimit(twitter,"statuses/user_timeline")){
+			Maintenance.writeLog("Reached rate limit for user_timeline");
+			return null;
+		}
+		else{
+			return twitter.getUserTimeline(id);
+		}
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, Paging query) throws TwitterException{
-		return twitter.getUserTimeline(id, query);
+		if(isAtRateLimit(twitter,"statuses/user_timeline")){
+			Maintenance.writeLog("Reached rate limit for user_timeline");
+			return null;
+		}
+		else{
+			return twitter.getUserTimeline(id, query);
+		}
 	}
 
 	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus) throws TwitterException{

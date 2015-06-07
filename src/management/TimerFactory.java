@@ -150,7 +150,7 @@ public class TimerFactory {
 
 		long incubated_followtime = incubated_followtime_min +
 				((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
-		long bigacctime =  0L; //TODO figure out rate for bigAcc scraping and harvesting
+		long bigacctime =  950000L; //This is an arbitrary time a little over 15 minutes to prevent rate limit problems
 
 		//If in incubation, follows at a rate of 425 per day
 		if(info.getBoolean("isIncubated")){

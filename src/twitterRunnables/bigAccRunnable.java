@@ -51,13 +51,14 @@ public class bigAccRunnable implements Runnable {
 		bird = tf.getInstance();
 		this.index = 0;
 		this.bigAccountIndex = DataBaseHandler.getBigAccountHarvestIndex(0);
-		//Maintenance.runStatus.put(index+"bigAcc", true);
+		Maintenance.runStatus.put(index+"bigAcc", true);
 	}
 
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
 		//TODO add latestTweet capability to bigAccount in DBH
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		ArrayList<Long> bigAccounts = new ArrayList<Long>();
+		Iterator<Long> AllCandidatesIterator;
 		int maxCandidates = 100;
 
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
@@ -134,6 +135,18 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 
+		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
+			Long user_id = i.next();
+			if(DataBaseHandler.isBigAccWhiteListed(index, user_id)){
+				i.remove();
+			}
+		}
+		
+		AllCandidatesIterator = AllCandidates.iterator(); 
+			while(AllCandidates.size() > 300){
+				AllCandidatesIterator.remove();
+			}
+		
 		for(long id : AllCandidates){
 			Maintenance.writeLog("considering candidate...", index);
 
@@ -200,74 +213,72 @@ public class bigAccRunnable implements Runnable {
 		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings);
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
-		if(DataBaseHandler.getToFollowSize(index)<11900){
-
-			//Makes sure the tweet is original to the bigAccount candidate
-			for(Status tweet: tweets){
-				if(!tweet.isRetweet()){
-					NoRTTweets.add(tweet);
-				}
-				if(NoRTTweets.size()==maxNoRTTweets){
-					break;
-				}
+		//Makes sure the tweet is original to the bigAccount candidate
+		for(Status tweet: tweets){
+			if(!tweet.isRetweet()){
+				NoRTTweets.add(tweet);
 			}
-			
-			//Reverse the order so that the latestTweet will be the last tweet used in the upcoming loop.
-			Collections.reverse(NoRTTweets);
+			if(NoRTTweets.size()==maxNoRTTweets){
+				break;
+			}
+		}
 
-			//Gets ids of retweeters and puts it into toFollowSet and updates latestTweet for bigAccount
-			//By using a HashSet, you get only unique retweeter ids.
-			for(Status tweet :NoRTTweets){
-				//Makes sure it won't pass the ratelimit
-				if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids")){
-					System.out.println("Reached rate limit on big account " + bigAccountIndex);
-					break;
-				}
-				long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1);
-				if(toFollows.length != 0){
+		//Reverse the order so that the latestTweet will be the last tweet used in the upcoming loop.
+		Collections.reverse(NoRTTweets);
+
+		//Gets ids of retweeters and puts it into toFollowSet and updates latestTweet for bigAccount
+		//By using a HashSet, you get only unique retweeter ids.
+		for(Status tweet :NoRTTweets){
+			//Makes sure it won't pass the ratelimit
+			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids")){
+				System.out.println("Reached rate limit on big account " + bigAccountIndex);
+				break;
+			}
+			long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1);
+			if(toFollows.length != 0){
 				for(long id : toFollows){
 					toFollowSet.add(id);
 				}
-				}
-				DataBaseHandler.editBigAccountLatestTweet(index, bigAccountIndex, tweet.getId());
 			}
+			DataBaseHandler.editBigAccountLatestTweet(index, bigAccountIndex, tweet.getId());
+		}
 
-			//If the retweeter is already in the whitelist, then remove that bitch
-			for (Iterator<Long> i = toFollowSet.iterator(); i.hasNext();) {
-			    Long user_id = i.next();
-			    if(DataBaseHandler.isWhiteListed(index, user_id)){
-					i.remove();
-				}
+		//If the retweeter is already in the whitelist, then remove that bitch
+		for (Iterator<Long> i = toFollowSet.iterator(); i.hasNext();) {
+			Long user_id = i.next();
+			if(DataBaseHandler.isWhiteListed(index, user_id)){
+				i.remove();
 			}
+		}
 
-			if(toFollowSet.size()==0){
-				if(DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex)==2){
-					if(DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)==2){
-						//if it gets 3 outs, it's removed from bigAccounts
-						DataBaseHandler.deleteBigAccount(index, bigAccountIndex);
-					}
-					else{
-						//if it gets 3 strikes, move it to the end of bigAccounts and reset strikes
-						//and adds an out
-						DataBaseHandler.editBigAccountStrikes(index, bigAccountIndex, 0);
-						DataBaseHandler.editBigAccountOuts(index, bigAccountIndex, 
-								DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1);
-						DataBaseHandler.moveBigAccountToEnd(index, bigAccountIndex);
-					}
+		if(toFollowSet.size()==0){
+			if(DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_STRIKES_FOR_OUT){
+				if(DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_OUTS_FOR_REMOVAL){
+					//if it gets however many outs, it's removed from bigAccounts
+					DataBaseHandler.deleteBigAccount(index, bigAccountIndex);
 				}
 				else{
-					//if it gets a strike, add it to what it has now.
-					DataBaseHandler.editBigAccountStrikes(index, bigAccountIndex, 
-							DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex) + 1);
+					//if it gets however many strikes, move it to the end of bigAccounts and reset strikes
+					//and adds an out
+					DataBaseHandler.editBigAccountStrikes(index, bigAccountIndex, 0);
+					DataBaseHandler.editBigAccountOuts(index, bigAccountIndex, 
+							DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1);
+					DataBaseHandler.moveBigAccountToEnd(index, bigAccountIndex);
 				}
 			}
 			else{
-				DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
-				DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
-				int bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index) == bigAccountIndex ? 0 : bigAccountIndex + 1;
-				DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
+				//if it gets a strike, add it to what it has now.
+				DataBaseHandler.editBigAccountStrikes(index, bigAccountIndex, 
+						DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex) + 1);
 			}
 		}
+		else{
+			DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
+			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
+			int bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index) == bigAccountIndex ? 0 : bigAccountIndex + 1;
+			DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
+		}
+
 		Maintenance.writeLog("done harvesting", index);
 	}
 
@@ -275,18 +286,22 @@ public class bigAccRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		//TODO stuff in here.
 		try {
-			harvestBigAccounts();
+			if(DataBaseHandler.getToFollowSize(index)==11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
+				findBigAccounts();
+			}
+			else{
+				harvestBigAccounts();
+			}
 		} catch (UnknownHostException | TwitterException | InterruptedException
 				| FuckinUpKPException e) {
 			// TODO Auto-generated catch block
-			System.out.println("didn't work");
 			e.printStackTrace();
 		}
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) throws UnknownHostException{
+		DataBaseHandler.findAndSetGlobalVars();
 		new Thread(new bigAccRunnable()).start();
 	}
 

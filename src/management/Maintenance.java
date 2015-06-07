@@ -24,8 +24,14 @@ public class Maintenance {
 
 	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
+	
+	private static void resetBigAccountHarvestIndexes() throws UnknownHostException {
+		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+			DataBaseHandler.editBigAccountHarvestIndex(index, 0);
+		}
+	}
 
-	public static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
+	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
 			Long[] bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts").toArray(new Long[DataBaseHandler.getBigAccountsSize(index)]);
 			Long[] bigAccWhiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getBigAccountsWhiteListSize(index)]);
@@ -46,7 +52,7 @@ public class Maintenance {
 		}
 	}
 
-	public static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
+	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
 			Long[] toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow").toArray(new Long[DataBaseHandler.getToFollowSize(index)]);
 			Long[] whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getWhiteListSize(index)]);
@@ -122,12 +128,20 @@ public class Maintenance {
 			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
-
+		
 		//cleans up and syncs toFollow with whiteList
 		try {
 			cleanToFollows();
 		} catch (UnknownHostException | FuckinUpKPException e) {
 			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***", "maintenance");
+			e.printStackTrace();
+		}
+		
+		//resets bigAccountHarvestIndexes to 0
+		try {
+			resetBigAccountHarvestIndexes();
+		} catch (UnknownHostException e) {
+			Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
 

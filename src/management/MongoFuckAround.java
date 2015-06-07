@@ -43,9 +43,19 @@ public class MongoFuckAround {
 		
 		//System.out.println(bird.getUserTimeline("jerseyshorerose").get(0).getRetweetedStatus().getUser().getFollowersCount());
 		System.out.println(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids"));
-		System.out.println("ToFollow size : " + DataBaseHandler.getToFollowSize(0));
-		DataBaseHandler.editBigAccountHarvestIndex(0, 6);
-		System.out.println("bigAccountHarvestIndex : " + DataBaseHandler.getBigAccountHarvestIndex(0));
+		long oneToFollow = DataBaseHandler.getOneToFollow(0);
+		int toFollowSize = DataBaseHandler.getToFollowSize(0);
+		int whiteListSize = DataBaseHandler.getWhiteListSize(0);
+		int bigAccountHarvestIndex = DataBaseHandler.getBigAccountHarvestIndex(0);
+		int bigaccountstrikes = DataBaseHandler.getBigAccountStrikes(0, 68);
+		int bigaccountouts = DataBaseHandler.getBigAccountOuts(0, 68);
+		long bigaccount = DataBaseHandler.getBigAccount(0, 68);
+		System.out.println("One to follow : "+oneToFollow);
+		System.out.println("ToFollow size : " + toFollowSize);
+		System.out.println("WhiteList size : " + whiteListSize);
+		System.out.println("bigAccountHarvestIndex : " + bigAccountHarvestIndex);
+		System.out.println("bigAccount 0 strikes : " + bigaccountstrikes);
+		System.out.println("bigAccount 0 outs : " + bigaccountouts);
 
 
 	}

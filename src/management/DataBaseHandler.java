@@ -34,7 +34,7 @@ import com.mongodb.MongoClient;
 public class DataBaseHandler{
 
 
-	public static MongoClient mongoClient;
+	public static MongoClient mongoClient = new MongoClient();
 
 	/**TODO BOJANG TEST
 	 * @param type The type of content, types are "ass", "pendingass", "workout", "weed"
@@ -795,9 +795,11 @@ public class DataBaseHandler{
 	public static synchronized void moveBigAccountToEnd(int index, int bigAccIndex) throws UnknownHostException, FuckinUpKPException {
 		long user_id = getBigAccount(index, bigAccIndex);
 		long latestTweet = getBigAccountLatestTweet(index,bigAccIndex);
+		int strikes = getBigAccountStrikes(index, bigAccIndex);
+		int outs = getBigAccountOuts(index,bigAccIndex);
 
 		deleteBigAccount(index, bigAccIndex);
-		addBigAccount(index, user_id, latestTweet);
+		addBigAccount(index, user_id, strikes, outs, latestTweet);
 	}
 
 
@@ -810,19 +812,14 @@ public class DataBaseHandler{
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 
-	public static synchronized void addBigAccount(int index, long bigAccountID, long latestTweet) throws UnknownHostException, FuckinUpKPException{
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-		Document query = new Document("_id", index);
+	public static synchronized void addBigAccount(int index, long bigAccountID, int strikes, int outs, long latestTweet) throws UnknownHostException, FuckinUpKPException{
 
 		Document bigAccount = new Document("user_id", bigAccountID);
-		bigAccount.append("strikes", 0);
-		bigAccount.append("outs", 0);
+		bigAccount.append("strikes", strikes);
+		bigAccount.append("outs", outs);
 		bigAccount.append("latestTweet", latestTweet);
 
-		Document ele = new Document("$addToSet", new Document("bigAccounts",bigAccount));
-
-		dbCollection.findOneAndUpdate(query, ele);
+		DataBaseHandler.addElementToSchwergsArray(0, bigAccount, "bigAccounts");
 		Maintenance.writeLog("successfully added an element to bigAccounts", index);
 	}
 
