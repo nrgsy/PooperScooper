@@ -100,12 +100,7 @@ public class Maintenance {
 		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
 				+ " ms for all the timers to die", "maintenance");
 
-		/*TODO the actual maintenance, Order task such that fastest tasks are done first,
-		 * consider having a maintenance cutoff if it runs for like 4 hours
-		 * old content garbage collection
-		 * sweep through links in all pending and regular content checking for validity
-		 * get big accounts (because of high api call amount)
-		 */
+
 
 		//Section that doesn't use api calls (runs first because we wait 15 min before using any api calls)
 		///////////////////////////////////////////////////////////////////////////////////////////////
