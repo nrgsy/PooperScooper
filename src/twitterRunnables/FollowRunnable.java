@@ -79,15 +79,15 @@ public class FollowRunnable implements Runnable{
 			//if something fucks up here, it's because TwitterHandler returns null and 
 			//the ResponseList<Status> is null. not sure if you can iterate over null.
 			//probably not.
-			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging);
+			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet() && tweet.getInReplyToScreenName().equals(null)){
-					TwitterHandler.favorite(bird,tweet.getId());
+					TwitterHandler.favorite(bird,tweet.getId(), index);
 					break;
 				}
 			}
 			//Follows the person
-			TwitterHandler.follow(bird,id);
+			TwitterHandler.follow(bird,id, index);
 			ArrayList<Long> followed = new ArrayList<Long>();
 			followed.add(id);
 			
@@ -107,7 +107,7 @@ public class FollowRunnable implements Runnable{
 		//TODO get a ratio
 		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
 		for(Long id : unfollowArr){
-			TwitterHandler.unfollow(bird,id);
+			TwitterHandler.unfollow(bird,id, index);
 		}
 	}
 

@@ -64,7 +64,7 @@ public class bigAccRunnable implements Runnable {
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId());
+			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 
 			if(OwnTweets.size()>15){
 				//sorts by most retweets and cuts out tweets with little retweets
@@ -89,7 +89,7 @@ public class bigAccRunnable implements Runnable {
 			for(Status tweet : OwnTweets){
 				//gathers all retweeters' ids from tweets
 				if(tweet.getRetweetCount()!=0){
-					long[] RTerIDs = TwitterHandler.getRetweeterIds(bird, tweet.getId(), 100, -1);
+					long[] RTerIDs = TwitterHandler.getRetweeterIds(bird, tweet.getId(), 100, -1, index);
 					for(long id : RTerIDs){
 						AllRTerIDs.add(id);
 					}
@@ -108,7 +108,7 @@ public class bigAccRunnable implements Runnable {
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
-				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings);
+				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
 				for(Status tweet: potentialBigAccs){
 					if(AllCandidates.size() == maxCandidates){
 						break;
@@ -156,7 +156,7 @@ public class bigAccRunnable implements Runnable {
 
 			Paging query = new Paging();
 			query.setCount(200);
-			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query);
+			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index);
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -210,7 +210,7 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setSinceId(lastTweet);
 		}
 
-		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings);
+		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
 		//Makes sure the tweet is original to the bigAccount candidate
@@ -230,11 +230,11 @@ public class bigAccRunnable implements Runnable {
 		//By using a HashSet, you get only unique retweeter ids.
 		for(Status tweet :NoRTTweets){
 			//Makes sure it won't pass the ratelimit
-			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids")){
+			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids", index)){
 				System.out.println("Reached rate limit on big account " + bigAccountIndex);
 				break;
 			}
-			long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1);
+			long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1, index);
 			if(toFollows.length != 0){
 				for(long id : toFollows){
 					toFollowSet.add(id);

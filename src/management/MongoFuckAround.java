@@ -42,7 +42,7 @@ public class MongoFuckAround {
 		bird = tf.getInstance();
 		
 		//System.out.println(bird.getUserTimeline("jerseyshorerose").get(0).getRetweetedStatus().getUser().getFollowersCount());
-		System.out.println(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids"));
+		System.out.println(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids", 0));
 		long oneToFollow = DataBaseHandler.getOneToFollow(0);
 		int toFollowSize = DataBaseHandler.getToFollowSize(0);
 		int whiteListSize = DataBaseHandler.getWhiteListSize(0);
