@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.bson.Document;
-import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -1335,23 +1334,8 @@ public class DataBaseHandler{
 	 * @throws UnknownHostException
 	 */
 	public static  void initUpdateFollowing(Twitter bird, int index) throws TwitterException, UnknownHostException{
-		int ratecount = 0;
-		IDs IDCollection;
-		HashSet<Long> following = new HashSet<>();
-		IDCollection = bird.getFriendsIDs(-1);
-		for(long id : IDCollection.getIDs()){
-			following.add(id);
-		}
-		ratecount++;
-		while(IDCollection.getNextCursor()!=0 && ratecount<14){
-			IDCollection = (bird.getFriendsIDs(IDCollection.getNextCursor()));
-			for(long id : IDCollection.getIDs()){
-				following.add(id);
-			}
-			ratecount++;
-		}
-
-		addFollowing(index, new ArrayList<Long>(following));
+		
+		addFollowing(index, new ArrayList<Long>(TwitterHandler.initUpdateFollowing(bird, index)));
 
 	}
 

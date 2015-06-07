@@ -74,6 +74,37 @@ public class TwitterHandler {
 		}
 	}
 
+	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/friends/ids", index)){
+			try {
+				int ratecount = 0;
+				IDs IDCollection;
+				HashSet<Long> following = new HashSet<>();
+
+				IDCollection = twitter.getFriendsIDs(-1);
+
+				for(long id : IDCollection.getIDs()){
+					following.add(id);
+				}
+				ratecount++;
+				while(IDCollection.getNextCursor()!=0 && ratecount<14){
+					IDCollection = (twitter.getFriendsIDs(IDCollection.getNextCursor()));
+					for(long id : IDCollection.getIDs()){
+						following.add(id);
+					}
+					ratecount++;
+				}
+				return following;
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return null;
+			}
+		}
+		else{
+			return null;
+		}
+	}
+
 	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
 		if(!DataBaseHandler.isSuspended(index)){
 			try {
