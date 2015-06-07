@@ -232,7 +232,7 @@ public class ApprovalGUI {
 	//the listener for the add button in Schwergsy account adding interface
 	private static class AddAccountListener implements ActionListener {
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent e) {  
 
 			String name = nameField.getText();
 			String customerSecret = cusSecField.getText();
