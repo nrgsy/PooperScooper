@@ -1,0 +1,15 @@
+2015-06-07 15:13:37.671 ----- done harvesting
+2015-06-07 15:17:09.374 ----- done harvesting
+2015-06-07 15:22:13.002 ----- done harvesting
+2015-06-07 15:25:36.271 ----- done harvesting
+2015-06-07 15:26:47.950 ----- done harvesting
+2015-06-07 15:33:44.566 ----- done harvesting
+2015-06-07 15:35:00.661 ----- successfully added an element to bigAccounts
+2015-06-07 15:35:00.669 ----- successfully added an element to bigAccounts
+2015-06-07 15:35:45.105 ----- done harvesting
+2015-06-07 15:40:23.905 ----- successfully added an element to bigAccounts
+2015-06-07 15:40:23.923 ----- successfully added an element to bigAccounts
+2015-06-07 15:40:23.930 ----- done harvesting
+2015-06-07 15:40:51.446 ----- successfully added an element to bigAccounts
+2015-06-07 15:40:51.454 ----- successfully added an element to bigAccounts
+2015-06-07 15:40:51.461 ----- done harvesting

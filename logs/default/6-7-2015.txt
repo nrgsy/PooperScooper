@@ -1,0 +1,1 @@
+2015-06-07 15:12:03.602 ----- Globals not found in db, initializing with defaults

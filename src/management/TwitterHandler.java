@@ -45,10 +45,15 @@ public class TwitterHandler {
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
 	 */
-	public static HashSet<Long> getFollowers(Twitter bird) throws TwitterException, UnknownHostException{
+	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
 		int ratecount = 0;
 		IDs blah;
-		blah = bird.getFollowersIDs(-1);
+		try {
+			blah = bird.getFollowersIDs(-1);
+		} catch (TwitterException e) {
+			blah = null;
+			errorHandling(e);
+		}
 		HashSet<Long> followers = new HashSet<>();
 		for(int i = 0; i < blah.getIDs().length; i++){
 			followers.add(blah.getIDs()[i]);
@@ -56,7 +61,12 @@ public class TwitterHandler {
 		ratecount++;
 
 		while(blah.getNextCursor()!=0 && ratecount<14){
-			blah = (bird.getFollowersIDs(blah.getNextCursor()));
+			try {
+				blah = (bird.getFollowersIDs(blah.getNextCursor()));
+			} catch (TwitterException e) {
+				blah = null;
+				errorHandling(e);
+			}
 			for(int i = 0; i < blah.getIDs().length; i++){
 				followers.add(blah.getIDs()[i]);
 			}
@@ -65,48 +75,72 @@ public class TwitterHandler {
 		return followers;
 	}
 
-	public static void updateStatus(Twitter twitter, StatusUpdate status) throws TwitterException{
-		twitter.updateStatus(status);
-	}
-
-	public static void follow(Twitter twitter, long id) throws TwitterException{
-		twitter.createFriendship(id);
-	}
-
-	public static void unfollow(Twitter twitter, long id) throws TwitterException{
-		twitter.destroyFriendship(id);
-	}
-
-	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id) throws TwitterException{
-		if(isAtRateLimit(twitter,"statuses/user_timeline")){
-			Maintenance.writeLog("Reached rate limit for user_timeline");
-			return null;
+	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
+		try {
+			twitter.updateStatus(status);
+		} catch (TwitterException e) {
+			errorHandling(e);
 		}
-		else{
+	}
+
+	public static void follow(Twitter twitter, long id, int index){
+		try {
+			twitter.createFriendship(id);
+		} catch (TwitterException e) {
+			errorHandling(e);
+		}
+	}
+
+	public static void unfollow(Twitter twitter, long id, int index){
+		try {
+			twitter.destroyFriendship(id);
+		} catch (TwitterException e) {
+			errorHandling(e);
+		}
+	}
+
+	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, int index){
+		try {
 			return twitter.getUserTimeline(id);
-		}
-	}
-
-	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, Paging query) throws TwitterException{
-		if(isAtRateLimit(twitter,"statuses/user_timeline")){
-			Maintenance.writeLog("Reached rate limit for user_timeline");
+		} catch (TwitterException e) {
+			errorHandling(e);
 			return null;
 		}
-		else{
-			return twitter.getUserTimeline(id, query);
-		}
+		
 	}
 
-	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus) throws TwitterException{
-		return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
+	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, Paging query, int index){
+
+		try {
+			return twitter.getUserTimeline(id, query);
+		} catch (TwitterException e) {
+			errorHandling(e);
+			return null;
+		}
+
+	}
+
+	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
+		try {
+			return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
+		} catch (TwitterException e) {
+			errorHandling(e);
+			return null;
+		}
 	}
 
 	public static void favorite(Twitter twitter, long id) throws TwitterException{
 		twitter.createFavorite(id);
 	}
 
-	public static boolean isAtRateLimit(Twitter twitter, String endpoint) throws TwitterException{
-		Map<String ,RateLimitStatus> rateLimitStatus = twitter.getRateLimitStatus();
+	public static boolean isAtRateLimit(Twitter twitter, String endpoint){
+		Map<String, RateLimitStatus> rateLimitStatus;
+		try {
+			rateLimitStatus = twitter.getRateLimitStatus();
+		} catch (TwitterException e) {
+			errorHandling(e);
+			rateLimitStatus = null;
+		}
 		RateLimitStatus status = rateLimitStatus.get(endpoint);
 		if (status.getRemaining() == 0){
 			return true;
@@ -115,4 +149,12 @@ public class TwitterHandler {
 			return false;
 		}
 	}
+
+	private static void errorHandling(TwitterException e){
+		if(e.getErrorCode()==64){    
+			//TODO databasehandler.suspendschwergsyaccount(index)
+		}
+	}
+	
+	
 }
