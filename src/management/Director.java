@@ -43,6 +43,8 @@ public class Director {
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
 
+		Maintenance.writeLog("Starting Director");
+		
 		//Initialize all the shit
 		DataBaseHandler.mongoClient = new MongoClient();
 		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();

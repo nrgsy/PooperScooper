@@ -2,20 +2,9 @@ package management;
 
 
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-
-import twitter4j.ResponseList;
-import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
 
 public class MongoFuckAround {
 
@@ -49,14 +38,11 @@ public class MongoFuckAround {
 		int bigAccountHarvestIndex = DataBaseHandler.getBigAccountHarvestIndex(0);
 		int bigaccountstrikes = DataBaseHandler.getBigAccountStrikes(0, 68);
 		int bigaccountouts = DataBaseHandler.getBigAccountOuts(0, 68);
-		long bigaccount = DataBaseHandler.getBigAccount(0, 68);
 		System.out.println("One to follow : "+oneToFollow);
 		System.out.println("ToFollow size : " + toFollowSize);
 		System.out.println("WhiteList size : " + whiteListSize);
 		System.out.println("bigAccountHarvestIndex : " + bigAccountHarvestIndex);
 		System.out.println("bigAccount 0 strikes : " + bigaccountstrikes);
 		System.out.println("bigAccount 0 outs : " + bigaccountouts);
-
-
 	}
 }
