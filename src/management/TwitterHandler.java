@@ -3,7 +3,6 @@ package management;
 
 import java.net.UnknownHostException;
 import java.util.HashSet;
-import java.util.Map.Entry;
 
 import twitter4j.IDs;
 
@@ -20,8 +19,6 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-
-import com.mongodb.BasicDBObject;
 
 public class TwitterHandler {
 
@@ -46,7 +43,7 @@ public class TwitterHandler {
 	 * @throws UnknownHostException 
 	 */
 	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(bird, "/followers/ids", index)){
 			int ratecount = 0;
 			IDs blah;
 			try {
@@ -67,6 +64,37 @@ public class TwitterHandler {
 					ratecount++;
 				}
 				return followers;
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return null;
+			}
+		}
+		else{
+			return null;
+		}
+	}
+
+	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/friends/ids", index)){
+			try {
+				int ratecount = 0;
+				IDs IDCollection;
+				HashSet<Long> following = new HashSet<>();
+
+				IDCollection = twitter.getFriendsIDs(-1);
+
+				for(long id : IDCollection.getIDs()){
+					following.add(id);
+				}
+				ratecount++;
+				while(IDCollection.getNextCursor()!=0 && ratecount<14){
+					IDCollection = (twitter.getFriendsIDs(IDCollection.getNextCursor()));
+					for(long id : IDCollection.getIDs()){
+						following.add(id);
+					}
+					ratecount++;
+				}
+				return following;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
 				return null;
@@ -108,7 +136,7 @@ public class TwitterHandler {
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, int index){
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
 				return twitter.getUserTimeline(id);
 			} catch (TwitterException e) {
@@ -138,7 +166,7 @@ public class TwitterHandler {
 	}
 
 	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
 			try {
 				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
 			} catch (TwitterException e) {

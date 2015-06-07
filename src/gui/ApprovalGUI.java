@@ -14,16 +14,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -37,20 +33,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
 import management.TimerFactory;
-
 import org.bson.Document;
-
 import twitter4j.TwitterException;
-
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -291,7 +279,24 @@ public class ApprovalGUI {
 			}
 		}		
 	}
+	
+	//The listener for the perform maintenance button
+	private static class MaintenanceListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
 
+			frame.setVisible(false);
+			frame.dispose();
+
+			try {
+				Maintenance.performMaintenance();
+			}
+			catch(Exception e1) {
+				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***");
+			}
+		}
+	}
+	
 	//the listener for the remove button in Schwergsy account interface
 	private static class RemoveAccountListener implements ActionListener {
 		@Override
@@ -310,7 +315,7 @@ public class ApprovalGUI {
 			}
 		}
 	}
-
+	
 	private static class ContentListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -515,11 +520,15 @@ public class ApprovalGUI {
 		schwergsButton.addActionListener(new SchwergsListener());
 		//for opening the gui that edits images
 		JButton contentButton = new JButton("Review Content");
-		contentButton.addActionListener(new ContentListener());	
+		contentButton.addActionListener(new ContentListener());
+		//for performing maintenance on command
+		JButton maintenanceButton = new JButton("Perform Maintenance");
+		maintenanceButton.addActionListener(new MaintenanceListener());
 
-		JPanel panel = new JPanel(new GridLayout(1, 2));
+		JPanel panel = new JPanel(new GridLayout(1, 3));
 		panel.add(schwergsButton);
 		panel.add(contentButton);
+		panel.add(maintenanceButton);
 		panel.setBackground(Color.GRAY);
 
 		frame = new JFrame("Main Menu");

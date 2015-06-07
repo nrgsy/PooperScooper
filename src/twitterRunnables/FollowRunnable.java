@@ -2,7 +2,6 @@ package twitterRunnables;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
@@ -30,7 +29,6 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessTokenSecret
 	 */
 	public FollowRunnable(Twitter twitter, int index){
-		super();
 		this.index = index;
 		bird = twitter;
 		Maintenance.runStatus.put(index+"follow", true);

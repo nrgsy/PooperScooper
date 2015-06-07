@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
 import management.GlobalStuff;
@@ -229,11 +228,6 @@ public class bigAccRunnable implements Runnable {
 		//Gets ids of retweeters and puts it into toFollowSet and updates latestTweet for bigAccount
 		//By using a HashSet, you get only unique retweeter ids.
 		for(Status tweet :NoRTTweets){
-			//Makes sure it won't pass the ratelimit
-			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids", index)){
-				System.out.println("Reached rate limit on big account " + bigAccountIndex);
-				break;
-			}
 			long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1, index);
 			if(toFollows.length != 0){
 				for(long id : toFollows){
