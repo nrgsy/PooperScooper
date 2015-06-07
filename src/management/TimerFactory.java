@@ -126,8 +126,19 @@ public class TimerFactory {
 	 * @param id The ID of the Schwergsy accout
 	 * @throws Exception 
 	 */
-	public static void createTimers(int id) throws Exception {
-		final Document info = DataBaseHandler.getAuthorizationInfo(id);			
+	public static void createTimers(int id) {
+		
+		Maintenance.writeLog("Creating timers for account with id: " + id);
+		
+		Document info;
+		try {
+			info = DataBaseHandler.getAuthorizationInfo(id);
+		} catch (Exception e) {
+			Maintenance.writeLog("***ERROR*** Failed to pull authorization info for account with "
+					+ "id: " + id + " from the database. Timers cannot be created. ***ERROR***");
+			e.printStackTrace();
+			return;
+		}		
 
 		long followtime_min = GlobalStuff.FOLLOW_TIME_MIN;
 		long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;

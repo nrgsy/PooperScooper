@@ -2,12 +2,9 @@ package management;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.UnknownHostException;
-import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,13 +12,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.xml.crypto.Data;
-
 //sets the global maintenance flag for director
 public class Maintenance {
 
 	//The key is index + runnable type
 	public static HashMap<String, Boolean> runStatus;
+	
+	//a list containing _id's of Schwergsy Accounts that will be deleted on
+	//the next maintenance run
+	public static ArrayList<Integer> doomedAccounts;
 
 	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
@@ -112,6 +111,8 @@ public class Maintenance {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 		long nonAPIstartTime = new Date().getTime();
 
+		DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
+		
 		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 		try {
 			DataBaseHandler.findAndSetGlobalVars();

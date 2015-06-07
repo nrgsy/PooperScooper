@@ -2,6 +2,7 @@ package management;
 
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,11 +43,13 @@ public class Director {
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
 
+		//Initialize all the shit
+		DataBaseHandler.mongoClient = new MongoClient();
 		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
 		Maintenance.runStatus = new HashMap<>();
-		DataBaseHandler.mongoClient = new MongoClient();
+		Maintenance.doomedAccounts = new ArrayList<Integer>();
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks
@@ -55,6 +58,7 @@ public class Director {
 				nextOccurrenceOf3am,
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
+		//create the initial timers
 		TimerFactory.createTimers();
 	}
 }

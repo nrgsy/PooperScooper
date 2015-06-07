@@ -221,12 +221,12 @@ public class DataBaseHandler{
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	public static synchronized void initGlobalVars() throws UnknownHostException{
-		
+
 		//because this may not be initialized if called from gui the 
 		if (mongoClient == null) {
 			mongoClient = new MongoClient();
 		}
-		
+
 		//Setting the global variables in GlobalStuff
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
@@ -718,28 +718,25 @@ public class DataBaseHandler{
 				change));
 		dbCollection.findOneAndUpdate(query, updater);
 	}
-	
+
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountHarvestIndex
 	 */
 	public static synchronized void editBigAccountHarvestIndex(int index, int bigAccountHarvestIndex){
-		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Document query = new Document("_id",index);
 		Document updater = new Document("$set", new Document("bigAccountHarvestIndex",
 				bigAccountHarvestIndex));
 		dbCollection.findOneAndUpdate(query, updater);
-		mongoClient.close();
 	}
-	
+
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @return
 	 */
 	public static synchronized int getBigAccountHarvestIndex(int index){
-		MongoClient mongoClient = new MongoClient();
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Document query = new Document("_id", index);
@@ -747,7 +744,6 @@ public class DataBaseHandler{
 		MongoCursor<Document> cursor = findIter.iterator();
 		int bigAccountHarvestIndex = (int)cursor.next().get("bigAccountHarvestIndex");
 		cursor.close();
-		mongoClient.close();
 		return bigAccountHarvestIndex;
 	}
 
@@ -826,7 +822,7 @@ public class DataBaseHandler{
 		DataBaseHandler.addElementToSchwergsArray(0, bigAccount, "bigAccounts");
 		Maintenance.writeLog("successfully added an element to bigAccounts", index);
 	}
-	
+
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountsArray
@@ -843,7 +839,7 @@ public class DataBaseHandler{
 		}
 		addArrayToSchwergsArray(index, bigAccountDocuments, "bigAccounts");
 	}
-	
+
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountsArray
@@ -988,7 +984,7 @@ public class DataBaseHandler{
 	}
 
 	/**
-	 * returns the document corresponding to the shcwergsy account referenced by index 
+	 * returns the document corresponding to the schwergsy account referenced by index 
 	 * 
 	 * @param index
 	 * @return
@@ -1003,7 +999,6 @@ public class DataBaseHandler{
 		Document doc = cursor.next();
 		cursor.close();
 		return doc;
-
 	}
 
 
@@ -1041,7 +1036,7 @@ public class DataBaseHandler{
 	public static int getBigAccountsSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "bigAccounts");
 	}
-	
+
 	/**
 	 * @param index
 	 * @return
@@ -1052,7 +1047,7 @@ public class DataBaseHandler{
 	public static int getWhiteListSize(int index) throws UnknownHostException{
 		return getSchwergsyAccountArraySize(index, "whiteList");
 	}
-	
+
 	/**
 	 * @param index
 	 * @return
@@ -1173,16 +1168,17 @@ public class DataBaseHandler{
 		}
 		else {
 			Maintenance.writeLog("inserting a new Schwergsy Account");
-			
-			int collectionSize = (int) getCollectionSize("SchwergsyAccounts");
-			
-			Document basicBitch = new Document("_id", collectionSize)
+
+			int _id = (int) getCollectionSize("SchwergsyAccounts");
+
+			Document basicBitch = new Document("_id", _id)
 			.append("name", name)
 			.append("customerSecret", customerSecret)
 			.append("customerKey", customerKey)
 			.append("authorizationSecret", authorizationSecret)
 			.append("authorizationKey", authorizationKey)
 			.append("isIncubated", isIncubated)
+			.append("isSuspended", isSuspended)
 			.append("followers", followers)
 			.append("following", following)
 			.append("toFollow", toFollow)
@@ -1194,34 +1190,110 @@ public class DataBaseHandler{
 			dbCollection.insertOne(basicBitch);
 
 			try {
-			//Makes sure that the account's following is synced in the database.
-			initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
-			.setDebugEnabled(true)
-			.setOAuthConsumerKey(customerKey)
-			.setOAuthConsumerSecret(customerSecret)
-			.setOAuthAccessToken(authorizationKey)
-			.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance(),
-			collectionSize);
+				//Makes sure that the account's following is synced in the database.
+				initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
+				.setDebugEnabled(true)
+				.setOAuthConsumerKey(customerKey)
+				.setOAuthConsumerSecret(customerSecret)
+				.setOAuthAccessToken(authorizationKey)
+				.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance(),
+				_id);
 			}
 			catch (Exception e) {
-				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate, removing from db");		
-				removeSchwergsyAccount(authorizationKey);				
+				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
+						+ "removing from db");	
+				//Can remove without the need to remap id's because we know this schwergsy account was
+				//the last to be added, so the ids of the others with still be in order without the
+				//need to remap.
+				suspendSchwergsyAccount(_id);
+				removeSchwergsyAccount(_id);				
 			}
 		}
 	}
+
+	/**
+	 * Sets the isSuspended flag to true in the db for this Schwergsy account
+	 * 
+	 * @param _id The _id of the Schwergsy account
+	 */
+	public static synchronized void suspendSchwergsyAccount(int _id) {
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("_id", _id);
+		Document updater = new Document("$set", new Document("isSuspended", true));
+		dbCollection.findOneAndUpdate(query, updater);
+	}
 	
 	/**
-	 * Delete a Schwergsy account from the database
+	 * Returns a boolean telling whether the given account is suspended
 	 * 
-	 * @param authorizationKey
+	 * @param index The index/_id corresponding to the schwergsy account
+	 * @return
 	 */
-	public static synchronized void removeSchwergsyAccount(String authorizationKey) {
-		
-		Maintenance.writeLog("Removing Schwergsy account with authorizationKey: " + authorizationKey);
+	public static synchronized boolean isSuspended(int index) {
+		return (boolean) getSchwergsyAccount(index).get("isSuspended");
+	}
+
+	/**
+	 * Flag a Schwergsy Account for removal, will be remove when maintenance runs.
+	 * Also Suspend it so nothing tries to use/run it in the meantime
+	 * 
+	 * @param _id The _id of the Schwergsy account to flag
+	 */
+	public static synchronized void flagForRemoval(Integer _id) {
+		suspendSchwergsyAccount(_id);
+		Maintenance.doomedAccounts.add(_id);
+	}
+
+	/**
+	 * Deletes the Schwergsy accounts flagged in Maintenance from the database and reassign _id's
+	 * of all others so that the remaining accounts are numbered 0 to (size - 1)
+	 * 
+	 */
+	public static synchronized void removeSchwergsyAccountsAndRemapIDs() {
+
+		for (int _id : Maintenance.doomedAccounts) {
+			removeSchwergsyAccount(_id);
+		}		
+		remapSchwergsyAccountIDs();
+	}
+
+	/**
+	 * Remove the given schwergsy account from the db.
+	 * WARNING, can cause errors if an account is removed while the system is running
+	 */
+	private static synchronized void removeSchwergsyAccount(int _id) {
+		Maintenance.writeLog("Removing Schwergsy account with _id: " + _id);
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("SchwergsyAccounts");	
-		Document query = new Document("authorizationKey", authorizationKey);
+		Document query = new Document("_id", _id);
 		collection.deleteOne(query);
+	}
+
+
+	/**
+	 * Remaps _id's of Schwerhsy Accounts so that they are numbered 0 to (size - 1)
+	 * WARNING: This should only be run during maintenance
+	 * 
+	 */
+	private static synchronized void remapSchwergsyAccountIDs() {
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		//get all documents indiscriminately 
+		FindIterable<Document> findIter = dbCollection.find();
+		MongoCursor<Document> cursor = findIter.iterator();
+
+		//iterate through all the schwergsy accounts, giving them unique sequential ids starting at 0;
+		int index = 0;
+		while (cursor.hasNext()) {
+			int _id = cursor.next().getInteger("_id");
+			Document query = new Document("_id", _id);
+			Document updater = new Document("$set", new Document("_id", index));
+			dbCollection.findOneAndUpdate(query, updater);
+			index++;
+		}
+		
+		cursor.close();
 	}
 
 	/**
