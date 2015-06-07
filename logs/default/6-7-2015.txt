@@ -1,0 +1,13 @@
+2015-06-07 17:56:25.910 ----- inserting a new Schwergsy Account
+2015-06-07 17:56:26.525 ----- WARNING: Schwergsy account failed to authenticate, removing from db
+2015-06-07 17:56:26.532 ----- Removing Schwergsy account with _id: 0
+2015-06-07 18:01:19.012 ----- inserting a new Schwergsy Account
+2015-06-07 18:01:19.621 ----- WARNING: Schwergsy account failed to authenticate, removing from db
+2015-06-07 18:01:19.627 ----- Removing Schwergsy account with _id: 0
+2015-06-07 18:07:45.105 ----- ***ERROR*** Cannot parse isIncubated, account not added ***ERROR***
+2015-06-07 18:07:53.616 ----- ***ERROR*** Cannot parse isSuspended, account not added ***ERROR***
+2015-06-07 18:08:26.439 ----- inserting a new Schwergsy Account
+2015-06-07 18:08:27.040 ----- WARNING: Schwergsy account failed to authenticate, removing from db
+2015-06-07 18:08:27.045 ----- Removing Schwergsy account with _id: 0
+2015-06-07 19:05:09.591 ----- ***ERROR*** Schwergsy Account with name: yooo not found. Cannot remove from db. ***ERROR***
+2015-06-07 19:05:09.594 ----- Could not find account with name: yooo. Nothing was flagged for removal.

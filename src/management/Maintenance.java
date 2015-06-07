@@ -181,7 +181,7 @@ public class Maintenance {
 	 * Prints the message to console and writes it to the appropriate log
 	 * 
 	 * @param message the message to print
-	 * @param subDir
+	 * @param subDir The directory within the logs folder that this log will be put in/written to
 	 */
 	public static void writeLog(String message, String subDir) {
 
