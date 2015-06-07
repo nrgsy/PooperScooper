@@ -2,7 +2,6 @@ package twitterRunnables;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;

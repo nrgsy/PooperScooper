@@ -1,30 +1,25 @@
 package management;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.bson.Document;
+
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.MongoClient;
 
 /**
@@ -403,6 +398,7 @@ public class DataBaseHandler{
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 
+	@SuppressWarnings("rawtypes")
 	private static synchronized void addArrayToSchwergsArray(int index, ArrayList StringArr, String column) throws UnknownHostException{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
@@ -615,6 +611,7 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
+	@SuppressWarnings("unchecked")
 	public static synchronized ArrayList<Long> popMultipleFollowing(int index, int amount) throws UnknownHostException{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		ArrayList<Long> toUnfollowArr = new ArrayList<Long>();
@@ -959,6 +956,7 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
+	@SuppressWarnings("unchecked")
 	public static synchronized long getOneToFollow(int index) throws UnknownHostException{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");

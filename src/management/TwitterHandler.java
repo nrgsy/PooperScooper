@@ -3,14 +3,9 @@ package management;
 
 import java.net.UnknownHostException;
 import java.util.HashSet;
-import java.util.Map.Entry;
-
 import twitter4j.IDs;
-
 import java.util.Map;
-
 import org.bson.Document;
-
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
@@ -20,8 +15,6 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-
-import com.mongodb.BasicDBObject;
 
 public class TwitterHandler {
 

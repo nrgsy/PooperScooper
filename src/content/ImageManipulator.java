@@ -8,10 +8,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Date;
-import java.util.Random;
-
 import javax.imageio.ImageIO;
-
 import management.FuckinUpKPException;
 import management.Maintenance;
 
