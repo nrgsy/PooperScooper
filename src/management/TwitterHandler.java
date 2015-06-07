@@ -46,115 +46,146 @@ public class TwitterHandler {
 	 * @throws UnknownHostException 
 	 */
 	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
-		int ratecount = 0;
-		IDs blah;
-		try {
-			blah = bird.getFollowersIDs(-1);
-		} catch (TwitterException e) {
-			blah = null;
-			errorHandling(e);
-		}
-		HashSet<Long> followers = new HashSet<>();
-		for(int i = 0; i < blah.getIDs().length; i++){
-			followers.add(blah.getIDs()[i]);
-		}
-		ratecount++;
-
-		while(blah.getNextCursor()!=0 && ratecount<14){
+		if(!DataBaseHandler.isSuspended(index)){
+			int ratecount = 0;
+			IDs blah;
 			try {
-				blah = (bird.getFollowersIDs(blah.getNextCursor()));
+				blah = bird.getFollowersIDs(-1);
+
+				HashSet<Long> followers = new HashSet<>();
+				for(int i = 0; i < blah.getIDs().length; i++){
+					followers.add(blah.getIDs()[i]);
+				}
+				ratecount++;
+
+				while(blah.getNextCursor()!=0 && ratecount<14){
+					blah = (bird.getFollowersIDs(blah.getNextCursor()));
+
+					for(int i = 0; i < blah.getIDs().length; i++){
+						followers.add(blah.getIDs()[i]);
+					}
+					ratecount++;
+				}
+				return followers;
 			} catch (TwitterException e) {
-				blah = null;
-				errorHandling(e);
+				errorHandling(e,index);
+				return null;
 			}
-			for(int i = 0; i < blah.getIDs().length; i++){
-				followers.add(blah.getIDs()[i]);
-			}
-			ratecount++;
 		}
-		return followers;
+		else{
+			return null;
+		}
 	}
 
 	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
-		try {
-			twitter.updateStatus(status);
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				twitter.updateStatus(status);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+			}
 		}
 	}
 
 	public static void follow(Twitter twitter, long id, int index){
-		try {
-			twitter.createFriendship(id);
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				twitter.createFriendship(id);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+			}
 		}
 	}
 
 	public static void unfollow(Twitter twitter, long id, int index){
-		try {
-			twitter.destroyFriendship(id);
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				twitter.destroyFriendship(id);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+			}
 		}
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, int index){
-		try {
-			return twitter.getUserTimeline(id);
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				return twitter.getUserTimeline(id);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return null;
+			}
+		}
+		else{
 			return null;
 		}
-		
+
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, Paging query, int index){
-
-		try {
-			return twitter.getUserTimeline(id, query);
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				return twitter.getUserTimeline(id, query);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return null;
+			}
+		}
+		else{
 			return null;
 		}
 
 	}
 
 	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
-		try {
-			return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
-		} catch (TwitterException e) {
-			errorHandling(e);
+		if(!DataBaseHandler.isSuspended(index)){
+			try {
+				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return null;
+			}
+		}
+		else{
 			return null;
 		}
 	}
 
-	public static void favorite(Twitter twitter, long id) throws TwitterException{
-		twitter.createFavorite(id);
+	public static void favorite(Twitter twitter, long id, int index){
+		if(!DataBaseHandler.isSuspended(index)){
+			try{
+				twitter.createFavorite(id);
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+			}
+		}
 	}
 
-	public static boolean isAtRateLimit(Twitter twitter, String endpoint){
-		Map<String, RateLimitStatus> rateLimitStatus;
-		try {
-			rateLimitStatus = twitter.getRateLimitStatus();
-		} catch (TwitterException e) {
-			errorHandling(e);
-			rateLimitStatus = null;
+	public static boolean isAtRateLimit(Twitter twitter, String endpoint, int index){
+		if(!DataBaseHandler.isSuspended(index)){
+			Map<String, RateLimitStatus> rateLimitStatus;
+			try {
+				rateLimitStatus = twitter.getRateLimitStatus();
+				RateLimitStatus status = rateLimitStatus.get(endpoint);
+				if (status.getRemaining() == 0){
+					return true;
+				}
+				else {
+					return false;
+				}
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return true;
+			}
 		}
-		RateLimitStatus status = rateLimitStatus.get(endpoint);
-		if (status.getRemaining() == 0){
+		else{
 			return true;
 		}
-		else {
-			return false;
-		}
 	}
 
-	private static void errorHandling(TwitterException e){
+	private static void errorHandling(TwitterException e, int index){
 		if(e.getErrorCode()==64){    
-			//TODO databasehandler.suspendschwergsyaccount(index)
+			DataBaseHandler.suspendSchwergsyAccount(index);
 		}
 	}
-	
-	
 }

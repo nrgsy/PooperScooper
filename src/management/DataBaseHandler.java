@@ -565,7 +565,7 @@ public class DataBaseHandler{
 		//get the current set of followers from twitter
 		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
-		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter);
+		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter, index);
 
 		int OGsize = freshFollowerSet.size();
 
