@@ -53,11 +53,25 @@ import org.bson.Document;
 		
 		
 		//This is the formula to determine how many accounts to follow
-		//TODO Need to revise this formula, it's shit
-		public static int GET_NUM_TO_UNFOLLOW(int sizeFollowers, int sizeFollowing){
-			int numToUnfollow =
-					(int)(FOLLOWING_BASE_CAP+(Math.log(sizeFollowers)/Math.log(100))) - sizeFollowing;
-			return numToUnfollow >= 0 ? numToUnfollow : 0;
+		public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
+			int numToUnfollow;
+			if (sizeFollowing <= FOLLOWING_BASE_CAP && sizeFollowers <= FOLLOWING_BASE_CAP) {
+				numToUnfollow =  0;
+			}
+			else if (sizeFollowing <= FOLLOWING_BASE_CAP && sizeFollowers > FOLLOWING_BASE_CAP){
+				numToUnfollow = 0;
+			}
+			else if (sizeFollowers < 100*FOLLOWING_BASE_CAP && sizeFollowing > FOLLOWING_BASE_CAP){
+				numToUnfollow = sizeFollowing - 2000;
+			}
+			else if (sizeFollowers > 100*FOLLOWING_BASE_CAP && sizeFollowing > FOLLOWING_BASE_CAP){
+				numToUnfollow = 100*sizeFollowing - sizeFollowers;
+			}
+			else {
+				numToUnfollow = 0;
+				Maintenance.writeLog("***ERROR*** We have negative followers or following or Jon is an idiot ***ERROR***");
+			}
+				return numToUnfollow >= 0 ? numToUnfollow : 0;
 		}
 		
 		/**
@@ -94,7 +108,7 @@ import org.bson.Document;
 			globalVars.put("BIG_ACCOUNT_TIME", 950000L);//This is an arbitrary time a little over 15 minutes to prevent rate limit problems
 			globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
 			globalVars.put("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
-			globalVars.put("FOLLOWING_BASE_CAP", 1000);
+			globalVars.put("FOLLOWING_BASE_CAP", 2000);
 			globalVars.put("ALPHA", 1.0/25.0);
 			globalVars.put("MIN_POST_TIME_INTERVAL", 900000L);
 			globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
