@@ -10,14 +10,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.bson.Document;
+
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
@@ -996,11 +1000,45 @@ public class DataBaseHandler{
 		Document query = new Document("_id", index);
 		FindIterable<Document> findIter = dbCollection.find(query);
 		MongoCursor<Document> cursor = findIter.iterator();
-		Document doc = cursor.next();
+		Document doc;
+		try {
+			doc = cursor.next();
+		}
+		catch (NoSuchElementException e) {
+			Maintenance.writeLog("***ERROR*** Schwergsy Account with _id: " + index +
+					" not found. Cannot remove from db. ***ERROR***");
+			e.printStackTrace();
+			return null;
+		}
 		cursor.close();
 		return doc;
 	}
+	
+	/**
+	 * returns the document corresponding to the schwergsy account referenced by name 
+	 * 
+	 * @param name The name of the Schwergsy Account
+	 * @return
+	 */
+	public static synchronized Document getSchwergsyAccount(String name) {
 
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
+		Document query = new Document("name", name);
+		FindIterable<Document> findIter = dbCollection.find(query);
+		MongoCursor<Document> cursor = findIter.iterator();
+		Document doc;
+		try {
+			doc = cursor.next();
+		}
+		catch (NoSuchElementException e) {
+			Maintenance.writeLog("***ERROR*** Schwergsy Account with name: " + name +
+					" not found. Cannot remove from db. ***ERROR***");
+			return null;
+		}
+		cursor.close();
+		return doc;
+	}
 
 	/**
 	 * @param index
@@ -1011,7 +1049,6 @@ public class DataBaseHandler{
 	 * Tested and given the Bojangles Seal of Approval
 	 */
 	private static synchronized int getSchwergsyAccountArraySize(int index, String column) throws UnknownHostException {
-
 		return getSchwergsyAccountArray(index, column).size();
 	}
 
@@ -1222,6 +1259,7 @@ public class DataBaseHandler{
 	 * @param _id The _id of the Schwergsy account
 	 */
 	public static synchronized void suspendSchwergsyAccount(int _id) {
+		Maintenance.writeLog("Suspending account with _id = " + _id, _id);
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Document query = new Document("_id", _id);
@@ -1245,8 +1283,9 @@ public class DataBaseHandler{
 	 * 
 	 * @param _id The _id of the Schwergsy account to flag
 	 */
-	public static synchronized void flagForRemoval(Integer _id) {
+	public static synchronized void flagAccountForRemoval(Integer _id) {
 		suspendSchwergsyAccount(_id);
+		Maintenance.writeLog("Flagging account with _id: " + _id + " for removal", _id);
 		Maintenance.doomedAccounts.add(_id);
 	}
 

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -218,6 +219,9 @@ public class ApprovalGUI {
 			JButton addButton = new JButton("Add");
 			addButton.addActionListener(new AddAccountListener());
 			mainPanel.add(addButton);
+			JButton removeButton = new JButton("Remove\n(Only fill in Name)");
+			removeButton.addActionListener(new RemoveAccountListener());
+			mainPanel.add(removeButton);
 			mainPanel.setBackground(Color.GRAY);
 
 			JFrame frame = new JFrame("Enter Schwergsy Account Info");
@@ -229,7 +233,7 @@ public class ApprovalGUI {
 		}		
 	}
 
-	//the listener for the add button in Schwergsy account adding interface
+	//the listener for the add button in Schwergsy account interface
 	private static class AddAccountListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {  
@@ -239,9 +243,33 @@ public class ApprovalGUI {
 			String customerKey = cusKeyField.getText();
 			String authorizationSecret = authSecField.getText();
 			String authorizationKey = authKeyField.getText();
-			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
-			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
-			
+
+			boolean isIncubated;
+			if (incubatedField.getText().toLowerCase().equals("true")) {
+				isIncubated = true;
+			}
+			else if (incubatedField.getText().toLowerCase().equals("false")) {
+				isIncubated = false;
+			}
+			else {
+				Maintenance.writeLog("***ERROR*** Cannot parse isIncubated, "
+						+ "account not added ***ERROR***");
+				return;
+			}
+
+			boolean isSuspended;
+			if (suspendedField.getText().toLowerCase().equals("true")) {
+				isSuspended = true;
+			}
+			else if (suspendedField.getText().toLowerCase().equals("false")) {
+				isSuspended = false;
+			}
+			else {
+				Maintenance.writeLog("***ERROR*** Cannot parse isSuspended, "
+						+ "account not added ***ERROR***");
+				return;
+			}
+
 			try {
 				//insertSchwergsyAccount return returns a boolean indicating success. Exits if insertion
 				//failed so the timers aren't created below
@@ -252,16 +280,35 @@ public class ApprovalGUI {
 			} catch (UnknownHostException | TwitterException e1) {
 				e1.printStackTrace();
 			}
-			
+
 			try {
 				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts"));
 			} catch (UnknownHostException e1) {
 				Maintenance.writeLog("***ERROR*** Unknown Host, timers failed to be created, for "
-						+ "account: " + name + ". Exiting... ***ERROR***");
+						+ "account: " + name + ". Exiting... ***ERROR***", "gui");
 				System.exit(0);
 				e1.printStackTrace();
 			}
 		}		
+	}
+
+	//the listener for the remove button in Schwergsy account interface
+	private static class RemoveAccountListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			String name = nameField.getText();			
+			Document doc = DataBaseHandler.getSchwergsyAccount(name);
+			if (doc == null) {
+				Maintenance.writeLog("Could not find account with name: " + name + 
+						". Nothing was flagged for removal.");
+			}
+			else {
+				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
+				int _id = (int) doc.get("_id");
+				DataBaseHandler.flagAccountForRemoval(_id);
+			}
+		}
 	}
 
 	private static class ContentListener implements ActionListener {
@@ -306,7 +353,8 @@ public class ApprovalGUI {
 					!kind.equals("college") &&
 					!kind.equals("canimals") &&
 					!kind.equals("space")) {
-				Maintenance.writeLog("***ERROR*** invalid argument, must be ass, workout, etc ***ERROR***",
+				Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
+						+ "workout, etc ***ERROR***",
 						"gui");
 			}
 			else {
@@ -318,7 +366,8 @@ public class ApprovalGUI {
 				mongoClient = new MongoClient();
 				MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
-				MongoCollection<Document> collection = DataBaseHandler.getCollection("pending" + kind, db);
+				MongoCollection<Document> collection =
+						DataBaseHandler.getCollection("pending" + kind, db);
 				try {
 					numRemaining = (int) DataBaseHandler.getCollectionSize(
 							collection.getNamespace().getCollectionName()) - 1;
