@@ -3,9 +3,13 @@ package management;
 
 import java.net.UnknownHostException;
 import java.util.HashSet;
+
 import twitter4j.IDs;
+
 import java.util.Map;
+
 import org.bson.Document;
+
 import twitter4j.Paging;
 import twitter4j.RateLimitStatus;
 import twitter4j.ResponseList;
@@ -39,7 +43,7 @@ public class TwitterHandler {
 	 * @throws UnknownHostException 
 	 */
 	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(bird, "/followers/ids", index)){
 			int ratecount = 0;
 			IDs blah;
 			try {
@@ -101,7 +105,7 @@ public class TwitterHandler {
 	}
 
 	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, int index){
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
 				return twitter.getUserTimeline(id);
 			} catch (TwitterException e) {
@@ -131,7 +135,7 @@ public class TwitterHandler {
 	}
 
 	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
-		if(!DataBaseHandler.isSuspended(index)){
+		if(!DataBaseHandler.isSuspended(index) && !TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
 			try {
 				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
 			} catch (TwitterException e) {
