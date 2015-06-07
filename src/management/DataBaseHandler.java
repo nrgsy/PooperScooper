@@ -1090,12 +1090,13 @@ public class DataBaseHandler{
 	 * @param authorizationSecret
 	 * @param authorizationKey
 	 * @param isIncubated
+	 * @return true or false depending on whether the insertion was successful
 	 * @throws UnknownHostException 
 	 * @throws TwitterException 
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static synchronized void insertSchwergsyAccount(
+	public static synchronized boolean insertSchwergsyAccount(
 			String name,
 			String customerSecret,
 			String customerKey,
@@ -1104,7 +1105,7 @@ public class DataBaseHandler{
 			boolean isIncubated,
 			boolean isSuspended) throws UnknownHostException, TwitterException {
 
-		insertSchwergsyAccount(
+		return insertSchwergsyAccount(
 				name,
 				customerSecret,
 				customerKey,
@@ -1136,12 +1137,13 @@ public class DataBaseHandler{
 	 * @param whiteList
 	 * @param bigAccounts
 	 * @param statistics
+	 * @return true or false depending on whether the insertion was successful
 	 * @throws UnknownHostException
 	 * @throws TwitterException 
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static synchronized void insertSchwergsyAccount(
+	public static synchronized boolean insertSchwergsyAccount(
 			String name,
 			String customerSecret,
 			String customerKey,
@@ -1165,6 +1167,7 @@ public class DataBaseHandler{
 		if (dbCollection.find(uniqueCheck).limit(1).first() != null) {
 			Maintenance.writeLog("WARNING: Schwergsy account already exists in the database, "
 					+ "will not add duplicate");
+			return false;
 		}
 		else {
 			Maintenance.writeLog("inserting a new Schwergsy Account");
@@ -1201,14 +1204,16 @@ public class DataBaseHandler{
 			}
 			catch (Exception e) {
 				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
-						+ "removing from db");	
+						+ " removing from db");	
 				//Can remove without the need to remap id's because we know this schwergsy account was
 				//the last to be added, so the ids of the others with still be in order without the
 				//need to remap.
 				suspendSchwergsyAccount(_id);
-				removeSchwergsyAccount(_id);				
+				removeSchwergsyAccount(_id);
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/**

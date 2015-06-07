@@ -241,15 +241,18 @@ public class ApprovalGUI {
 			String authorizationKey = authKeyField.getText();
 			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
 			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
-
+			
 			try {
-				DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
-						authorizationSecret, authorizationKey, isIncubated, isSuspended);
+				//insertSchwergsyAccount return returns a boolean indicating success. Exits if insertion
+				//failed so the timers aren't created below
+				if (DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
+						authorizationSecret, authorizationKey, isIncubated, isSuspended) == false) {
+					return;
+				}
 			} catch (UnknownHostException | TwitterException e1) {
 				e1.printStackTrace();
 			}
-
-
+			
 			try {
 				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts"));
 			} catch (UnknownHostException e1) {
