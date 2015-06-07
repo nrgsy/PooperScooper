@@ -71,7 +71,7 @@ public class TwitterRunnable implements Runnable {
 	public void uploadPicTwitter(File file, String message) throws TwitterException{
 			StatusUpdate status = new StatusUpdate(message);
 			status.setMedia(file);
-			TwitterHandler.updateStatus(bird, status);
+			TwitterHandler.updateStatus(bird, status, index);
 	}
 
 	/**
