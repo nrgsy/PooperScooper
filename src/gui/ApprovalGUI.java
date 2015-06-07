@@ -40,6 +40,7 @@ import javax.swing.SwingConstants;
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
+import management.TimerFactory;
 
 import org.bson.Document;
 
@@ -240,16 +241,23 @@ public class ApprovalGUI {
 			String authorizationKey = authKeyField.getText();
 			boolean isIncubated = Boolean.parseBoolean(incubatedField.getText());
 			boolean isSuspended = Boolean.parseBoolean(suspendedField.getText());
-			
+
 			try {
 				DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
 						authorizationSecret, authorizationKey, isIncubated, isSuspended);
 			} catch (UnknownHostException | TwitterException e1) {
 				e1.printStackTrace();
 			}
-			
-			
-			
+
+
+			try {
+				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts"));
+			} catch (UnknownHostException e1) {
+				Maintenance.writeLog("***ERROR*** Unknown Host, timers failed to be created, for "
+						+ "account: " + name + ". Exiting... ***ERROR***");
+				System.exit(0);
+				e1.printStackTrace();
+			}
 		}		
 	}
 
