@@ -434,6 +434,19 @@ public class DataBaseHandler{
 
 		Maintenance.writeLog("successfully replaced array: " + column, index);
 	}
+	
+	/**TODO BOJANG TEST
+	 * @param index
+	 */
+	public static void finishedIncubation(int index){
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = DataBaseHandler.getCollection("SchwergsyAccount", db);
+		dbCollection.findOneAndUpdate(
+				new Document("_id", index),
+				new Document("$set", new Document("isIncubated", false)));
+		
+		Maintenance.writeLog("congratulations, SchwergsyAccount #"+index+" has graduated from incubation");
+	}
 
 	/**
 	 * Adds the given object to the given list in the a particular schwergsy account
@@ -558,6 +571,10 @@ public class DataBaseHandler{
 		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter, index);
+		
+		if(freshFollowerSet.size()>2000){
+			finishedIncubation(index);
+		}
 
 		int OGsize = freshFollowerSet.size();
 
