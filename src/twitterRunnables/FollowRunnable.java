@@ -116,7 +116,13 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
-		//TODO stuff in here
+		try {
+			unfollowUsers();
+			followAndFavoriteUsers();
+		} catch (UnknownHostException | TwitterException e) {
+			System.out.println(e.getStackTrace());
+			Maintenance.writeLog("FollowRunnable fucked up somewhere", index);
+		}
 
 	}
 	

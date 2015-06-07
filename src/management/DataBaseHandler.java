@@ -1238,14 +1238,15 @@ public class DataBaseHandler{
 			dbCollection.insertOne(basicBitch);
 
 			try {
-				//Makes sure that the account's following is synced in the database.
-				initUpdateFollowing(new TwitterFactory(new ConfigurationBuilder()
+				Twitter bird = (new TwitterFactory(new ConfigurationBuilder()
 				.setDebugEnabled(true)
 				.setOAuthConsumerKey(customerKey)
 				.setOAuthConsumerSecret(customerSecret)
 				.setOAuthAccessToken(authorizationKey)
-				.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance(),
-				_id);
+				.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance());
+				//Makes sure that the account's following is synced in the database.
+				initUpdateFollowing(bird,_id);
+				initUpdateFollowers(bird,_id);
 			}
 			catch (Exception e) {
 				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
@@ -1385,10 +1386,16 @@ public class DataBaseHandler{
 	 * @throws TwitterException
 	 * @throws UnknownHostException
 	 */
-	public static  void initUpdateFollowing(Twitter bird, int index) throws TwitterException, UnknownHostException{
+	public static void initUpdateFollowing(Twitter bird, int index) throws UnknownHostException{
 
 		addFollowing(index, new ArrayList<Long>(TwitterHandler.initUpdateFollowing(bird, index)));
 
+	}
+	
+	public static void initUpdateFollowers(Twitter bird, int index) throws UnknownHostException{
+		
+		addFollowers(index, new ArrayList<Long>(TwitterHandler.getFollowers(bird, index)));
+		
 	}
 
 	/**
