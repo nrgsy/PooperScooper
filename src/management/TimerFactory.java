@@ -144,13 +144,13 @@ public class TimerFactory {
 		long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
 		long incubated_followtime_min = GlobalStuff.FOLLOW_TIME_INCUBATED_MIN;
 		long incubated_followtime_max = GlobalStuff.FOLLOW_TIME_INCUBATED_MAX;
+		long bigacctime = GlobalStuff.BIG_ACCOUNT_TIME;
 
 		Random r = new Random();
 		long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
 
 		long incubated_followtime = incubated_followtime_min +
 				((long)r.nextDouble()*(incubated_followtime_max - incubated_followtime_min));
-		long bigacctime =  950000L; //This is an arbitrary time a little over 15 minutes to prevent rate limit problems
 
 		//If in incubation, follows at a rate of 425 per day
 		if(info.getBoolean("isIncubated")){
