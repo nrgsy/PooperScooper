@@ -230,7 +230,7 @@ public class bigAccRunnable implements Runnable {
 		//By using a HashSet, you get only unique retweeter ids.
 		for(Status tweet :NoRTTweets){
 			//Makes sure it won't pass the ratelimit
-			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids")){
+			if(TwitterHandler.isAtRateLimit(bird,"/statuses/retweeters/ids", index)){
 				System.out.println("Reached rate limit on big account " + bigAccountIndex);
 				break;
 			}

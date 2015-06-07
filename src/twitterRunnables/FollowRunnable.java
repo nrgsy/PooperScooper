@@ -82,7 +82,7 @@ public class FollowRunnable implements Runnable{
 			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet() && tweet.getInReplyToScreenName().equals(null)){
-					TwitterHandler.favorite(bird,tweet.getId());
+					TwitterHandler.favorite(bird,tweet.getId(), index);
 					break;
 				}
 			}
