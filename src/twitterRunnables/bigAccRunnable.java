@@ -65,7 +65,7 @@ public class bigAccRunnable implements Runnable {
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 
-			if(OwnTweets.size()>15){
+			if(OwnTweets.size()>30){
 				//sorts by most retweets and cuts out tweets with little retweets
 				Collections.sort(OwnTweets, new Comparator<Status>() {
 					@Override
@@ -198,7 +198,7 @@ public class bigAccRunnable implements Runnable {
 	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException, FuckinUpKPException{
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
-		int maxNoRTTweets = 15;
+		int maxNoRTTweets = 30;
 
 		//TODO see if we can take more tweets
 		//Only gets the 5 latest tweets of the bigAccount candidate. If the bigaccount was harvested 
@@ -281,7 +281,7 @@ public class bigAccRunnable implements Runnable {
 	@Override
 	public void run() {
 		try {
-			if(DataBaseHandler.getToFollowSize(index)==11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
+			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
 				findBigAccounts();
 			}
 			else{
@@ -289,8 +289,8 @@ public class bigAccRunnable implements Runnable {
 			}
 		} catch (UnknownHostException | TwitterException | InterruptedException
 				| FuckinUpKPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getStackTrace());
+			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
 		}
 	}
 

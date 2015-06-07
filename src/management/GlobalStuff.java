@@ -28,6 +28,7 @@ import org.bson.Document;
 		public static long FOLLOW_TIME_MAX;
 		public static long FOLLOW_TIME_INCUBATED_MIN;
 		public static long FOLLOW_TIME_INCUBATED_MAX;
+		public static long BIG_ACCOUNT_TIME;
 		public static int BIG_ACCOUNT_STRIKES_FOR_OUT;
 		public static int BIG_ACCOUNT_OUTS_FOR_REMOVAL;
 		//Base amount of accounts to follow before applying the formula
@@ -70,6 +71,7 @@ import org.bson.Document;
 			FOLLOW_TIME_MAX = globalVars.getLong("FOLLOW_TIME_MAX");
 			FOLLOW_TIME_INCUBATED_MIN = globalVars.getLong("FOLLOW_TIME_INCUBATED_MIN");
 			FOLLOW_TIME_INCUBATED_MAX = globalVars.getLong("FOLLOW_TIME_INCUBATED_MAX");	
+			BIG_ACCOUNT_TIME = globalVars.getLong("BIG_ACCOUNT_TIME");
 			FOLLOWING_BASE_CAP = globalVars.getInteger("FOLLOWING_BASE_CAP");
 			BIG_ACCOUNT_OUTS_FOR_REMOVAL = globalVars.getInteger("BIG_ACCOUNT_OUTS_FOR_REMOVAL");
 			BIG_ACCOUNT_STRIKES_FOR_OUT = globalVars.getInteger("BIG_ACCOUNT_STRIKES_FOR_OUT");
@@ -89,6 +91,7 @@ import org.bson.Document;
 			globalVars.put("FOLLOW_TIME_MAX", 123430L);
 			globalVars.put("FOLLOW_TIME_INCUBATED_MIN", 180000L);
 			globalVars.put("FOLLOW_TIME_INCUBATED_MAX", 240000L);
+			globalVars.put("BIG_ACCOUNT_TIME", 950000L);//This is an arbitrary time a little over 15 minutes to prevent rate limit problems
 			globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
 			globalVars.put("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
 			globalVars.put("FOLLOWING_BASE_CAP", 1000);

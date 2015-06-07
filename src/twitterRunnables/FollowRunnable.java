@@ -29,9 +29,11 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessTokenSecret
 	 */
 	public FollowRunnable(Twitter twitter, int index){
+		
 		this.index = index;
 		bird = twitter;
 		Maintenance.runStatus.put(index+"follow", true);
+		
 	}
 	
 	//this constructor only for testing
