@@ -1,4 +1,0 @@
-2015-06-07 21:51:06.898 ----- Creating timers for all accounts
-2015-06-07 21:51:06.899 ----- creating RedditTimerTask
-2015-06-07 21:51:06.900 ----- RedditTimerTask fired
-2015-06-07 21:51:06.900 ----- Skipped creation of RedditScraper because maintenance flag is set
