@@ -219,6 +219,7 @@ public class ApprovalGUI {
 			mainPanel.setBackground(Color.GRAY);
 
 			JFrame frame = new JFrame("Enter Schwergsy Account Info");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setContentPane(mainPanel);
 
 			frame.setSize(400, 500);
@@ -455,7 +456,8 @@ public class ApprovalGUI {
 
 					frame.setVisible(false);
 					frame.dispose();
-					frame = new JFrame("Content Reviewer");			
+					frame = new JFrame("Content Reviewer");
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					//So that these things close when we end the program
 					frame.addWindowListener(new WindowAdapter()
 					{
@@ -465,7 +467,6 @@ public class ApprovalGUI {
 							mongoClient.close();			        
 						}
 					});			
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					frame.getContentPane().add(scrPane);
 					frame.pack();
 					frame.setMinimumSize(new Dimension(300, 300));
@@ -552,8 +553,8 @@ public class ApprovalGUI {
 		panel.setBackground(Color.GRAY);
 
 		frame = new JFrame("Main Menu");
-		frame.add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.add(panel);
 		frame.setSize(800, 100);
 		frame.setLocationRelativeTo(null);	
 		frame.setVisible(true);

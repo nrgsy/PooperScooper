@@ -42,14 +42,13 @@ public class Director {
 	 * @throws Exception
 	 */
 	public static void main(String[]args) throws UnknownHostException, Exception {
-
-		Maintenance.writeLog("Starting Director");
 		
 		//Initialize all the shit
+		DataBaseHandler.initGlobalVars();
+		DataBaseHandler.findAndSetGlobalVars();		
+		Maintenance.writeLog("Starting Director");
 		DataBaseHandler.mongoClient = new MongoClient();
 		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
-		DataBaseHandler.initGlobalVars();
-		DataBaseHandler.findAndSetGlobalVars();
 		Maintenance.runStatus = new HashMap<>();
 		Maintenance.doomedAccounts = new ArrayList<Integer>();
 

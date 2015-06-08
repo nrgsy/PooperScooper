@@ -106,7 +106,10 @@ public class GlobalStuff{
 		globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
 		globalVars.put("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
 		globalVars.put("FOLLOWING_BASE_CAP", 2000);
-		globalVars.put("ALPHA", 1.0/25.0);
+		//ie we want it to post every 25 minutes on average, but will not post more frequently than
+		//once every MIN_POST_TIME_INTERVAL (15 for now) minutes so 25 - 15 = 10
+		globalVars.put("ALPHA", 1.0/10.0);
+		//ie 15 minutes
 		globalVars.put("MIN_POST_TIME_INTERVAL", 900000L);
 		globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
 		globalVars.put("CONTENT_SAMPLE_SIZE", 100L);

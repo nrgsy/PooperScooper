@@ -5,10 +5,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Date;
+
 import javax.imageio.ImageIO;
+
 import management.FuckinUpKPException;
 import management.Maintenance;
 
@@ -35,7 +36,14 @@ public class ImageManipulator {
 			URL url = new URL(URI);
 			image = ImageIO.read(url);
 			BufferedImage bi = (BufferedImage) image;
-			img = new File("pics/"+inc+".jpg");
+			
+			String dir = "pics/";
+			
+			if (!new File(dir).exists()) {
+				new File(dir).mkdirs();
+			}
+			
+			img = new File(dir + inc + ".jpg");
 			inc++;
 			ImageIO.write(bi, "jpg", img);
 			//Checks to see img size is less than ~3MB
@@ -43,12 +51,8 @@ public class ImageManipulator {
 				Maintenance.writeLog("image is less than 3MB #" + inc, "content");
 				return true;
 			}
-			
 		}
-		catch (SocketTimeoutException e){
-			return false;
-		}
-		catch(IOException e) {
+		catch (Exception e) {
 			return false;
 		}
 		finally{
