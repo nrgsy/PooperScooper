@@ -79,10 +79,14 @@ public class FollowRunnable implements Runnable{
 			//if something fucks up here, it's because TwitterHandler returns null and 
 			//the ResponseList<Status> is null. not sure if you can iterate over null.
 			//probably not.
+			int count = 0;
 			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging, index).get(0);
 			for(Status tweet: tweets){
-				if(!tweet.isRetweet() && tweet.getInReplyToScreenName().equals(null)){
+				if(!tweet.isRetweet() && tweet.getInReplyToScreenName() == null && count < 5){
 					TwitterHandler.favorite(bird,tweet.getId(), index);
+					count++;
+				}
+				if(count >= 5){
 					break;
 				}
 			}

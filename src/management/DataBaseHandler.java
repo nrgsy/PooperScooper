@@ -7,12 +7,16 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.bson.Document;
+
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -79,7 +83,7 @@ public class DataBaseHandler{
 		long minTimesAccessed = Long.MAX_VALUE;
 		for (int i = 0; i < contentArray.length; i++) {
 			Document candidateContent = (Document)contentArray[i];		
-			BasicDBList list = (BasicDBList) candidateContent.get("accessInfo");
+			ArrayList<BasicDBObject> list = (ArrayList<BasicDBObject>) candidateContent.get("accessInfo");
 			boolean foundMatch = false;
 
 			for (Object o : list) {
@@ -108,7 +112,7 @@ public class DataBaseHandler{
 		}
 
 		if (bestContent != null) {
-			BasicDBList list = (BasicDBList) bestContent.get("accessInfo");
+			ArrayList<Document> list = (ArrayList<Document>) bestContent.get("accessInfo");
 			Document info = null;
 			for (Object o : list) {
 				info = (Document) o;
@@ -133,10 +137,10 @@ public class DataBaseHandler{
 			bestContent.remove("accessInfo");
 			bestContent.put("accessInfo", list);
 
-			long id = (long) bestContent.get("_id");
+			Long id = (Long) bestContent.get("_id");
 			Document query = new Document("_id", id);
 
-			collection.findOneAndUpdate(query, bestContent);
+			collection.findOneAndReplace(query, bestContent);
 		}
 
 		return bestContent;
@@ -151,7 +155,7 @@ public class DataBaseHandler{
 	 */
 	public static  boolean hasNotBeenAccessedRecently(long index, Document content) {
 
-		BasicDBList list = (BasicDBList) content.get("accessInfo");
+		ArrayList<BasicDBObject> list = (ArrayList<BasicDBObject>) content.get("accessInfo");
 		boolean valid = true;
 		for (Object o : list) {
 			Document info = (Document) o;
@@ -849,7 +853,7 @@ public class DataBaseHandler{
 			Document bigAccount = new Document("user_id", id);
 			bigAccount.append("strikes", 0);
 			bigAccount.append("outs", 0);
-			bigAccount.append("latestTweet", -1);
+			bigAccount.append("latestTweet", -1L);
 			bigAccountDocuments.add(bigAccount);
 		}
 		addArrayToSchwergsArray(index, bigAccountDocuments, "bigAccounts");
