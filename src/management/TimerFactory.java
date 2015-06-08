@@ -25,7 +25,7 @@ public class TimerFactory {
 			public void run() {
 				Maintenance.writeLog("RedditTimerTask fired");
 				if(!Maintenance.flagSet){
-					new RedditScraper();
+					new RedditScraper().run();
 				}
 				else{
 					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
@@ -50,7 +50,7 @@ public class TimerFactory {
 			public void run() {
 				Maintenance.writeLog("TwitterRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
-					new TwitterRunnable(bird,index);
+					new TwitterRunnable(bird,index).run();
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of TwitterRunnable because maintenance "
@@ -76,7 +76,7 @@ public class TimerFactory {
 			public void run() {
 				Maintenance.writeLog("FollowRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
-					new FollowRunnable(bird,index);
+					new FollowRunnable(bird,index).run();
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of FollowRunnable because maintenance "
@@ -102,7 +102,7 @@ public class TimerFactory {
 			public void run() {
 				Maintenance.writeLog("BigAccRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
-					new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index));
+					new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index)).run();
 				}
 				else{
 					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "

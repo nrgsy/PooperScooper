@@ -276,7 +276,8 @@ public class ApprovalGUI {
 			}
 
 			try {
-				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts"));
+				//SchwergsyAccount is already added at this point, so you must - 1 to get index
+				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts")-1);
 			} catch (UnknownHostException e1) {
 				Maintenance.writeLog("***ERROR*** Unknown Host, timers failed to be created, for "
 						+ "account: " + name + ". Exiting... ***ERROR***", "gui");

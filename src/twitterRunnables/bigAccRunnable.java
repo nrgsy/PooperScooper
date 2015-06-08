@@ -201,6 +201,7 @@ public class bigAccRunnable implements Runnable {
 	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException{
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
+		int bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index) == bigAccountIndex ? 0 : bigAccountIndex + 1;
 		int maxNoRTTweets = 30;
 
 		//TODO see if we can take more tweets
@@ -272,10 +273,9 @@ public class bigAccRunnable implements Runnable {
 		else{
 			DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
 			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
-			int bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index) == bigAccountIndex ? 0 : bigAccountIndex + 1;
-			DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
 		}
-
+		
+		DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
 		Maintenance.writeLog("done harvesting", index);
 	}
 
