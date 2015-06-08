@@ -34,6 +34,7 @@ public class TwitterRunnable implements Runnable {
 	 */
 	public TwitterRunnable (Twitter twitter, int index){
 		super();
+		Maintenance.writeLog("New TwitterRunnable created");
 		this.index = index;
 		bird = twitter;
 		Maintenance.runStatus.put(index+"twitter", true);
@@ -43,6 +44,7 @@ public class TwitterRunnable implements Runnable {
 	 * temp testing constructor
 	 */
 	public TwitterRunnable(){
+		Maintenance.writeLog("New TwitterRunnable created");
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
@@ -106,6 +108,7 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run() {
+		Maintenance.writeLog("run method called for TwitterRunnable");
 		long now = new Date().getTime();
 		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
 		boolean canPost = true;

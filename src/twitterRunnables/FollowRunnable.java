@@ -115,6 +115,7 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
+		Maintenance.writeLog("run method called for FollowRunnable");
 		try {
 			unfollowUsers();
 			followAndFavoriteUsers();

@@ -16,3 +16,9 @@
 2015-06-07 19:32:13.074 ----- ***ERROR*** Could not perform maintenance ***ERROR***
 2015-06-07 20:24:04.071 ----- Creating timers for all accounts
 2015-06-07 20:24:04.073 ----- creating RedditTimerTask
+2015-06-07 20:37:43.036 ----- Creating timers for all accounts
+2015-06-07 20:37:43.038 ----- creating RedditTimerTask
+2015-06-07 20:47:34.863 ----- Creating timers for all accounts
+2015-06-07 20:47:34.864 ----- creating RedditTimerTask
+2015-06-07 20:47:34.864 ----- RedditTimerTask fired
+2015-06-07 20:47:34.865 ----- Skipped creation of RedditScraper because maintenance flag is set

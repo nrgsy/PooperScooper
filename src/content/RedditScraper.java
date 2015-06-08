@@ -23,9 +23,9 @@ import org.jsoup.select.Elements;
 
 public class RedditScraper implements Runnable{
 
-
 	public RedditScraper() {
 		super();
+		Maintenance.writeLog("New Reddit scraper created");
 		Maintenance.runStatus.put("reddit", true);
 	}
 
@@ -34,7 +34,7 @@ public class RedditScraper implements Runnable{
 	 * @throws FuckinUpKPException
 	 * @throws InterruptedException 
 	 */
-	public void contentSnatch(boolean init) throws FuckinUpKPException, InterruptedException{
+	public void contentSnatch(boolean init) throws FuckinUpKPException, InterruptedException {
 		ArrayList<String> captions = new ArrayList<String>();
 		ArrayList<String> imglinks = new ArrayList<String>(); 
 
@@ -107,6 +107,7 @@ public class RedditScraper implements Runnable{
 	 */
 	@Override
 	public void run() {
+		Maintenance.writeLog("run method called for RedditScraper");
 		try {
 			new RedditScraper().contentSnatch(true);
 		} catch (FuckinUpKPException | InterruptedException e) {

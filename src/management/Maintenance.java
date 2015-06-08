@@ -155,10 +155,10 @@ public class Maintenance {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		//don't start api call section until 15 minutes from start has passed
-		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
-			//wait 10 seconds before trying again
-			Thread.sleep(10000);
-		}
+//		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
+//			//wait 10 seconds before trying again
+//			Thread.sleep(10000);
+//		}
 
 		//Section that uses api calls
 		///////////////////////////////////////////////////////////////////////////////////////////////

@@ -23,10 +23,13 @@ public class TimerFactory {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.writeLog("RedditTimerTask fired");
 				if(!Maintenance.flagSet){
 					new RedditScraper();
 				}
 				else{
+					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
+							+ "flag is set");
 					Maintenance.runStatus.put("reddit", false);
 					this.cancel();
 				}
@@ -45,10 +48,13 @@ public class TimerFactory {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.writeLog("TwitterRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					new TwitterRunnable(bird,index);
 				}
-				else{
+				else {
+					Maintenance.writeLog("Skipped creation of TwitterRunnable because maintenance "
+							+ "flag is set");
 					Maintenance.runStatus.put(index+"twitter", false);
 					this.cancel();
 				}
@@ -68,10 +74,13 @@ public class TimerFactory {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.writeLog("FollowRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					new FollowRunnable(bird,index);
 				}
-				else{
+				else {
+					Maintenance.writeLog("Skipped creation of FollowRunnable because maintenance "
+							+ "flag is set");
 					Maintenance.runStatus.put(index+"follow", false);
 					this.cancel();
 				}
@@ -91,10 +100,13 @@ public class TimerFactory {
 		return new TimerTask() {					
 			@Override
 			public void run() {
+				Maintenance.writeLog("BigAccRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index));
 				}
 				else{
+					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "
+							+ "flag is set");
 					Maintenance.runStatus.put(index+"bigAcc", false);
 					this.cancel();
 				}
@@ -110,6 +122,7 @@ public class TimerFactory {
 		return new TimerTask() {
 			@Override
 			public void run() {
+				Maintenance.writeLog("MaintenanceTimerTask fired");
 				try {
 					Maintenance.performMaintenance();
 				} catch (Exception e) {
