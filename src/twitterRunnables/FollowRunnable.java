@@ -29,11 +29,10 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessTokenSecret
 	 */
 	public FollowRunnable(Twitter twitter, int index){
-		
+		Maintenance.writeLog("New FollowRunnable created");
 		this.index = index;
 		bird = twitter;
-		Maintenance.runStatus.put(index+"follow", true);
-		
+		Maintenance.runStatus.put(index+"follow", true);	
 	}
 	
 	//this constructor only for testing
@@ -41,6 +40,7 @@ public class FollowRunnable implements Runnable{
 	 * @param lol
 	 */
 	public FollowRunnable(int lol){
+		Maintenance.writeLog("New FollowRunnable created");
 		if(lol == 0){
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)

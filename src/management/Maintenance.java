@@ -17,14 +17,14 @@ public class Maintenance {
 
 	//The key is index + runnable type
 	public static HashMap<String, Boolean> runStatus;
-	
+
 	//a list containing _id's of Schwergsy Accounts that will be deleted on
 	//the next maintenance run
 	public static ArrayList<Integer> doomedAccounts;
 
 	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
-	
+
 	private static void resetBigAccountHarvestIndexes() throws UnknownHostException {
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
 			DataBaseHandler.editBigAccountHarvestIndex(index, 0);
@@ -47,7 +47,7 @@ public class Maintenance {
 					toAddToBigAccWhiteList.add(id);
 				}
 			}
-			
+
 			DataBaseHandler.addBigAccountsWhiteList(index, new ArrayList<Long>(toAddToBigAccWhiteList));
 		}
 	}
@@ -73,6 +73,13 @@ public class Maintenance {
 	}
 
 	public static void performMaintenance() throws Exception {
+		
+		if (flagSet) {
+			Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
+					+ " running (flagSet was true). Exiting performMaintenance", "maintenance");
+			return;
+		}
+		
 		Maintenance.writeLog("Maintenance Started", "maintenance");
 		long ogStartTime = new Date().getTime();
 		flagSet = true;
@@ -90,10 +97,12 @@ public class Maintenance {
 				}
 			}
 
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			if (somethingStillRunning) {
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -112,7 +121,7 @@ public class Maintenance {
 		long nonAPIstartTime = new Date().getTime();
 
 		DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
-		
+
 		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 		try {
 			DataBaseHandler.findAndSetGlobalVars();
@@ -128,7 +137,7 @@ public class Maintenance {
 			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
-		
+
 		//cleans up and syncs toFollow with whiteList
 		try {
 			cleanToFollows();
@@ -136,12 +145,13 @@ public class Maintenance {
 			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***", "maintenance");
 			e.printStackTrace();
 		}
-		
+
 		//resets bigAccountHarvestIndexes to 0
 		try {
 			resetBigAccountHarvestIndexes();
 		} catch (UnknownHostException e) {
-			Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***", "maintenance");
+			Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***",
+					"maintenance");
 			e.printStackTrace();
 		}
 

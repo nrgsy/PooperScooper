@@ -11,3 +11,8 @@
 2015-06-07 18:08:27.045 ----- Removing Schwergsy account with _id: 0
 2015-06-07 19:05:09.591 ----- ***ERROR*** Schwergsy Account with name: yooo not found. Cannot remove from db. ***ERROR***
 2015-06-07 19:05:09.594 ----- Could not find account with name: yooo. Nothing was flagged for removal.
+2015-06-07 19:26:20.303 ----- Globals not found in db, initializing with defaults
+2015-06-07 19:26:32.792 ----- ***ERROR*** Could not perform maintenance ***ERROR***
+2015-06-07 19:32:13.074 ----- ***ERROR*** Could not perform maintenance ***ERROR***
+2015-06-07 20:24:04.071 ----- Creating timers for all accounts
+2015-06-07 20:24:04.073 ----- creating RedditTimerTask

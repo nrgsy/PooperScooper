@@ -17,9 +17,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -33,12 +35,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
 import management.TimerFactory;
+
 import org.bson.Document;
+
 import twitter4j.TwitterException;
+
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -279,7 +285,7 @@ public class ApprovalGUI {
 			}
 		}		
 	}
-	
+
 	//The listener for the perform maintenance button
 	private static class MaintenanceListener implements ActionListener {
 		@Override
@@ -296,7 +302,7 @@ public class ApprovalGUI {
 			}
 		}
 	}
-	
+
 	//the listener for the remove button in Schwergsy account interface
 	private static class RemoveAccountListener implements ActionListener {
 		@Override
@@ -315,7 +321,7 @@ public class ApprovalGUI {
 			}
 		}
 	}
-	
+
 	private static class ContentListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -503,8 +509,21 @@ public class ApprovalGUI {
 
 	public static void main(String[] args) throws IOException {
 
+		//init stuff if not already initialized
+		if (DataBaseHandler.mongoClient == null) {
+			DataBaseHandler.mongoClient = new MongoClient();
+		}
+		if (GlobalStuff.lastPostTimeMap == null) {
+			GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
+		}
 		DataBaseHandler.initGlobalVars();
 		DataBaseHandler.findAndSetGlobalVars();
+		if (Maintenance.runStatus == null) {
+			Maintenance.runStatus = new HashMap<>();
+		}
+		if (Maintenance.doomedAccounts == null) {
+			Maintenance.doomedAccounts = new ArrayList<Integer>();
+		}
 
 		//initialize these
 		nameField = new JTextField();
@@ -534,7 +553,7 @@ public class ApprovalGUI {
 		frame = new JFrame("Main Menu");
 		frame.add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(600, 100);
+		frame.setSize(800, 100);
 		frame.setLocationRelativeTo(null);	
 		frame.setVisible(true);
 	}

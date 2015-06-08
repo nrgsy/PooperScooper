@@ -18,6 +18,8 @@ public class TimerFactory {
 
 	public static TimerTask createRedditTimerTask() {
 
+		Maintenance.writeLog("creating RedditTimerTask");
+
 		return new TimerTask() {
 			@Override
 			public void run() {
@@ -37,6 +39,9 @@ public class TimerFactory {
 	 * @return
 	 */
 	private static TimerTask createTwitterRunnableTimerTask(final Twitter bird, final int index){
+		
+		Maintenance.writeLog("creating TwitterRunnableTimerTask");
+		
 		return new TimerTask() {
 			@Override
 			public void run() {
@@ -57,6 +62,9 @@ public class TimerFactory {
 	 * @return
 	 */
 	private static TimerTask createFollowRunnableTimerTask(final Twitter bird, final int index){
+		
+		Maintenance.writeLog("creating FollowRunnableTimerTask");
+		
 		return new TimerTask() {
 			@Override
 			public void run() {
@@ -77,7 +85,10 @@ public class TimerFactory {
 	 * @return
 	 */
 	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index){
-		return new TimerTask() {
+		
+		Maintenance.writeLog("creating BigAccRunnableTimerTask");
+		
+		return new TimerTask() {					
 			@Override
 			public void run() {
 				if (!Maintenance.flagSet) {
@@ -94,6 +105,8 @@ public class TimerFactory {
 	
 	public static TimerTask createMaintenanceTimerTask() {
 
+		Maintenance.writeLog("creating MaintenanceTimerTask");
+		
 		return new TimerTask() {
 			@Override
 			public void run() {
@@ -112,6 +125,9 @@ public class TimerFactory {
 	 * @throws Exception
 	 */
 	public static void createTimers() throws UnknownHostException, Exception {
+		
+		Maintenance.writeLog("Creating timers for all accounts");
+		
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
 		new Timer().scheduleAtFixedRate(createRedditTimerTask(), 0L, scrapetime);
 

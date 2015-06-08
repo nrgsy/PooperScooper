@@ -33,6 +33,7 @@ public class bigAccRunnable implements Runnable {
 	 * @param OAuthAccessTokenSecret
 	 */
 	public bigAccRunnable(Twitter twitter, int index, int bigAccountIndex){
+		Maintenance.writeLog("New bigAccRunnable created");
 		this.index = index;
 		this.bigAccountIndex = bigAccountIndex;
 		bird = twitter;
@@ -40,6 +41,7 @@ public class bigAccRunnable implements Runnable {
 	}
 
 	public bigAccRunnable(){
+		Maintenance.writeLog("New bigAccRunnable created");
 		ConfigurationBuilder cb = new ConfigurationBuilder();
 		cb.setDebugEnabled(true)
 		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
@@ -276,10 +278,9 @@ public class bigAccRunnable implements Runnable {
 		Maintenance.writeLog("done harvesting", index);
 	}
 
-
-
 	@Override
 	public void run() {
+		Maintenance.writeLog("run method called for bigAccRunnable");
 		try {
 			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
 				findBigAccounts();
