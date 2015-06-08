@@ -2,6 +2,8 @@ package management;
 
 
 
+import java.util.ArrayList;
+
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
@@ -20,6 +22,9 @@ public class MongoFuckAround {
 		//DataBaseHandler.moveBigAccountToEnd(0, 0);
 		//DataBaseHandler.insertSchwergsyAccount("WorkoutGetSwole", "uHQV3x8pHZD7jzteRwUIw", "OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg", "2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI", "Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t", false, false);
 		//System.out.println(DataBaseHandler.getOneToFollow(0));
-		DataBaseHandler.initGlobalVars();
+		ArrayList<Long> ina = null;
+		for(long i : ina){
+			System.out.println("hello");
+		}
 	}
 }

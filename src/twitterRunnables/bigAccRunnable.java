@@ -65,7 +65,8 @@ public class bigAccRunnable implements Runnable {
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
+			//I know this is jank, but i can't make empty ResponseLists, so it's gotta be the way
+			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index).get(0);
 
 			if(OwnTweets.size()>30){
 				//sorts by most retweets and cuts out tweets with little retweets

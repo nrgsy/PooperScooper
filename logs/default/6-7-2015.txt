@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 2015-06-07 17:56:25.910 ----- inserting a new Schwergsy Account
 2015-06-07 17:56:26.525 ----- WARNING: Schwergsy account failed to authenticate, removing from db
 2015-06-07 17:56:26.532 ----- Removing Schwergsy account with _id: 0
@@ -23,3 +24,9 @@
 2015-06-07 20:47:34.864 ----- RedditTimerTask fired
 2015-06-07 20:47:34.865 ----- Skipped creation of RedditScraper because maintenance flag is set
 2015-06-07 21:43:28.965 ----- Globals not found in db, initializing with defaults
+=======
+2015-06-07 21:51:06.898 ----- Creating timers for all accounts
+2015-06-07 21:51:06.899 ----- creating RedditTimerTask
+2015-06-07 21:51:06.900 ----- RedditTimerTask fired
+2015-06-07 21:51:06.900 ----- Skipped creation of RedditScraper because maintenance flag is set
+>>>>>>> 34c15228d6deca853ea809257f1076196d352ca9
