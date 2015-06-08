@@ -110,7 +110,7 @@ public class bigAccRunnable implements Runnable {
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
-				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
+				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index).get(0);
 				for(Status tweet: potentialBigAccs){
 					if(AllCandidates.size() == maxCandidates){
 						break;
@@ -158,7 +158,7 @@ public class bigAccRunnable implements Runnable {
 
 			Paging query = new Paging();
 			query.setCount(200);
-			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index);
+			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index).get(0);
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -212,7 +212,7 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setSinceId(lastTweet);
 		}
 
-		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
+		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index).get(0);
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
 		//Makes sure the tweet is original to the bigAccount candidate

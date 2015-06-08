@@ -223,7 +223,8 @@ public class DataBaseHandler{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
 
-		Maintenance.writeLog("Initializing global vars with default values");
+		//can't writelog because log depends on initialized globals
+		System.out.println("Initializing global vars with default values");
 
 		//These are the default values to set the volatile variables to
 		Document globalVars = new Document();
