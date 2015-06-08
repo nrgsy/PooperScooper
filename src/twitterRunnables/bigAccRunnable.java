@@ -197,7 +197,7 @@ public class bigAccRunnable implements Runnable {
 		DataBaseHandler.addBigAccountsWhiteList(index, bigAccounts);
 	}
 
-	public void harvestBigAccounts() throws UnknownHostException, TwitterException, InterruptedException, FuckinUpKPException{
+	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException{
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
 		int maxNoRTTweets = 30;
@@ -288,8 +288,8 @@ public class bigAccRunnable implements Runnable {
 			else{
 				harvestBigAccounts();
 			}
-		} catch (UnknownHostException | TwitterException | InterruptedException
-				| FuckinUpKPException e) {
+		} catch (UnknownHostException | InterruptedException
+				| FuckinUpKPException | TwitterException e) {
 			System.out.println(e.getStackTrace());
 			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
 		}

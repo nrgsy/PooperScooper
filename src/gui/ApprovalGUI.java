@@ -383,7 +383,7 @@ public class ApprovalGUI {
 					numRemaining = (int) DataBaseHandler.getCollectionSize(
 							collection.getNamespace().getCollectionName()) - 1;
 				} catch (UnknownHostException e1) {
-					// TODO Auto-generated catch block
+					Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
 					e1.printStackTrace();
 				}
 
@@ -398,7 +398,7 @@ public class ApprovalGUI {
 					try {
 						picPanel.add(getPicLabel());
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
+						Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
 						e1.printStackTrace();
 					}
 					picPanel.setBackground(Color.GRAY);
