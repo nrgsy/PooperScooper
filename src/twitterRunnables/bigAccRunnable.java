@@ -65,7 +65,8 @@ public class bigAccRunnable implements Runnable {
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
+			//I know this is jank, but i can't make empty ResponseLists, so it's gotta be the way
+			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index).get(0);
 
 			if(OwnTweets.size()>30){
 				//sorts by most retweets and cuts out tweets with little retweets
@@ -109,7 +110,7 @@ public class bigAccRunnable implements Runnable {
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
-				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
+				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index).get(0);
 				for(Status tweet: potentialBigAccs){
 					if(AllCandidates.size() == maxCandidates){
 						break;
@@ -157,7 +158,7 @@ public class bigAccRunnable implements Runnable {
 
 			Paging query = new Paging();
 			query.setCount(200);
-			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index);
+			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index).get(0);
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -211,7 +212,7 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setSinceId(lastTweet);
 		}
 
-		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
+		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index).get(0);
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
 		//Makes sure the tweet is original to the bigAccount candidate

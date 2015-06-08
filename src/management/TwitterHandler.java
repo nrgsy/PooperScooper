@@ -2,6 +2,7 @@ package management;
 
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import twitter4j.IDs;
@@ -49,7 +50,7 @@ public class TwitterHandler {
 			try {
 				blah = bird.getFollowersIDs(-1);
 
-				HashSet<Long> followers = new HashSet<>();
+				HashSet<Long> followers = new HashSet<Long>();
 				for(int i = 0; i < blah.getIDs().length; i++){
 					followers.add(blah.getIDs()[i]);
 				}
@@ -66,23 +67,23 @@ public class TwitterHandler {
 				return followers;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				return new HashSet<Long>();
 			}
 		}
 		else{
-			return null;
+			return new HashSet<Long>();
 		}
 	}
 
 	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index){
+		
 		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/friends/ids", index)){
 			try {
 				int ratecount = 0;
 				IDs IDCollection;
-				HashSet<Long> following = new HashSet<>();
-
 				IDCollection = twitter.getFriendsIDs(-1);
-
+				HashSet<Long> following = new HashSet<Long>();
+				
 				for(long id : IDCollection.getIDs()){
 					following.add(id);
 				}
@@ -97,11 +98,11 @@ public class TwitterHandler {
 				return following;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				return new HashSet<Long>();
 			}
 		}
 		else{
-			return null;
+			return new HashSet<Long>();
 		}
 	}
 
@@ -135,32 +136,36 @@ public class TwitterHandler {
 		}
 	}
 
-	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, int index){
+	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, int index){
+		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
-				return twitter.getUserTimeline(id);
+				ListWrapper.add(twitter.getUserTimeline(id));
+				return ListWrapper;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				return ListWrapper;
 			}
 		}
 		else{
-			return null;
+			return ListWrapper;
 		}
 
 	}
 
-	public static ResponseList<Status> getUserTimeline(Twitter twitter, long id, Paging query, int index){
+	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, Paging query, int index){
+		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		if(!DataBaseHandler.isSuspended(index)){
 			try {
-				return twitter.getUserTimeline(id, query);
+				ListWrapper.add(twitter.getUserTimeline(id, query));
+				return ListWrapper;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				return ListWrapper;
 			}
 		}
 		else{
-			return null;
+			return ListWrapper;
 		}
 
 	}
@@ -171,11 +176,11 @@ public class TwitterHandler {
 				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				return new long[0];
 			}
 		}
 		else{
-			return null;
+			return new long[0];
 		}
 	}
 
