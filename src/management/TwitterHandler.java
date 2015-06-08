@@ -217,8 +217,22 @@ public class TwitterHandler {
 	}
 
 	private static void errorHandling(TwitterException e, int index){
-		if(e.getErrorCode()==64){    
-			DataBaseHandler.suspendSchwergsyAccount(index);
+		switch(e.getErrorCode()){
+			case 64:
+				Maintenance.writeLog("***ERROR*** This account has been suspended", index);
+				DataBaseHandler.suspendSchwergsyAccount(index);
+			case 88:
+				Maintenance.writeLog("***WARNING*** Rate limit has been exceeded", index);
+			case 130:
+				Maintenance.writeLog("***WARNING*** Twitter is over capacity to fulfill this request",index);
+			case 131:
+				Maintenance.writeLog("***WARNING*** Twitter internal error",index);
+			case 161:
+				Maintenance.writeLog("***WARNING*** Unable to follow more people at this time", index );
+			case 226:
+				Maintenance.writeLog("***WARNING*** Twitter thinks this request was automated", index);
+			default:
+				Maintenance.writeLog("***WARNING*** "+e.getErrorMessage(), index);
 		}
 	}
 }

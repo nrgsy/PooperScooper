@@ -22,11 +22,13 @@ import org.jsoup.select.Elements;
  */
 
 public class RedditScraper implements Runnable{
+	
+	boolean init;
 
-	public RedditScraper() {
-		super();
+	public RedditScraper(boolean init) {
 		Maintenance.writeLog("New Reddit scraper created");
 		Maintenance.runStatus.put("reddit", true);
+		this.init = init;
 	}
 
 	/**
@@ -34,7 +36,7 @@ public class RedditScraper implements Runnable{
 	 * @throws FuckinUpKPException
 	 * @throws InterruptedException 
 	 */
-	public void contentSnatch(boolean init) throws FuckinUpKPException, InterruptedException {
+	public void contentSnatch() throws FuckinUpKPException, InterruptedException {
 		ArrayList<String> captions = new ArrayList<String>();
 		ArrayList<String> imglinks = new ArrayList<String>(); 
 
@@ -94,14 +96,6 @@ public class RedditScraper implements Runnable{
 		}
 	}
 
-	/**
-	 * @throws FuckinUpKPException
-	 * @throws InterruptedException 
-	 */
-	public void contentSnatch() throws FuckinUpKPException, InterruptedException{
-		contentSnatch(false);
-	}
-
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
@@ -109,14 +103,12 @@ public class RedditScraper implements Runnable{
 	public void run() {
 		Maintenance.writeLog("run method called for RedditScraper");
 		try {
-			new RedditScraper().contentSnatch(true);
+			contentSnatch();
 		} catch (FuckinUpKPException | InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
-
-
-	public static void main(String[] args){
-		(new Thread(new RedditScraper())).start();
+		finally{
+			Maintenance.runStatus.put("reddit", false);
+		}
 	}
 }

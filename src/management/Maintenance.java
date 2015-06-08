@@ -169,7 +169,7 @@ public class Maintenance {
 		}
 
 		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.createTimers();
+		TimerFactory.createTimers(false);
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
 				+ " ms for the API-calling section to complete", "maintenance");

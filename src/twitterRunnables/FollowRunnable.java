@@ -72,7 +72,7 @@ public class FollowRunnable implements Runnable{
 	public void followAndFavoriteUsers() throws  UnknownHostException, TwitterException{
 		if(DataBaseHandler.getToFollowSize(index)!=0){
 			long id = DataBaseHandler.getOneToFollow(index);
-			
+			ResponseList<Status> tweets = null;
 			//Favorites a tweet which is unique and not a response to another tweet, if available.
 			Paging paging = new Paging();
 			paging.setCount(50);
@@ -80,7 +80,14 @@ public class FollowRunnable implements Runnable{
 			//the ResponseList<Status> is null. not sure if you can iterate over null.
 			//probably not.
 			int count = 0;
-			ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird, id, paging, index).get(0);
+			ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
+			if(ListTweets.isEmpty()){
+				Maintenance.writeLog("***ERROR*** Could not run getUserTimeline in FollowRunnable", index);
+				return;
+			}
+			else{
+				tweets = ListTweets.get(0);
+			}
 			for(Status tweet: tweets){
 				if(!tweet.isRetweet() && tweet.getInReplyToScreenName() == null && count < 5){
 					TwitterHandler.favorite(bird,tweet.getId(), index);
