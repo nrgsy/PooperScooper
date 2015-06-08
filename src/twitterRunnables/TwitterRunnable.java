@@ -83,7 +83,7 @@ public class TwitterRunnable implements Runnable {
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
-			//TODO assContent structure may have  been changed since writing this method.
+			//TODO assContent structure may have been changed since writing this method.
 			Document assContent = DataBaseHandler.getRandomContent("ass", 0);
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();

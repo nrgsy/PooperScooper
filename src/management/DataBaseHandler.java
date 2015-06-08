@@ -191,7 +191,7 @@ public class DataBaseHandler{
 	public static  void findAndSetGlobalVars() throws UnknownHostException {
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
-		if (db.getCollection("GlobalVariables")==null) {
+		if (collection == null || collection.count() == 0) {
 			Maintenance.writeLog("***ERROR*** cannot pull global vars. "
 					+ "Collection GlobalVariables does not exist ***ERROR***");
 		}
@@ -201,13 +201,13 @@ public class DataBaseHandler{
 			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
-			Maintenance.writeLog("***ERROR*** GlobalVariables had " + collection.count() + "entries. "
+			Maintenance.writeLog("***ERROR*** GlobalVariables had " + collection.count() + " entries. "
 					+ "It should only ever have one entry, or not exist at all ***ERROR***");
 		}
 	}
 
 	/**
-	 * Initializes GlobalVars if it doesn't exist in the database.
+	 * Initializes GlobalVars with the hard coded defaults
 	 * @throws UnknownHostException
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
@@ -222,19 +222,22 @@ public class DataBaseHandler{
 		//Setting the global variables in GlobalStuff
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
-		if (db.getCollection("GlobalVariables").find().first()==null) {
-			Maintenance.writeLog("Globals not found in db, initializing with defaults");
 
-			//These are the default values to set the volatile variables to
-			Document globalVars = new Document();
+		Maintenance.writeLog("Initializing global vars with default values");
 
-			for(Entry<String,Object> entry : GlobalStuff.getDefaultGlobalVars().entrySet()){
-				globalVars.append(entry.getKey(),entry.getValue());
-			}
+		//These are the default values to set the volatile variables to
+		Document globalVars = new Document();
 
-			collection.insertOne(globalVars);
+		for(Entry<String,Object> entry : GlobalStuff.getDefaultGlobalVars().entrySet()){
+			globalVars.append(entry.getKey(),entry.getValue());
 		}
-		//set the global vars bases on the current state of the GlobalVariables collection
+
+		if (collection.find().first() == null) {
+			collection.insertOne(globalVars);		
+		}
+		else {
+			collection.findOneAndReplace(new Document(), globalVars);
+		}
 	}
 
 	//TODO Bojang Test
@@ -435,7 +438,7 @@ public class DataBaseHandler{
 
 		Maintenance.writeLog("successfully replaced array: " + column, index);
 	}
-	
+
 	/**TODO BOJANG TEST
 	 * @param index
 	 */
@@ -445,7 +448,7 @@ public class DataBaseHandler{
 		dbCollection.findOneAndUpdate(
 				new Document("_id", index),
 				new Document("$set", new Document("isIncubated", false)));
-		
+
 		Maintenance.writeLog("congratulations, SchwergsyAccount #"+index+" has graduated from incubation");
 	}
 
@@ -572,7 +575,7 @@ public class DataBaseHandler{
 		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter, index);
-		
+
 		if(freshFollowerSet.size()>2000){
 			finishedIncubation(index);
 		}
@@ -1391,11 +1394,11 @@ public class DataBaseHandler{
 		addFollowing(index, new ArrayList<Long>(TwitterHandler.initUpdateFollowing(bird, index)));
 
 	}
-	
+
 	public static void initUpdateFollowers(Twitter bird, int index) throws UnknownHostException{
-		
+
 		addFollowers(index, new ArrayList<Long>(TwitterHandler.getFollowers(bird, index)));
-		
+
 	}
 
 	/**

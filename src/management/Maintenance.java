@@ -73,13 +73,13 @@ public class Maintenance {
 	}
 
 	public static void performMaintenance() throws Exception {
-		
+
 		if (flagSet) {
 			Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
 					+ " running (flagSet was true). Exiting performMaintenance", "maintenance");
 			return;
 		}
-		
+
 		Maintenance.writeLog("Maintenance Started", "maintenance");
 		long ogStartTime = new Date().getTime();
 		flagSet = true;
@@ -108,8 +108,6 @@ public class Maintenance {
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
 				+ " ms for all the timers to die", "maintenance");
-
-
 
 		//Section that doesn't use api calls (runs first because we wait 15 min before using any api calls)
 		///////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,10 +153,10 @@ public class Maintenance {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		//don't start api call section until 15 minutes from start has passed
-//		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
-//			//wait 10 seconds before trying again
-//			Thread.sleep(10000);
-//		}
+		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
+			//wait 10 seconds before trying again
+			Thread.sleep(10000);
+		}
 
 		//Section that uses api calls
 		///////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +198,7 @@ public class Maintenance {
 			subDir = "default"; 
 		}
 
-		String dir = "logs/" + subDir + "/";
+		String dir = GlobalStuff.LOG_DIRECTORY + subDir + "/";
 
 		if (!new File(dir).exists()) {
 			new File(dir).mkdirs();
@@ -215,6 +213,14 @@ public class Maintenance {
 			FileWriter fw = new FileWriter(fileName,true); //the true will append the new data
 			fw.write(output + "\n"); //appends the string to the file
 			fw.close();
+
+			//also write the message to allLogs
+			FileWriter fw2 = new FileWriter(
+					GlobalStuff.LOG_DIRECTORY + (cal.get(Calendar.MONTH) + 1) +  "-" +
+							cal.get(Calendar.DAY_OF_MONTH) + "-" +
+							cal.get(Calendar.YEAR) + "-allLogs.txt", true);
+			fw2.write(output + "\n");
+			fw2.close();
 		} catch (IOException e) {
 			System.out.println("***ERROR*** Failed to write to log file ***ERROR***");
 			e.printStackTrace();
@@ -229,7 +235,6 @@ public class Maintenance {
 		String name = (String) DataBaseHandler.getSchwergsyAccount(index).get("name");
 		writeLog(message, name);
 	}
-
 
 	public static void writeLog(String message) { writeLog(message, null); }
 

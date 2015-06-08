@@ -45,6 +45,8 @@ public class GlobalStuff{
 	public static long MIN_TIME_BETWEEN_ACCESSES;
 	//The max width and height of an image in the Approval GUI
 	public static long MAX_IMAGE_DIMENSION;
+	//The directory where the logs live
+	public static String LOG_DIRECTORY;
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
 	//Other globals, non changeable via the database, but still mutable by the code
@@ -89,6 +91,7 @@ public class GlobalStuff{
 		CONTENT_SAMPLE_SIZE = globalVars.getLong("CONTENT_SAMPLE_SIZE");
 		MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
 		MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
+		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -109,6 +112,7 @@ public class GlobalStuff{
 		globalVars.put("CONTENT_SAMPLE_SIZE", 100L);
 		globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 		globalVars.put("MAX_IMAGE_DIMENSION", 700L);
+		globalVars.put("LOG_DIRECTORY", "logs/");
 
 		return globalVars;
 	}
