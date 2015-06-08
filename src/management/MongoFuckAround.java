@@ -22,9 +22,6 @@ public class MongoFuckAround {
 		//DataBaseHandler.moveBigAccountToEnd(0, 0);
 		//DataBaseHandler.insertSchwergsyAccount("WorkoutGetSwole", "uHQV3x8pHZD7jzteRwUIw", "OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg", "2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI", "Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t", false, false);
 		//System.out.println(DataBaseHandler.getOneToFollow(0));
-		ArrayList<Long> ina = null;
-		for(long i : ina){
-			System.out.println("hello");
-		}
+		System.out.println(DataBaseHandler.getFollowersSize(0));
 	}
 }

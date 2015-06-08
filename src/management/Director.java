@@ -61,6 +61,6 @@ public class Director {
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
 		//create the initial timers
-		TimerFactory.createTimers();
+		TimerFactory.createTimers(true);
 	}
 }

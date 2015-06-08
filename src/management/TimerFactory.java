@@ -16,7 +16,7 @@ import twitterRunnables.bigAccRunnable;
 
 public class TimerFactory {
 
-	public static TimerTask createRedditTimerTask() {
+	public static TimerTask createRedditTimerTask(final boolean init) {
 
 		Maintenance.writeLog("creating RedditTimerTask");
 
@@ -25,12 +25,11 @@ public class TimerFactory {
 			public void run() {
 				Maintenance.writeLog("RedditTimerTask fired");
 				if(!Maintenance.flagSet){
-					new RedditScraper().run();
+					new RedditScraper(init).run();
 				}
 				else{
 					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
 							+ "flag is set");
-					Maintenance.runStatus.put("reddit", false);
 					this.cancel();
 				}
 			}};
@@ -137,12 +136,12 @@ public class TimerFactory {
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void createTimers() throws UnknownHostException, Exception {
+	public static void createTimers(boolean init) throws UnknownHostException, Exception {
 		
 		Maintenance.writeLog("Creating timers for all accounts");
 		
 		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
-		new Timer().scheduleAtFixedRate(createRedditTimerTask(), 0L, scrapetime);
+		new Timer().scheduleAtFixedRate(createRedditTimerTask(init), 0L, scrapetime);
 
 		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			createTimers(id);

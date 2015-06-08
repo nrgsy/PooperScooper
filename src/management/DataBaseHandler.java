@@ -549,10 +549,11 @@ public class DataBaseHandler{
 	 */
 	public static  void addNewStatistic(int index, int unfollows, int newFollows, int retainedFollowers, int totalFollowers) throws UnknownHostException, FuckinUpKPException {
 
+		Maintenance.writeLog("Adding statistic",index);
 		long now = new Date().getTime();
 		long oldStatCreationTime = now;
 
-		BasicDBList statList = (BasicDBList) getSchwergsyAccount(index).get("statistics");
+		ArrayList<Document> statList = (ArrayList<Document>) getSchwergsyAccount(index).get("statistics");
 		//get time of creation of the last statistic is statList, which should be the most recent stat
 		if (statList.size() > 0) {
 			oldStatCreationTime = ((Document) statList.get(statList.size() -1)).getLong("creationDate");
@@ -567,6 +568,7 @@ public class DataBaseHandler{
 		.append("totalFollowers", totalFollowers);
 
 		addElementToSchwergsArray(index, stat, "statistics");
+		Maintenance.writeLog("Finished addint statistic", index);
 	}
 
 	/**TODO Bojang Test
@@ -1433,7 +1435,7 @@ public class DataBaseHandler{
 			FindIterable<Document> findIter = dbCollection.find(query);
 			MongoCursor<Document> cursor = findIter.iterator();
 			Document account = (Document) cursor.next();
-			BasicDBList statList = (BasicDBList) account.get("statistics");
+			ArrayList<Document> statList = (ArrayList<Document>) account.get("statistics");
 
 			if (statList.size() > 0) {
 

@@ -20,8 +20,8 @@ import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
+
 public class bigAccRunnable implements Runnable {
-	//TODO when getting new bigAccs, check that it doesn't exist already in bigAccs
 	private Twitter bird;
 	private int index;
 	private int bigAccountIndex;
@@ -55,6 +55,8 @@ public class bigAccRunnable implements Runnable {
 		Maintenance.runStatus.put(index+"bigAcc", true);
 	}
 
+	//This method does not put rejected candidates into the whitelist because they have the potential
+	//to become bigAccounts later on.
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
 		//TODO add latestTweet capability to bigAccount in DBH
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
@@ -65,9 +67,17 @@ public class bigAccRunnable implements Runnable {
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
-			//I know this is jank, but i can't make empty ResponseLists, so it's gotta be the way
-			ResponseList<Status> OwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index).get(0);
-
+			ResponseList<Status> OwnTweets = null;
+			
+			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
+			if(ListOwnTweets.isEmpty()){
+				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+				return;
+			}
+			else{
+				OwnTweets = ListOwnTweets.get(0);
+			}
+			
 			if(OwnTweets.size()>30){
 				//sorts by most retweets and cuts out tweets with little retweets
 				Collections.sort(OwnTweets, new Comparator<Status>() {
@@ -110,7 +120,17 @@ public class bigAccRunnable implements Runnable {
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
-				ResponseList<Status> potentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index).get(0);
+				ResponseList<Status> potentialBigAccs = null;
+				
+				ArrayList<ResponseList<Status>> ListPotentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
+				if(ListPotentialBigAccs.isEmpty()){
+					Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+					return;
+				}
+				else{
+					potentialBigAccs = ListPotentialBigAccs.get(0);
+				}
+				
 				for(Status tweet: potentialBigAccs){
 					if(AllCandidates.size() == maxCandidates){
 						break;
@@ -158,7 +178,16 @@ public class bigAccRunnable implements Runnable {
 
 			Paging query = new Paging();
 			query.setCount(200);
-			ResponseList<Status> timeline = TwitterHandler.getUserTimeline(bird,id, query , index).get(0);
+			ResponseList<Status> timeline = null;
+			ArrayList<ResponseList<Status>> ListTimeline = TwitterHandler.getUserTimeline(bird,id, query , index);
+			if(ListTimeline.isEmpty()){
+				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+				return;
+			}
+			else{
+				timeline = ListTimeline.get(0);
+			}
+			
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -213,7 +242,16 @@ public class bigAccRunnable implements Runnable {
 			querySettings.setSinceId(lastTweet);
 		}
 
-		ResponseList<Status> tweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index).get(0);
+		ResponseList<Status> tweets = null;
+		ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
+		if(ListTweets.isEmpty()){
+			Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+			return;
+		}
+		else{
+			tweets = ListTweets.get(0);
+		}
+		
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
 		//Makes sure the tweet is original to the bigAccount candidate
