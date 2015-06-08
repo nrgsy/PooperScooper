@@ -104,7 +104,7 @@ public class FollowRunnable implements Runnable{
 	public void unfollowUsers() throws UnknownHostException, TwitterException{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
-		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.GET_NUM_TO_UNFOLLOW(sizeFollowers, sizeFollowing));
+		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.getNumToUnfollow(sizeFollowers, sizeFollowing));
 		for(Long id : unfollowArr){
 			TwitterHandler.unfollow(bird,id, index);
 		}
