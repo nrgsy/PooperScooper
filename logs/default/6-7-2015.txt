@@ -22,3 +22,4 @@
 2015-06-07 20:47:34.864 ----- creating RedditTimerTask
 2015-06-07 20:47:34.864 ----- RedditTimerTask fired
 2015-06-07 20:47:34.865 ----- Skipped creation of RedditScraper because maintenance flag is set
+2015-06-07 21:43:28.965 ----- Globals not found in db, initializing with defaults
