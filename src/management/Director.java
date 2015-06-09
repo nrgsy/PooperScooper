@@ -43,7 +43,7 @@ public class Director {
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void main(String[]args) throws UnknownHostException, Exception {
+	public static void runDirector() throws UnknownHostException, Exception {
 		
 		//Initialize all the shit
 		DataBaseHandler.initGlobalVars();
