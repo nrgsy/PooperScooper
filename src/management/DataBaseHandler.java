@@ -449,7 +449,7 @@ public class DataBaseHandler{
 	 */
 	public static void finishedIncubation(int index){
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = DataBaseHandler.getCollection("SchwergsyAccount", db);
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccount");
 		dbCollection.findOneAndUpdate(
 				new Document("_id", index),
 				new Document("$set", new Document("isIncubated", false)));

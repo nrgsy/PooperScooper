@@ -22,13 +22,9 @@ import org.jsoup.select.Elements;
  */
 
 public class RedditScraper implements Runnable{
-	
-	boolean init;
 
-	public RedditScraper(boolean init) {
+	public RedditScraper() {
 		Maintenance.writeLog("New Reddit scraper created");
-		Maintenance.runStatus.put("reddit", true);
-		this.init = init;
 	}
 
 	/**
@@ -42,11 +38,7 @@ public class RedditScraper implements Runnable{
 
 		String url = "http://www.reddit.com/r/blackpeopletwitter";
 
-		int pages = 1;
-
-		if(init){
-			pages = 35;
-		}
+		int pages = 35;
 
 		//Loop through reddit and gathers title + image link
 		for(int j = 0; j<pages; j++){
@@ -106,9 +98,7 @@ public class RedditScraper implements Runnable{
 			contentSnatch();
 		} catch (FuckinUpKPException | InterruptedException e) {
 			e.printStackTrace();
-		}
-		finally{
-			Maintenance.runStatus.put("reddit", false);
+			Maintenance.writeLog("RedditScraper failed somewhere in snatching content");
 		}
 	}
 }
