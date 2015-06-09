@@ -22,5 +22,7 @@ public class MongoFuckAround {
 		Twitter bird = tf.getInstance();
 		
 		System.out.println(bird.getId());
+		
+		System.out.println(TwitterHandler.getUserSuggestions(bird, 0).get(0).get(3).getName());
 	}
 }

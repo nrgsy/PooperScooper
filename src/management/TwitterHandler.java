@@ -190,7 +190,7 @@ public class TwitterHandler {
 		if(!DataBaseHandler.isSuspended(index)){
 			
 			try{
-				returnval.add(twitter.getUserSuggestions("funny"));
+				returnval.add(twitter.getUserSuggestions("entertainment"));
 				return returnval;
 			} catch (TwitterException e) {
 				errorHandling(e,index);

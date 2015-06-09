@@ -76,9 +76,6 @@ public class FollowRunnable implements Runnable{
 			//Favorites a tweet which is unique and not a response to another tweet, if available.
 			Paging paging = new Paging();
 			paging.setCount(50);
-			//if something fucks up here, it's because TwitterHandler returns null and 
-			//the ResponseList<Status> is null. not sure if you can iterate over null.
-			//probably not.
 			int count = 0;
 			ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
 			if(ListTweets.isEmpty()){

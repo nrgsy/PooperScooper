@@ -148,7 +148,7 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 
-		//TODO make this part better
+
 		else{
 			ResponseList<User> suggestedUsers = null;
 			ArrayList<ResponseList<User>> ListSuggestedUsers = TwitterHandler.getUserSuggestions(bird, index);
@@ -158,12 +158,9 @@ public class bigAccRunnable implements Runnable {
 			else{
 				suggestedUsers = ListSuggestedUsers.get(0);
 			}
-			int limit = 1;
+
 			for(User user : suggestedUsers){
-				if(limit != 0){
-					limit--;
-					AllCandidates.add(user.getId());
-				}
+				AllCandidates.add(user.getId());
 			}
 		}
 
@@ -331,7 +328,7 @@ public class bigAccRunnable implements Runnable {
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable");
 		try {
-			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
+			if(DataBaseHandler.getToFollowSize(index)>1200 || DataBaseHandler.getBigAccountsSize(index) == 0){
 				findBigAccounts();
 			}
 			else{
