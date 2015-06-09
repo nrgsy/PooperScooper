@@ -591,10 +591,10 @@ public class DataBaseHandler{
 
 		HashSet<Long> storedFollowerSet = new HashSet<>();
 
-		ArrayList<Object> tmpList = getSchwergsyAccountArray(index, "followers");
+		ArrayList<Long> tmpList = getSchwergsyAccountArray(index, "followers");
 
-		for(Object id : tmpList) {
-			storedFollowerSet.add((long) id);
+		for(Long id : tmpList) {
+			storedFollowerSet.add(id);
 		}
 
 		//getting the number of cool new followers and unfollowing bastards.
@@ -999,9 +999,8 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static  ArrayList<Object> getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
-		@SuppressWarnings("unchecked")
-		ArrayList<Object> SchwergsList = (ArrayList<Object>) getSchwergsyAccount(index).get(column);
+	public static  ArrayList getSchwergsyAccountArray(int index, String column) throws UnknownHostException {
+		ArrayList SchwergsList = (ArrayList) getSchwergsyAccount(index).get(column);
 		return SchwergsList;
 	}
 

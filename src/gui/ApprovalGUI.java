@@ -300,7 +300,13 @@ public class ApprovalGUI {
 				Maintenance.performMaintenance();
 			}
 			catch(Exception e1) {
-				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***");
+				String stacktrace = "";
+				for (StackTraceElement stack : e1.getStackTrace()){
+					stacktrace += stack.toString();
+					stacktrace += "\n";
+				}
+				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***\n" + stacktrace, "maintenance");
+				
 			}
 		}
 	}
