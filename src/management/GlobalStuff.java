@@ -65,8 +65,12 @@ public class GlobalStuff{
 				numToUnfollow = 100*sizeFollowing - sizeFollowers;
 			}
 		}
-		else {
+		else if (sizeFollowing < FOLLOWING_BASE_CAP) {
+			numToUnfollow = 0;
+		}
+		else{
 			Maintenance.writeLog("***ERROR*** We have negative followers or following or Jon is an idiot ***ERROR***");
+
 		}
 		return numToUnfollow >= 0 ? numToUnfollow : 0;
 	}
