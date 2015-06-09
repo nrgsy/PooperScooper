@@ -25,7 +25,7 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				Maintenance.writeLog("TwitterRunnableTimerTask fired");
-				if (!Maintenance.flagSet) {
+				if (!Maintenance.flagSet && !DataBaseHandler.isSuspended(index)) {
 					new TwitterRunnable(bird,index).run();
 				}
 				else {
@@ -51,7 +51,7 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				Maintenance.writeLog("FollowRunnableTimerTask fired");
-				if (!Maintenance.flagSet) {
+				if (!Maintenance.flagSet && !DataBaseHandler.isSuspended(index)) {
 					new FollowRunnable(bird,index).run();
 				}
 				else {
@@ -77,7 +77,7 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				Maintenance.writeLog("BigAccRunnableTimerTask fired");
-				if (!Maintenance.flagSet) {
+				if (!Maintenance.flagSet && !DataBaseHandler.isSuspended(index)) {
 					new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index)).run();
 				}
 				else{

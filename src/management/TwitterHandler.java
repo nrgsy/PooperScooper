@@ -19,6 +19,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterHandler {
@@ -182,6 +183,21 @@ public class TwitterHandler {
 		else{
 			return new long[0];
 		}
+	}
+	
+	public static ArrayList<ResponseList<User>> getUserSuggestions(Twitter twitter, int index){
+		ArrayList<ResponseList<User>> returnval = new ArrayList<ResponseList<User>>();
+		if(!DataBaseHandler.isSuspended(index)){
+			
+			try{
+				returnval.add(twitter.getUserSuggestions("funny"));
+				return returnval;
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return returnval;
+			}
+		}
+		return returnval;
 	}
 
 	public static void favorite(Twitter twitter, long id, int index){

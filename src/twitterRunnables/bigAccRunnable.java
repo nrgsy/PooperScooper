@@ -69,7 +69,10 @@ public class bigAccRunnable implements Runnable {
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
 			
-			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
+			Paging paging = new Paging();
+			paging.setCount(200);
+			
+			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), paging, index);
 			if(ListOwnTweets.isEmpty()){
 				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
 				return;
@@ -147,7 +150,14 @@ public class bigAccRunnable implements Runnable {
 
 		//TODO make this part better
 		else{
-			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
+			ResponseList<User> suggestedUsers = null;
+			ArrayList<ResponseList<User>> ListSuggestedUsers = TwitterHandler.getUserSuggestions(bird, index);
+			if(ListSuggestedUsers.isEmpty()){
+				return;
+			}
+			else{
+				suggestedUsers = ListSuggestedUsers.get(0);
+			}
 			int limit = 1;
 			for(User user : suggestedUsers){
 				if(limit != 0){
@@ -329,8 +339,12 @@ public class bigAccRunnable implements Runnable {
 			}
 		} catch (UnknownHostException | InterruptedException
 				| FuckinUpKPException | TwitterException e) {
-			System.out.println(e.getStackTrace());
-			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
+			String stacktrace = "";
+			for(StackTraceElement stack : e.getStackTrace()){
+				stacktrace += stack;
+				stacktrace +="\n";
+			}
+			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+stacktrace, index);
 		}
 	}
 
