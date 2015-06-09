@@ -26,7 +26,7 @@ public class TimerFactory {
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
-							+ "flag is set");
+							+ "flag is set, cancelling this timertask");
 					this.cancel();
 				}
 			}};
@@ -50,7 +50,7 @@ public class TimerFactory {
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of TwitterRunnable because maintenance "
-							+ "flag is set");
+							+ "flag is set, cancelling this timertask");
 					Maintenance.runStatus.put(index+"twitter", false);
 					this.cancel();
 				}
@@ -76,7 +76,7 @@ public class TimerFactory {
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of FollowRunnable because maintenance "
-							+ "flag is set");
+							+ "flag is set, cancelling this timertask");
 					Maintenance.runStatus.put(index+"follow", false);
 					this.cancel();
 				}
@@ -102,7 +102,7 @@ public class TimerFactory {
 				}
 				else{
 					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "
-							+ "flag is set");
+							+ "flag is set, cancelling this timertask");
 					Maintenance.runStatus.put(index+"bigAcc", false);
 					this.cancel();
 				}

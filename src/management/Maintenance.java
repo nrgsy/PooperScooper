@@ -171,6 +171,8 @@ public class Maintenance {
 			DataBaseHandler.updateFollowers(i);
 		}
 
+		flagSet = false;
+		
 		//start all the timers because they all suicide when they see maintenance flag is set
 		TimerFactory.createTimers(false);
 
@@ -178,7 +180,6 @@ public class Maintenance {
 				+ " ms for the API-calling section to complete", "maintenance");
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
-		flagSet = false;
 		Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
 				(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 	}
