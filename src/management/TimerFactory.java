@@ -1,13 +1,10 @@
 package management;
 
-
 import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import org.bson.Document;
-
 import content.RedditScraper;
 import twitter4j.Twitter;
 import twitterRunnables.FollowRunnable;
@@ -24,10 +21,10 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				Maintenance.writeLog("RedditTimerTask fired");
-				if(!Maintenance.flagSet){
+				if (!Maintenance.flagSet){
 					new RedditScraper(init).run();
 				}
-				else{
+				else {
 					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
 							+ "flag is set");
 					this.cancel();
