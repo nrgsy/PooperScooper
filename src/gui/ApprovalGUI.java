@@ -549,7 +549,7 @@ public class ApprovalGUI {
 		frame = new JFrame("Main Menu");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(panel);
-		frame.setSize(800, 100);
+		frame.setSize(1000, 100);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
