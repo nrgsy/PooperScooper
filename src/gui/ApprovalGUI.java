@@ -286,7 +286,13 @@ public class ApprovalGUI {
 			try {
 				Maintenance.performMaintenance();
 			} catch (Exception e1) {
-				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***");
+				String stacktrace = "";
+				for (StackTraceElement stack : e1.getStackTrace()){
+					stacktrace += stack.toString();
+					stacktrace += "\n";
+				}
+				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***\n" + stacktrace, "maintenance");
+
 			}
 		}
 	}
@@ -373,7 +379,7 @@ public class ApprovalGUI {
 					!kind.equals("canimals") &&
 					!kind.equals("space")) {
 				Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
-								+ "workout, etc ***ERROR***",
+						+ "workout, etc ***ERROR***",
 						"gui");
 			} else {
 				lastWasApproved = null;
