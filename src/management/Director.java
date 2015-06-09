@@ -54,6 +54,9 @@ public class Director {
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks
+		
+		System.out.println("YOOOO GlobalStuff.DAY_IN_MILLISECONDS is : " + GlobalStuff.DAY_IN_MILLISECONDS);
+		
 		new Timer().scheduleAtFixedRate(
 				TimerFactory.createMaintenanceTimerTask(),
 				nextOccurrenceOf3am,
