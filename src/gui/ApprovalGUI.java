@@ -305,6 +305,15 @@ public class ApprovalGUI {
 		}
 	}
 
+	private static class DirectorListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			//TODO add some stuff later
+
+		}
+	}
+
 	//the listener for the remove button in Schwergsy account interface
 	private static class RemoveAccountListener implements ActionListener {
 		@Override
@@ -459,12 +468,10 @@ public class ApprovalGUI {
 					frame = new JFrame("Content Reviewer");
 					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 					//So that these things close when we end the program
-					frame.addWindowListener(new WindowAdapter()
-					{
-						public void windowClosing(WindowEvent e)
-						{
+					frame.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
 							cursor.close();
-							mongoClient.close();			        
+							mongoClient.close();
 						}
 					});			
 					frame.getContentPane().add(scrPane);
@@ -545,11 +552,15 @@ public class ApprovalGUI {
 		//for performing maintenance on command
 		JButton maintenanceButton = new JButton("Perform Maintenance");
 		maintenanceButton.addActionListener(new MaintenanceListener());
+		//for running director
+		JButton directorButton = new JButton("Run Director");
+		directorButton.addActionListener(new DirectorListener());
 
-		JPanel panel = new JPanel(new GridLayout(1, 3));
+		JPanel panel = new JPanel(new GridLayout(1, 4));
 		panel.add(schwergsButton);
 		panel.add(contentButton);
 		panel.add(maintenanceButton);
+		panel.add(directorButton);
 		panel.setBackground(Color.GRAY);
 
 		frame = new JFrame("Main Menu");
