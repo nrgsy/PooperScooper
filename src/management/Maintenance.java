@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.bson.Document;
+
 //sets the global maintenance flag for director
 public class Maintenance {
 
@@ -33,8 +35,8 @@ public class Maintenance {
 
 	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
-			Long[] bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts").toArray(new Long[DataBaseHandler.getBigAccountsSize(index)]);
-			Long[] bigAccWhiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getBigAccountsWhiteListSize(index)]);
+			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
+			ArrayList<Long> bigAccWhiteList = (ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList");
 			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
 			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
 
@@ -42,9 +44,9 @@ public class Maintenance {
 				bigAccWhiteListSet.add(id);
 			}
 
-			for(Long id : bigAcc){
-				if(!bigAccWhiteListSet.contains(id)){
-					toAddToBigAccWhiteList.add(id);
+			for(Document bigAccount : bigAcc){
+				if(!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))){
+					toAddToBigAccWhiteList.add(bigAccount.getLong("user_id"));
 				}
 			}
 
@@ -54,8 +56,8 @@ public class Maintenance {
 
 	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
-			Long[] toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow").toArray(new Long[DataBaseHandler.getToFollowSize(index)]);
-			Long[] whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList").toArray(new Long[DataBaseHandler.getWhiteListSize(index)]);
+			ArrayList<Long> toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow");
+			ArrayList<Long> whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "whiteList");
 			HashSet<Long> toAddToWhiteList = new HashSet<Long>();
 			HashSet<Long> whiteListSet = new HashSet<Long>();
 
@@ -153,6 +155,7 @@ public class Maintenance {
 		///////////////////////////////////////////////////////////////////////////////////////////////
 
 		//don't start api call section until 15 minutes from start has passed
+		Maintenance.writeLog("Waiting 15 minutes for rate limits to reset", "maintenance");
 		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
 			//wait 10 seconds before trying again
 			Thread.sleep(10000);
