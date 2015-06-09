@@ -763,7 +763,13 @@ public class DataBaseHandler{
 		Document query = new Document("_id", index);
 		FindIterable<Document> findIter = dbCollection.find(query);
 		MongoCursor<Document> cursor = findIter.iterator();
-		int bigAccountHarvestIndex = (int)cursor.next().get("bigAccountHarvestIndex");
+		int bigAccountHarvestIndex = 0;
+		if(cursor.hasNext()){
+			bigAccountHarvestIndex = (int)cursor.next().get("bigAccountHarvestIndex");
+		}
+		else{
+			Maintenance.writeLog("***ERROR*** bigAccountHarvestIndex could not be found while running getBigAccountHarvestIndex", index);
+		}
 		cursor.close();
 		return bigAccountHarvestIndex;
 	}
