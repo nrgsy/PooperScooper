@@ -26,6 +26,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import management.DataBaseHandler;
+import management.Director;
 import management.GlobalStuff;
 import management.Maintenance;
 import management.TimerFactory;
@@ -301,7 +302,11 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			//TODO add some stuff later
+			try {
+				Director.runDirector();
+			} catch (Exception e1) {
+				Maintenance.writeLog("***ERROR*** Couldn't call Director.runDirector() ***ERROR***");
+			}
 		}
 	}
 
