@@ -5,32 +5,12 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.bson.Document;
-import content.RedditScraper;
 import twitter4j.Twitter;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
 import twitterRunnables.bigAccRunnable;
 
 public class TimerFactory {
-
-	public static TimerTask createRedditTimerTask(final boolean init) {
-
-		Maintenance.writeLog("creating RedditTimerTask");
-
-		return new TimerTask() {
-			@Override
-			public void run() {
-				Maintenance.writeLog("RedditTimerTask fired");
-				if (!Maintenance.flagSet){
-					new RedditScraper(init).run();
-				}
-				else {
-					Maintenance.writeLog("Skipped creation of RedditScraper because maintenance "
-							+ "flag is set, cancelling this timertask");
-					this.cancel();
-				}
-			}};
-	}
 	
 	/**
 	 * @param Twitter created by Director
@@ -133,13 +113,10 @@ public class TimerFactory {
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void createTimers(boolean init) throws UnknownHostException, Exception {
+	public static void createTimers() throws UnknownHostException, Exception {
 		
 		Maintenance.writeLog("Creating timers for all accounts");
 		
-		long scrapetime = GlobalStuff.DAY_IN_MILLISECONDS;
-		new Timer().scheduleAtFixedRate(createRedditTimerTask(init), 0L, scrapetime);
-
 		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			createTimers(id);
 		}

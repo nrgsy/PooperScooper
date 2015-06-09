@@ -221,18 +221,25 @@ public class TwitterHandler {
 			case 64:
 				Maintenance.writeLog("***ERROR*** This account has been suspended", index);
 				DataBaseHandler.suspendSchwergsyAccount(index);
+				break;
 			case 88:
 				Maintenance.writeLog("***WARNING*** Rate limit has been exceeded", index);
+				break;
 			case 130:
 				Maintenance.writeLog("***WARNING*** Twitter is over capacity to fulfill this request",index);
+				break;
 			case 131:
 				Maintenance.writeLog("***WARNING*** Twitter internal error",index);
+				break;
 			case 161:
 				Maintenance.writeLog("***WARNING*** Unable to follow more people at this time", index );
+				break;
 			case 226:
 				Maintenance.writeLog("***WARNING*** Twitter thinks this request was automated", index);
+				break;
 			default:
 				Maintenance.writeLog("***WARNING*** "+e.getErrorMessage(), index);
+				break;
 		}
 	}
 }

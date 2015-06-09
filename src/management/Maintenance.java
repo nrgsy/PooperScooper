@@ -11,8 +11,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import org.bson.Document;
+
+import content.RedditScraper;
 
 //sets the global maintenance flag for director
 public class Maintenance {
@@ -92,8 +95,9 @@ public class Maintenance {
 
 			//look for a status that's true (indicating that something's still running)
 			somethingStillRunning = false;
-			for (boolean status : runStatus.values()) {
-				if (status) {
+			for (Entry<String, Boolean> status : runStatus.entrySet()) {
+				if (status.getValue()) {
+					Maintenance.writeLog(status.getKey()+ " is still running. Waiting for it to end...", "maintenance");
 					somethingStillRunning = true;
 					break;
 				}
@@ -174,7 +178,8 @@ public class Maintenance {
 		flagSet = false;
 		
 		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.createTimers(false);
+		TimerFactory.createTimers();
+		new Thread(new RedditScraper()).start();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
 				+ " ms for the API-calling section to complete", "maintenance");

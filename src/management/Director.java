@@ -10,6 +10,8 @@ import java.util.Timer;
 
 import com.mongodb.MongoClient;
 
+import content.RedditScraper;
+
 /**
  * @author Bojangles and McChrpchrp
  *
@@ -25,7 +27,7 @@ public class Director {
 		Calendar then = Calendar.getInstance();
 		then.setTime(base);
 		then.set(Calendar.HOUR_OF_DAY, hourOfDay);
-		then.set(Calendar.MINUTE, 0);
+		then.set(Calendar.MINUTE, 00);
 		then.set(Calendar.SECOND, 0);
 		then.set(Calendar.MILLISECOND, 0);
 		if (then.getTime().before(base)) {
@@ -41,7 +43,7 @@ public class Director {
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void main(String[]args) throws UnknownHostException, Exception {
+	public static void runDirector() throws UnknownHostException, Exception {
 		
 		//Initialize all the shit
 		DataBaseHandler.initGlobalVars();
@@ -63,6 +65,7 @@ public class Director {
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
 		//create the initial timers
-		TimerFactory.createTimers(true);
+		TimerFactory.createTimers();
+		new Thread(new RedditScraper()).start();
 	}
 }

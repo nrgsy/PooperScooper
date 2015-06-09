@@ -23,20 +23,10 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 import management.DataBaseHandler;
+import management.Director;
 import management.GlobalStuff;
 import management.Maintenance;
 import management.TimerFactory;
@@ -58,6 +48,7 @@ public class ApprovalGUI {
 	private static boolean undoClicked;
 	private static String lastApprovedLink;
 	private static JFrame frame;
+	private static JButton backToMainButton;
 	private static JPanel topPanel;
 	private static JPanel labelPanel;
 	private static JPanel buttonPanel;
@@ -111,9 +102,8 @@ public class ApprovalGUI {
 
 			topPanel.revalidate();
 			topPanel.repaint();
-			frame.repaint();		
-		}
-		else {
+			frame.repaint();
+		} else {
 			Maintenance.writeLog("Cannot load next. No content remaining", "gui");
 		}
 	}
@@ -130,13 +120,13 @@ public class ApprovalGUI {
 				ApprovalGUI.loadNext();
 			} catch (IOException e1) {
 				e1.printStackTrace();
-			}			
-		}		
+			}
+		}
 	}
 
 	private static class TrashListener implements ActionListener {
 		@Override
-		public void actionPerformed(ActionEvent e) {		
+		public void actionPerformed(ActionEvent e) {
 			schwagLinks.add(currentContent.get("imglink").toString());
 			lastWasApproved = false;
 			try {
@@ -144,7 +134,7 @@ public class ApprovalGUI {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		}		
+		}
 	}
 
 	private static class UndoListener implements ActionListener {
@@ -154,8 +144,7 @@ public class ApprovalGUI {
 			if (lastWasApproved != null && !undoClicked) {
 				if (lastWasApproved) {
 					approvedContent.remove(lastApprovedLink);
-				}
-				else {
+				} else {
 					schwagLinks.removeLast();
 				}
 				undoClicked = true;
@@ -185,7 +174,7 @@ public class ApprovalGUI {
 					e1.printStackTrace();
 				}
 			}
-		}		
+		}
 	}
 
 	private static class SchwergsListener implements ActionListener {
@@ -195,7 +184,7 @@ public class ApprovalGUI {
 			frame.setVisible(false);
 			frame.dispose();
 
-			JPanel mainPanel = new JPanel(new GridLayout(8, 2));
+			JPanel mainPanel = new JPanel(new GridLayout(9, 2));
 			mainPanel.add(new JLabel("Name"));
 			mainPanel.add(nameField);
 			mainPanel.add(new JLabel("Customer Secret"));
@@ -216,22 +205,25 @@ public class ApprovalGUI {
 			JButton removeButton = new JButton("Remove\n(Only fill in Name)");
 			removeButton.addActionListener(new RemoveAccountListener());
 			mainPanel.add(removeButton);
+			JButton backToMainButton = new JButton("Back");
+			backToMainButton.addActionListener(new BackToMainListener());
+			mainPanel.add(backToMainButton);
 			mainPanel.setBackground(Color.GRAY);
 
-			JFrame frame = new JFrame("Enter Schwergsy Account Info");
+			frame = new JFrame("Enter Schwergsy Account Info");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setContentPane(mainPanel);
 
 			frame.setSize(400, 500);
-			frame.setLocationRelativeTo(null);	
+			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
-		}		
+		}
 	}
 
 	//the listener for the add button in Schwergsy account interface
 	private static class AddAccountListener implements ActionListener {
 		@Override
-		public void actionPerformed(ActionEvent e) {  
+		public void actionPerformed(ActionEvent e) {
 
 			String name = nameField.getText();
 			String customerSecret = cusSecField.getText();
@@ -242,11 +234,9 @@ public class ApprovalGUI {
 			boolean isIncubated;
 			if (incubatedField.getText().toLowerCase().equals("true")) {
 				isIncubated = true;
-			}
-			else if (incubatedField.getText().toLowerCase().equals("false")) {
+			} else if (incubatedField.getText().toLowerCase().equals("false")) {
 				isIncubated = false;
-			}
-			else {
+			} else {
 				Maintenance.writeLog("***ERROR*** Cannot parse isIncubated, "
 						+ "account not added ***ERROR***");
 				return;
@@ -255,11 +245,9 @@ public class ApprovalGUI {
 			boolean isSuspended;
 			if (suspendedField.getText().toLowerCase().equals("true")) {
 				isSuspended = true;
-			}
-			else if (suspendedField.getText().toLowerCase().equals("false")) {
+			} else if (suspendedField.getText().toLowerCase().equals("false")) {
 				isSuspended = false;
-			}
-			else {
+			} else {
 				Maintenance.writeLog("***ERROR*** Cannot parse isSuspended, "
 						+ "account not added ***ERROR***");
 				return;
@@ -278,14 +266,14 @@ public class ApprovalGUI {
 
 			try {
 				//SchwergsyAccount is already added at this point, so you must - 1 to get index
-				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts")-1);
+				TimerFactory.createTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts") - 1);
 			} catch (UnknownHostException e1) {
 				Maintenance.writeLog("***ERROR*** Unknown Host, timers failed to be created, for "
 						+ "account: " + name + ". Exiting... ***ERROR***", "gui");
 				System.exit(0);
 				e1.printStackTrace();
 			}
-		}		
+		}
 	}
 
 	//The listener for the perform maintenance button
@@ -298,15 +286,14 @@ public class ApprovalGUI {
 
 			try {
 				Maintenance.performMaintenance();
-			}
-			catch(Exception e1) {
+			} catch (Exception e1) {
 				String stacktrace = "";
 				for (StackTraceElement stack : e1.getStackTrace()){
 					stacktrace += stack.toString();
 					stacktrace += "\n";
 				}
 				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***\n" + stacktrace, "maintenance");
-				
+
 			}
 		}
 	}
@@ -315,8 +302,23 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			//TODO add some stuff later
+			try {
+				Director.runDirector();
+			} catch (Exception e1) {
+				Maintenance.writeLog("***ERROR*** Couldn't call Director.runDirector() ***ERROR***");
+			}
+		}
+	}
 
+	//the listener for going back in the add account screen
+	private static class BackToMainListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			frame.setVisible(false);
+			frame.dispose();
+
+			drawMain();
 		}
 	}
 
@@ -325,13 +327,12 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			String name = nameField.getText();			
+			String name = nameField.getText();
 			Document doc = DataBaseHandler.getSchwergsyAccount(name);
 			if (doc == null) {
-				Maintenance.writeLog("Could not find account with name: " + name + 
+				Maintenance.writeLog("Could not find account with name: " + name +
 						". Nothing was flagged for removal.");
-			}
-			else {
+			} else {
 				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
 				int _id = (int) doc.get("_id");
 				DataBaseHandler.flagAccountForRemoval(_id);
@@ -347,23 +348,24 @@ public class ApprovalGUI {
 			frame.dispose();
 
 			JComponent panel = new JPanel();
-			String[] contentTypes = { "ass", "workout", "weed", "college", "canimals", "space"};
+			String[] contentTypes = {"ass", "workout", "weed", "college", "canimals", "space"};
 			JComboBox<Object> petList = new JComboBox<Object>(contentTypes);
 			petList.setSelectedIndex(0);
 			petList.addActionListener(new ListSelectListener());
 			panel.add(petList, BorderLayout.PAGE_START);
+			panel.add(backToMainButton);
 			panel.setBackground(Color.GRAY);
-			panel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));    
+			panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 			panel.setOpaque(true); //content panes must be opaque
 			frame = new JFrame("Select Content Type");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setContentPane(panel);
 			//Display the window.
 			frame.setSize(300, 100);
-			frame.setLocationRelativeTo(null);	
+			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 
-		}		
+		}
 	}
 
 	private static class ListSelectListener implements ActionListener {
@@ -371,9 +373,9 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 
 			@SuppressWarnings("unchecked")
-			JComboBox<Object> cb = (JComboBox<Object>)e.getSource();
+			JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
 
-			kind = (String)cb.getSelectedItem();
+			kind = (String) cb.getSelectedItem();
 
 			if (!kind.equals("ass") &&
 					!kind.equals("workout") &&
@@ -384,8 +386,7 @@ public class ApprovalGUI {
 				Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
 						+ "workout, etc ***ERROR***",
 						"gui");
-			}
-			else {
+			} else {
 				lastWasApproved = null;
 				undoClicked = false;
 				approvedContent = new HashMap<>();
@@ -421,7 +422,7 @@ public class ApprovalGUI {
 					picPanel.setBackground(Color.GRAY);
 
 					String labelText = "number of pending " + kind +
-							" images remaining: " + numRemaining;			
+							" images remaining: " + numRemaining;
 					JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
 					labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 					labelPanel.add(numRemainingLabel);
@@ -431,22 +432,23 @@ public class ApprovalGUI {
 					captionTextField = new JTextField();
 					captionTextField.setFont(font);
 					captionTextField.setText(currentContent.get("caption").toString());
-					captionTextField.setPreferredSize(new Dimension(333,30));
+					captionTextField.setPreferredSize(new Dimension(333, 30));
 
 					JButton addButton = new JButton("Add");
-					addButton.addActionListener(new AddListener());	
+					addButton.addActionListener(new AddListener());
 					JButton trashButton = new JButton("Trash");
-					trashButton.addActionListener(new TrashListener());	
+					trashButton.addActionListener(new TrashListener());
 					JButton undoButton = new JButton("Undo");
-					undoButton.addActionListener(new UndoListener());	
+					undoButton.addActionListener(new UndoListener());
 					JButton doneButton = new JButton("Done");
-					doneButton.addActionListener(new DoneListener());		
+					doneButton.addActionListener(new DoneListener());
 
 					buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 					buttonPanel.add(addButton);
 					buttonPanel.add(trashButton);
 					buttonPanel.add(undoButton);
 					buttonPanel.add(doneButton);
+					buttonPanel.add(backToMainButton);
 					buttonPanel.setBackground(Color.GRAY);
 
 					topPanel = new JPanel();
@@ -462,12 +464,13 @@ public class ApprovalGUI {
 					JPanel bottomPanel = new JPanel();
 					bottomPanel.setBackground(Color.GRAY);
 
+
 					JPanel containerPanel = new JPanel();
-					containerPanel.setLayout(new BorderLayout());	
+					containerPanel.setLayout(new BorderLayout());
 					containerPanel.add(topPanel, BorderLayout.NORTH);
 					containerPanel.add(bottomPanel, BorderLayout.CENTER);
 
-					JScrollPane scrPane = new JScrollPane(containerPanel);	
+					JScrollPane scrPane = new JScrollPane(containerPanel);
 
 					frame.setVisible(false);
 					frame.dispose();
@@ -479,75 +482,49 @@ public class ApprovalGUI {
 							cursor.close();
 							mongoClient.close();
 						}
-					});			
+					});
 					frame.getContentPane().add(scrPane);
 					frame.pack();
 					frame.setMinimumSize(new Dimension(300, 300));
 					frame.setSize(800, 900);
-					frame.setLocationRelativeTo(null);	
-					frame.setVisible(true);	
-				}
-				else {
+					frame.setLocationRelativeTo(null);
+					frame.setVisible(true);
+				} else {
 					Maintenance.writeLog("No content found in pending" + kind, "gui");
 				}
 			}
-		}		
+		}
 	}
 
 	/**
 	 * Get the JLabel contain the image in currentContent
-	 * 
+	 *
 	 * @return the JLabel
 	 * @throws IOException
 	 */
 	public static JLabel getPicLabel() throws IOException {
 
-		URL url = new URL(currentContent.get("imglink").toString());			
+		URL url = new URL(currentContent.get("imglink").toString());
 		BufferedImage bufferedImage = ImageIO.read(url);
 		double newHeight = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
-		double ratio = newHeight/((double) bufferedImage.getHeight());
-		double newWidth = ((double)bufferedImage.getWidth()) * ratio;
+		double ratio = newHeight / ((double) bufferedImage.getHeight());
+		double newWidth = ((double) bufferedImage.getWidth()) * ratio;
 
 		//to guarantee really wide images will be fully contained by the window
-		if (newWidth > (double)GlobalStuff.MAX_IMAGE_DIMENSION) {
-			newWidth = (double)GlobalStuff.MAX_IMAGE_DIMENSION;
-			ratio = newWidth/((double)bufferedImage.getWidth());
-			newHeight = ((double)bufferedImage.getWidth()) * ratio;
+		if (newWidth > (double) GlobalStuff.MAX_IMAGE_DIMENSION) {
+			newWidth = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
+			ratio = newWidth / ((double) bufferedImage.getWidth());
+			newHeight = ((double) bufferedImage.getWidth()) * ratio;
 		}
 
 		Image scaledImage =
 				bufferedImage.getScaledInstance(
 						(int) newWidth, (int) newHeight, Image.SCALE_SMOOTH);
-		ImageIcon image = new ImageIcon(scaledImage);		
+		ImageIcon image = new ImageIcon(scaledImage);
 		return new JLabel(image, SwingConstants.RIGHT);
 	}
 
-	public static void main(String[] args) throws IOException {
-
-		//init stuff if not already initialized
-		if (DataBaseHandler.mongoClient == null) {
-			DataBaseHandler.mongoClient = new MongoClient();
-		}
-		if (GlobalStuff.lastPostTimeMap == null) {
-			GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
-		}
-		DataBaseHandler.initGlobalVars();
-		DataBaseHandler.findAndSetGlobalVars();
-		if (Maintenance.runStatus == null) {
-			Maintenance.runStatus = new HashMap<>();
-		}
-		if (Maintenance.doomedAccounts == null) {
-			Maintenance.doomedAccounts = new ArrayList<Integer>();
-		}
-
-		//initialize these
-		nameField = new JTextField();
-		cusSecField  = new JTextField();
-		cusKeyField = new JTextField();
-		authSecField = new JTextField();
-		authKeyField = new JTextField();
-		incubatedField = new JTextField();
-		suspendedField = new JTextField();
+	private static void drawMain() {
 
 		//for opening the gui that adds or removes schwergsy accounts from the database
 		JButton schwergsButton = new JButton("Add or Remove Schwergsy Accounts");
@@ -573,7 +550,42 @@ public class ApprovalGUI {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(panel);
 		frame.setSize(800, 100);
-		frame.setLocationRelativeTo(null);	
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
+
+
+	public static void main(String[] args) throws IOException {
+
+		//init stuff if not already initialized
+		if (DataBaseHandler.mongoClient == null) {
+			DataBaseHandler.mongoClient = new MongoClient();
+		}
+		if (GlobalStuff.lastPostTimeMap == null) {
+			GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
+		}
+		DataBaseHandler.initGlobalVars();
+		DataBaseHandler.findAndSetGlobalVars();
+		if (Maintenance.runStatus == null) {
+			Maintenance.runStatus = new HashMap<>();
+		}
+		if (Maintenance.doomedAccounts == null) {
+			Maintenance.doomedAccounts = new ArrayList<Integer>();
+		}
+
+		//initialize these
+		nameField = new JTextField();
+		cusSecField = new JTextField();
+		cusKeyField = new JTextField();
+		authSecField = new JTextField();
+		authKeyField = new JTextField();
+		incubatedField = new JTextField();
+		suspendedField = new JTextField();
+		backToMainButton = new JButton("Back");
+		backToMainButton.addActionListener(new BackToMainListener());
+
+		drawMain();
+
+	}
 }
+
