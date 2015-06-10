@@ -328,11 +328,21 @@ public class bigAccRunnable implements Runnable {
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable");
 		try {
-			if(DataBaseHandler.getToFollowSize(index)>1200 || DataBaseHandler.getBigAccountsSize(index) == 0){
+			if(DataBaseHandler.getToFollowSize(index) < 1200 && DataBaseHandler.getBigAccountsSize(index) >= 5){
+				harvestBigAccounts();
+				
+			}
+			else if(DataBaseHandler.getBigAccountsSize(index) < 5){
 				findBigAccounts();
 			}
 			else{
-				harvestBigAccounts();
+				double randomChoice = Math.random() * 10.0;
+				if(randomChoice >= 5.0){
+					harvestBigAccounts();
+				}
+				else{
+					findBigAccounts();
+				}
 			}
 		} catch (UnknownHostException | InterruptedException
 				| FuckinUpKPException | TwitterException e) {
