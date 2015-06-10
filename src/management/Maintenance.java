@@ -38,12 +38,15 @@ public class Maintenance {
 
 	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
 		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
 			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
-			HashSet<Long> bigAccWhiteListSet = new HashSet((ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
+			if(DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList") != null){
+				bigAccWhiteListSet = new HashSet((ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
+			}
 			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
 
 			for(Document bigAccount : bigAcc){
-				if(bigAccWhiteListSet.isEmpty() || !bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))){
+				if(!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))){
 					toAddToBigAccWhiteList.add(bigAccount.getLong("user_id"));
 				}
 			}
