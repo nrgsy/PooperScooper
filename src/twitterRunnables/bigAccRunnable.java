@@ -65,7 +65,7 @@ public class bigAccRunnable implements Runnable {
 		int maxCandidates = 100;
 
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
-		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
+		if(DataBaseHandler.getBigAccountsSize(index)!=0){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
 			
