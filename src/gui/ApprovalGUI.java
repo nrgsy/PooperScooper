@@ -48,6 +48,7 @@ public class ApprovalGUI {
 	private static boolean undoClicked;
 	private static String lastApprovedLink;
 	private static JFrame frame;
+	private static JButton directorButton;
 	private static JButton backToMainButton;
 	private static JPanel topPanel;
 	private static JPanel labelPanel;
@@ -303,6 +304,7 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 
 			try {
+				directorButton.setEnabled(false);
 				Director.runDirector();
 			} catch (Exception e1) {
 				Maintenance.writeLog("***ERROR*** Couldn't call Director.runDirector() ***ERROR***");
@@ -536,9 +538,10 @@ public class ApprovalGUI {
 		JButton maintenanceButton = new JButton("Perform Maintenance");
 		maintenanceButton.addActionListener(new MaintenanceListener());
 		//for running director
-		JButton directorButton = new JButton("Run Director");
-		directorButton.addActionListener(new DirectorListener());
-
+		if (directorButton == null) {
+			directorButton = new JButton("Run Director");
+			directorButton.addActionListener(new DirectorListener());
+		}
 		JPanel panel = new JPanel(new GridLayout(1, 4));
 		panel.add(schwergsButton);
 		panel.add(contentButton);
