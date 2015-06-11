@@ -125,7 +125,4 @@ public class TwitterRunnable implements Runnable {
 
 	}
 
-	public static void main(String[] args){
-		new Thread(new TwitterRunnable()).start();
-	}
 }
