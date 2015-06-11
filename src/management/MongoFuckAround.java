@@ -15,57 +15,16 @@ public class MongoFuckAround {
 
 	public static void main(String[]args) throws Exception{
 		
-//		DataBaseHandler.newContent("dude in skirt", "http://i.imgur.com/vx3glwO.jpg", "pendingass");
-//		DataBaseHandler.newContent("girl in a bed", "http://i.imgur.com/x0ZSk6c.jpg", "pendingass");
-//		DataBaseHandler.newContent("archer", "http://i.imgur.com/Rsed2ln.jpg", "pendingass");
-//		DataBaseHandler.newContent("lawn", "http://i.imgur.com/gg0gBej.jpg", "pendingass");
+		ConfigurationBuilder cb = new ConfigurationBuilder();
+		cb.setDebugEnabled(true)
+		.setOAuthConsumerKey("GMOjVyxhfLv2zFfPDV2fTIqb2")
+		.setOAuthConsumerSecret("aP5TqAMzGQp27T6cAU6SOVz5n7yn7DmPOmCLpKl1wkI4PYB0Ak")
+		.setOAuthAccessToken("2417418090-S5ufxoMkWN1inBPKUVNbUupMpmNWqZSfPLPbkre")
+		.setOAuthAccessTokenSecret("JlbLo4guz0b7TVUdPnjjHQojVBDTY6HqcYy5yzGhFXWXm");
+		TwitterFactory tf = new TwitterFactory(cb.build());
+		Twitter bird = tf.getInstance();
 		
-		//System.out.println(DataBaseHandler.getOneToFollow(0));
+		System.out.println(bird.getId());
 
-		//DataBaseHandler.moveBigAccountToEnd(0, 0);
-		//DataBaseHandler.insertSchwergsyAccount("WorkoutGetSwole", "uHQV3x8pHZD7jzteRwUIw", "OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg", "2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI", "Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t", false, false);
-		//System.out.println(DataBaseHandler.getOneToFollow(0));
-		//System.out.println(DataBaseHandler.getFollowersSize(0));
-		
-		
-		//DataBaseHandler.prettyPrintStatistics("HandsomeBeards");
-		
-		Timer timer = new Timer();
-		
-		TimerTask task = new TimerTask() {
-			@Override
-			public void run() {
-				
-
-				System.out.println("yo");
-			
-			}
-		};
-		
-		TimerTask task2 = new TimerTask() {
-			@Override
-			public void run() {
-				
-
-				System.out.println("eyyy");
-				
-			}
-		};
-
-		
-		timer.scheduleAtFixedRate(task, 0L, 700);
-		timer.scheduleAtFixedRate(task2, 0L, 500);
-		
-		System.out.println("cancelling");
-
-		//timer.cancel();
-		//timer.purge();
-		
-		//timer = new Timer();
-		
-		//timer.scheduleAtFixedRate(task2, 0L, 500);
-
-		
-		
 	}
 }

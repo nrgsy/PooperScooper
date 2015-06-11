@@ -19,6 +19,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterHandler {
@@ -44,7 +45,7 @@ public class TwitterHandler {
 	 * @throws UnknownHostException 
 	 */
 	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
-		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(bird, "/followers/ids", index)){
+		if(!isAtRateLimit(bird, "/followers/ids", index)){
 			int ratecount = 0;
 			IDs blah;
 			try {
@@ -76,14 +77,14 @@ public class TwitterHandler {
 	}
 
 	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index){
-		
-		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/friends/ids", index)){
+
+		if(!isAtRateLimit(twitter, "/friends/ids", index)){
 			try {
 				int ratecount = 0;
 				IDs IDCollection;
 				IDCollection = twitter.getFriendsIDs(-1);
 				HashSet<Long> following = new HashSet<Long>();
-				
+
 				for(long id : IDCollection.getIDs()){
 					following.add(id);
 				}
@@ -107,38 +108,38 @@ public class TwitterHandler {
 	}
 
 	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
-		if(!DataBaseHandler.isSuspended(index)){
-			try {
-				twitter.updateStatus(status);
-			} catch (TwitterException e) {
-				errorHandling(e,index);
-			}
+
+		try {
+			twitter.updateStatus(status);
+		} catch (TwitterException e) {
+			errorHandling(e,index);
 		}
+
 	}
 
 	public static void follow(Twitter twitter, long id, int index){
-		if(!DataBaseHandler.isSuspended(index)){
-			try {
-				twitter.createFriendship(id);
-			} catch (TwitterException e) {
-				errorHandling(e,index);
-			}
+
+		try {
+			twitter.createFriendship(id);
+		} catch (TwitterException e) {
+			errorHandling(e,index);
 		}
+
 	}
 
 	public static void unfollow(Twitter twitter, long id, int index){
-		if(!DataBaseHandler.isSuspended(index)){
-			try {
-				twitter.destroyFriendship(id);
-			} catch (TwitterException e) {
-				errorHandling(e,index);
-			}
+
+		try {
+			twitter.destroyFriendship(id);
+		} catch (TwitterException e) {
+			errorHandling(e,index);
 		}
+
 	}
 
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, int index){
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
-		if(!DataBaseHandler.isSuspended(index) && !isAtRateLimit(twitter, "/statuses/user_timeline", index)){
+		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
 				ListWrapper.add(twitter.getUserTimeline(id));
 				return ListWrapper;
@@ -155,23 +156,20 @@ public class TwitterHandler {
 
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, Paging query, int index){
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
-		if(!DataBaseHandler.isSuspended(index)){
-			try {
-				ListWrapper.add(twitter.getUserTimeline(id, query));
-				return ListWrapper;
-			} catch (TwitterException e) {
-				errorHandling(e,index);
-				return ListWrapper;
-			}
-		}
-		else{
+
+		try {
+			ListWrapper.add(twitter.getUserTimeline(id, query));
+			return ListWrapper;
+		} catch (TwitterException e) {
+			errorHandling(e,index);
 			return ListWrapper;
 		}
+
 
 	}
 
 	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
-		if(!DataBaseHandler.isSuspended(index) && !TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
+		if(!TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
 			try {
 				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
 			} catch (TwitterException e) {
@@ -184,62 +182,73 @@ public class TwitterHandler {
 		}
 	}
 
-	public static void favorite(Twitter twitter, long id, int index){
-		if(!DataBaseHandler.isSuspended(index)){
-			try{
-				twitter.createFavorite(id);
-			} catch (TwitterException e) {
-				errorHandling(e,index);
-			}
+	public static ArrayList<ResponseList<User>> getUserSuggestions(Twitter twitter, int index){
+		ArrayList<ResponseList<User>> returnval = new ArrayList<ResponseList<User>>();
+
+
+		try{
+			returnval.add(twitter.getUserSuggestions("entertainment"));
+			return returnval;
+		} catch (TwitterException e) {
+			errorHandling(e,index);
+			return returnval;
 		}
+
+	}
+
+	public static void favorite(Twitter twitter, long id, int index){
+
+		try{
+			twitter.createFavorite(id);
+		} catch (TwitterException e) {
+			errorHandling(e,index);
+		}
+
 	}
 
 	public static boolean isAtRateLimit(Twitter twitter, String endpoint, int index){
-		if(!DataBaseHandler.isSuspended(index)){
-			Map<String, RateLimitStatus> rateLimitStatus;
-			try {
-				rateLimitStatus = twitter.getRateLimitStatus();
-				RateLimitStatus status = rateLimitStatus.get(endpoint);
-				if (status.getRemaining() == 0){
-					return true;
-				}
-				else {
-					return false;
-				}
-			} catch (TwitterException e) {
-				errorHandling(e,index);
+
+		Map<String, RateLimitStatus> rateLimitStatus;
+		try {
+			rateLimitStatus = twitter.getRateLimitStatus();
+			RateLimitStatus status = rateLimitStatus.get(endpoint);
+			if (status.getRemaining() == 0){
 				return true;
 			}
-		}
-		else{
+			else {
+				return false;
+			}
+		} catch (TwitterException e) {
+			errorHandling(e,index);
 			return true;
 		}
+
 	}
 
 	private static void errorHandling(TwitterException e, int index){
 		switch(e.getErrorCode()){
-			case 64:
-				Maintenance.writeLog("***ERROR*** This account has been suspended", index);
-				DataBaseHandler.suspendSchwergsyAccount(index);
-				break;
-			case 88:
-				Maintenance.writeLog("***WARNING*** Rate limit has been exceeded", index);
-				break;
-			case 130:
-				Maintenance.writeLog("***WARNING*** Twitter is over capacity to fulfill this request",index);
-				break;
-			case 131:
-				Maintenance.writeLog("***WARNING*** Twitter internal error",index);
-				break;
-			case 161:
-				Maintenance.writeLog("***WARNING*** Unable to follow more people at this time", index );
-				break;
-			case 226:
-				Maintenance.writeLog("***WARNING*** Twitter thinks this request was automated", index);
-				break;
-			default:
-				Maintenance.writeLog("***WARNING*** "+e.getErrorMessage(), index);
-				break;
+		case 64:
+			Maintenance.writeLog("***ERROR*** This account has been suspended", index);
+			DataBaseHandler.suspendSchwergsyAccount(index);
+			break;
+		case 88:
+			Maintenance.writeLog("***WARNING*** Rate limit has been exceeded", index);
+			break;
+		case 130:
+			Maintenance.writeLog("***WARNING*** Twitter is over capacity to fulfill this request",index);
+			break;
+		case 131:
+			Maintenance.writeLog("***WARNING*** Twitter internal error",index);
+			break;
+		case 161:
+			Maintenance.writeLog("***WARNING*** Unable to follow more people at this time", index );
+			break;
+		case 226:
+			Maintenance.writeLog("***WARNING*** Twitter thinks this request was automated", index);
+			break;
+		default:
+			Maintenance.writeLog("***WARNING*** "+e.getErrorMessage(), index);
+			break;
 		}
 	}
 }

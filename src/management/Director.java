@@ -40,32 +40,32 @@ public class Director {
 	/**
 	 * Runs all the threads and initializes the volatile variables in GlobalStuff
 	 * 
-	 * @param args
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void runDirector() throws UnknownHostException, Exception {
-		
-		//Initialize all the shit
-		DataBaseHandler.initGlobalVars();
-		DataBaseHandler.findAndSetGlobalVars();		
-		Maintenance.writeLog("Starting Director");
-		DataBaseHandler.mongoClient = new MongoClient();
-		GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
-		Maintenance.runStatus = new HashMap<>();
-		Maintenance.doomedAccounts = new ArrayList<Integer>();
+	public static void runDirector() throws Exception {
 
-		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
-		//The timer who's task fires once a day to do the maintenance tasks
-				
-		new Timer().scheduleAtFixedRate(
-				TimerFactory.createMaintenanceTimerTask(),
-				nextOccurrenceOf3am,
-				GlobalStuff.DAY_IN_MILLISECONDS);
+			//Initialize all the shit
+			DataBaseHandler.initGlobalVars();
+			DataBaseHandler.findAndSetGlobalVars();
+			Maintenance.writeLog("Starting Director");
+			DataBaseHandler.mongoClient = new MongoClient();
+			GlobalStuff.lastPostTimeMap = new HashMap<Integer, Long>();
+			Maintenance.runStatus = new HashMap<>();
+			Maintenance.doomedAccounts = new ArrayList<Integer>();
 
-		//create the initial timers
-		TimerFactory.createAllSchwergsyTimers();
-		new Thread(new RedditScraper()).start();
+			Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
+			//The timer who's task fires once a day to do the maintenance tasks
+
+			new Timer().scheduleAtFixedRate(
+					TimerFactory.createMaintenanceTimerTask(),
+					nextOccurrenceOf3am,
+					GlobalStuff.DAY_IN_MILLISECONDS);
+
+			//create the initial timers
+			TimerFactory.createAllSchwergsyTimers();
+			new Thread(new RedditScraper()).start();
+
 	}
 	
 }

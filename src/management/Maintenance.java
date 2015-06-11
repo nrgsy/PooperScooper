@@ -31,24 +31,22 @@ public class Maintenance {
 	public static boolean flagSet;
 
 	private static void resetBigAccountHarvestIndexes() throws UnknownHostException {
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			DataBaseHandler.editBigAccountHarvestIndex(index, 0);
 		}
 	}
 
-	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
-			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
-			ArrayList<Long> bigAccWhiteList = (ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList");
-			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
+	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException {
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
-
-			for(Long id : bigAccWhiteList){
-				bigAccWhiteListSet.add(id);
+			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
+			if (DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList") != null) {
+				bigAccWhiteListSet = new HashSet((ArrayList<Long>) DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
 			}
+			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
 
-			for(Document bigAccount : bigAcc){
-				if(!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))){
+			for (Document bigAccount : bigAcc) {
+				if (!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))) {
 					toAddToBigAccWhiteList.add(bigAccount.getLong("user_id"));
 				}
 			}
@@ -57,23 +55,53 @@ public class Maintenance {
 		}
 	}
 
-	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException {
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			ArrayList<Long> toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow");
 			ArrayList<Long> whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "whiteList");
 			HashSet<Long> toAddToWhiteList = new HashSet<Long>();
 			HashSet<Long> whiteListSet = new HashSet<Long>();
 
-			for(Long id : whiteList){
+			for (Long id : whiteList) {
 				whiteListSet.add(id);
 			}
 
-			for(Long id : toFollow){
-				if(!whiteListSet.contains(id)){
+			for (Long id : toFollow) {
+				if (!whiteListSet.contains(id)) {
 					toAddToWhiteList.add(id);
 				}
 			}
-			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toAddToWhiteList));	
+			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toAddToWhiteList));
+		}
+	}
+
+	//shuts down the schwergsy timertasks
+	public static void safeShutDownAccounts() {
+
+		Maintenance.writeLog("Shutting down", "maintenance");
+
+		//TODO Add Safe Shut Down Procedures to not fuck up dbs
+		//be sure to put infinite snooze loops to wait for all the timers to cancel.
+		//DO NOT exit this method until the global timer has cancelled all its timertasks, and they finish like 1 second later
+		//because we have them running once a second.
+
+	}
+
+	//wait for e verything to stop
+	public static void safeShutdownSystem() {
+		try {
+			safeShutDownAccounts();
+
+			//wait for maintenance to complete if running;
+			while (flagSet) {
+				Thread.sleep(1000);
+			}
+
+			System.exit(0);
+		}
+		catch (Exception e) {
+			Maintenance.writeLog("YOLO", "maintenance");
+			System.exit(0);
 		}
 	}
 
@@ -92,6 +120,7 @@ public class Maintenance {
 		long ogStartTime = new Date().getTime();
 		flagSet = true;
 
+		//TODO replace this whole loop with a call to safeShutdownAccounts
 		//chill in an infinite loop until all the threads kill themselves
 		boolean somethingStillRunning = true;
 		while (somethingStillRunning) {

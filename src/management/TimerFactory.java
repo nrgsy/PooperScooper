@@ -90,7 +90,8 @@ public class TimerFactory {
 					updateRuns(TimerTaskID);
 					if(GlobalStuff.numberOfRuns.get(TimerTaskID)==GlobalStuff.BIG_ACCOUNT_RUNS){
 						new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index)).run();
-					}}
+					}
+				}
 				else{
 					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "
 							+ "flag is set, cancelling this timertask");

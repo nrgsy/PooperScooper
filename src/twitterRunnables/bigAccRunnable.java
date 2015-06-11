@@ -320,7 +320,6 @@ public class bigAccRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable");
-		if(GlobalStuff.numberOfRuns.get(index+"bigAcc")==GlobalStuff.BIG_ACCOUNT_RUNS){
 		try {
 			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
 				findBigAccounts();
@@ -332,9 +331,6 @@ public class bigAccRunnable implements Runnable {
 				| FuckinUpKPException | TwitterException e) {
 			System.out.println(e.getStackTrace());
 			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
-		}finally{
-			GlobalStuff.numberOfRuns.put(index+"bigAcc", 0);
-		}
 		}
 	}
 

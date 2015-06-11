@@ -76,10 +76,7 @@ public class FollowRunnable implements Runnable{
 			//Favorites a tweet which is unique and not a response to another tweet, if available.
 			Paging paging = new Paging();
 			paging.setCount(50);
-			//if something fucks up here, it's because TwitterHandler returns null and 
-			//the ResponseList<Status> is null. not sure if you can iterate over null.
-			//probably not.
-			int count = 0;
+			
 			ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
 			if(ListTweets.isEmpty()){
 				Maintenance.writeLog("***ERROR*** Could not run getUserTimeline in FollowRunnable", index);
@@ -89,11 +86,8 @@ public class FollowRunnable implements Runnable{
 				tweets = ListTweets.get(0);
 			}
 			for(Status tweet: tweets){
-				if(!tweet.isRetweet() && tweet.getInReplyToScreenName() == null && count < 5){
+				if(!tweet.isRetweet() && tweet.getInReplyToScreenName() == null){
 					TwitterHandler.favorite(bird,tweet.getId(), index);
-					count++;
-				}
-				if(count >= 5){
 					break;
 				}
 			}
@@ -138,11 +132,5 @@ public class FollowRunnable implements Runnable{
 		
 
 	}
-	
-	
-	public static void main(String[] args){
-		(new Thread(new FollowRunnable(0))).start();
-	}
-	
 }
 
