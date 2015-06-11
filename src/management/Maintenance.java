@@ -106,6 +106,7 @@ public class Maintenance {
 	}
 
 	public static void performMaintenance() throws Exception {
+		try{
 		
 		TimerFactory.globalTimer.cancel();
 		TimerFactory.globalTimer.purge();
@@ -219,6 +220,10 @@ public class Maintenance {
 
 		Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
 				(new Date().getTime() - ogStartTime) + " ms", "maintenance");
+		}
+		catch(Exception e){
+			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+e.toString(), "KP");
+		}
 	}
 
 	/**

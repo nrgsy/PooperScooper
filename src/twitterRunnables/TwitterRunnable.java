@@ -109,6 +109,7 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for TwitterRunnable");
+		try{
 		long now = new Date().getTime();
 		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
 		boolean canPost = true;
@@ -121,6 +122,12 @@ public class TwitterRunnable implements Runnable {
 		if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
 			uploadPic();
 			GlobalStuff.lastPostTimeMap.put(index, now);
+		}
+		}
+		catch(Exception e){
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), index);
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), "KP");
+
 		}
 
 	}

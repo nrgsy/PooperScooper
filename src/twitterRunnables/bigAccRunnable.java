@@ -327,10 +327,9 @@ public class bigAccRunnable implements Runnable {
 			else{
 				harvestBigAccounts();
 			}
-		} catch (UnknownHostException | InterruptedException
-				| FuckinUpKPException | TwitterException e) {
-			System.out.println(e.getStackTrace());
-			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
+		} catch (Exception e) {
+			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+e.toString(), index);
+			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+e.toString(), "KP");
 		}
 	}
 
