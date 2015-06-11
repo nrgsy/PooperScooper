@@ -281,9 +281,6 @@ public class ApprovalGUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			frame.setVisible(false);
-			frame.dispose();
-
 			try {
 				Maintenance.performMaintenance();
 			} catch (Exception e1) {

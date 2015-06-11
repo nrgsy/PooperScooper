@@ -78,6 +78,9 @@ public class Maintenance {
 	}
 
 	public static void performMaintenance() throws Exception {
+		
+		TimerFactory.globalTimer.cancel();
+		TimerFactory.globalTimer.purge();
 
 		if (flagSet) {
 			Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
@@ -178,7 +181,7 @@ public class Maintenance {
 		flagSet = false;
 		
 		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.createTimers();
+		TimerFactory.createAllSchwergsyTimers();
 		new Thread(new RedditScraper()).start();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)

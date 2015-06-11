@@ -47,11 +47,14 @@ public class GlobalStuff{
 	public static long MAX_IMAGE_DIMENSION;
 	//The directory where the logs live
 	public static String LOG_DIRECTORY;
+	public static int BIG_ACCOUNT_RUNS;
+
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
 	//Other globals, non changeable via the database, but still mutable by the code
 	//the map of schwergsy account index to the last time they had a post
 	public static HashMap<Integer, Long> lastPostTimeMap;
+	public static HashMap<String, Integer> numberOfRuns;
 
 
 	//This is the formula to determine how many accounts to follow
@@ -96,6 +99,7 @@ public class GlobalStuff{
 		MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
 		MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
+		BIG_ACCOUNT_RUNS = globalVars.getInteger("BIG_ACCOUNT_RUNS");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -120,7 +124,7 @@ public class GlobalStuff{
 		globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 		globalVars.put("MAX_IMAGE_DIMENSION", 700L);
 		globalVars.put("LOG_DIRECTORY", "logs/");
-
+		globalVars.put("BIG_ACCOUNT_RUNS", 15);
 		return globalVars;
 	}
 

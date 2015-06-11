@@ -3,10 +3,13 @@ package management;
 
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+import twitterRunnables.TwitterRunnable;
 
 public class MongoFuckAround {
 
@@ -25,6 +28,44 @@ public class MongoFuckAround {
 		//System.out.println(DataBaseHandler.getFollowersSize(0));
 		
 		
-		DataBaseHandler.prettyPrintStatistics("AccountName");
+		//DataBaseHandler.prettyPrintStatistics("HandsomeBeards");
+		
+		Timer timer = new Timer();
+		
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				
+
+				System.out.println("yo");
+			
+			}
+		};
+		
+		TimerTask task2 = new TimerTask() {
+			@Override
+			public void run() {
+				
+
+				System.out.println("eyyy");
+				
+			}
+		};
+
+		
+		timer.scheduleAtFixedRate(task, 0L, 700);
+		timer.scheduleAtFixedRate(task2, 0L, 500);
+		
+		System.out.println("cancelling");
+
+		//timer.cancel();
+		//timer.purge();
+		
+		//timer = new Timer();
+		
+		//timer.scheduleAtFixedRate(task2, 0L, 500);
+
+		
+		
 	}
 }

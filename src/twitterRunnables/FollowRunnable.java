@@ -127,6 +127,7 @@ public class FollowRunnable implements Runnable{
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for FollowRunnable");
+
 		try {
 			unfollowUsers();
 			followAndFavoriteUsers();
@@ -134,6 +135,7 @@ public class FollowRunnable implements Runnable{
 			System.out.println(e.getStackTrace());
 			Maintenance.writeLog("FollowRunnable fucked up somewhere", index);
 		}
+		
 
 	}
 	

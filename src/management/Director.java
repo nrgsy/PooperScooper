@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import com.mongodb.MongoClient;
 
@@ -17,7 +18,7 @@ import content.RedditScraper;
  *
  */
 public class Director {
-
+	
 	/**
 	 * @param base
 	 * @param hourOfDay
@@ -56,16 +57,15 @@ public class Director {
 
 		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 		//The timer who's task fires once a day to do the maintenance tasks
-		
-		Maintenance.writeLog("YOOOO GlobalStuff.DAY_IN_MILLISECONDS is : " + GlobalStuff.DAY_IN_MILLISECONDS);
-		
+				
 		new Timer().scheduleAtFixedRate(
 				TimerFactory.createMaintenanceTimerTask(),
 				nextOccurrenceOf3am,
 				GlobalStuff.DAY_IN_MILLISECONDS);
 
 		//create the initial timers
-		TimerFactory.createTimers();
+		TimerFactory.createAllSchwergsyTimers();
 		new Thread(new RedditScraper()).start();
 	}
+	
 }
