@@ -3,10 +3,13 @@ package management;
 
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
+import twitterRunnables.TwitterRunnable;
 
 public class MongoFuckAround {
 
@@ -22,7 +25,6 @@ public class MongoFuckAround {
 		Twitter bird = tf.getInstance();
 		
 		System.out.println(bird.getId());
-		
-		System.out.println(TwitterHandler.getUserSuggestions(bird, 0).get(0).get(3).getName());
+
 	}
 }

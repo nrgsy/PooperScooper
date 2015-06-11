@@ -65,14 +65,11 @@ public class bigAccRunnable implements Runnable {
 		int maxCandidates = 100;
 
 		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
-		if(DataBaseHandler.getBigAccountsSize(index)!=0){
+		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
 			
-			Paging paging = new Paging();
-			paging.setCount(200);
-			
-			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), paging, index);
+			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 			if(ListOwnTweets.isEmpty()){
 				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
 				return;
@@ -148,19 +145,15 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 
-
+		//TODO make this part better
 		else{
-			ResponseList<User> suggestedUsers = null;
-			ArrayList<ResponseList<User>> ListSuggestedUsers = TwitterHandler.getUserSuggestions(bird, index);
-			if(ListSuggestedUsers.isEmpty()){
-				return;
-			}
-			else{
-				suggestedUsers = ListSuggestedUsers.get(0);
-			}
-
+			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
+			int limit = 1;
 			for(User user : suggestedUsers){
-				AllCandidates.add(user.getId());
+				if(limit != 0){
+					limit--;
+					AllCandidates.add(user.getId());
+				}
 			}
 		}
 
@@ -328,30 +321,16 @@ public class bigAccRunnable implements Runnable {
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable");
 		try {
-			if(DataBaseHandler.getToFollowSize(index) < 1200 && DataBaseHandler.getBigAccountsSize(index) >= 5){
-				harvestBigAccounts();
-				
-			}
-			else if(DataBaseHandler.getBigAccountsSize(index) < 5){
+			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
 				findBigAccounts();
 			}
 			else{
-				double randomChoice = Math.random() * 10.0;
-				if(randomChoice >= 5.0){
-					harvestBigAccounts();
-				}
-				else{
-					findBigAccounts();
-				}
+				harvestBigAccounts();
 			}
 		} catch (UnknownHostException | InterruptedException
 				| FuckinUpKPException | TwitterException e) {
-			String stacktrace = "";
-			for(StackTraceElement stack : e.getStackTrace()){
-				stacktrace += stack;
-				stacktrace +="\n";
-			}
-			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+stacktrace, index);
+			System.out.println(e.getStackTrace());
+			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
 		}
 	}
 
