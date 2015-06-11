@@ -130,11 +130,5 @@ public class FollowRunnable implements Runnable{
 		}
 
 	}
-	
-	
-	public static void main(String[] args){
-		(new Thread(new FollowRunnable(0))).start();
-	}
-	
 }
 
