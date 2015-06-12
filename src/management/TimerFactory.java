@@ -29,10 +29,12 @@ public class TimerFactory {
 				String TimerTaskID = index+"twitter";
 				Maintenance.writeLog("TwitterRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
-				
-	
-					new TwitterRunnable(bird,index).run();
-					
+					updateRuns(TimerTaskID);
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >= GlobalStuff.TWITTER_RUNS) {
+						GlobalStuff.numberOfRuns.put(index+"twitter", 0);
+						new TwitterRunnable(bird,index).run();
+					}
+
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of TwitterRunnable because maintenance "
@@ -88,13 +90,14 @@ public class TimerFactory {
 				Maintenance.writeLog("BigAccRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					updateRuns(TimerTaskID);
-					if(GlobalStuff.numberOfRuns.get(TimerTaskID) == GlobalStuff.BIG_ACCOUNT_RUNS) {
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >= GlobalStuff.BIG_ACCOUNT_RUNS) {
+						GlobalStuff.numberOfRuns.put(index+"bigAcc", 0);
 						new bigAccRunnable(bird,
 								index,
 								DataBaseHandler.getBigAccountHarvestIndex(index)).run();
 					}
 				}
-				else{
+				else {
 					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "
 							+ "flag is set, cancelling this timertask");
 					Maintenance.runStatus.put(TimerTaskID, false);
@@ -104,12 +107,12 @@ public class TimerFactory {
 			}
 		};
 	}
-	
+
 	private static void updateRuns(String TimerTaskID){
 		GlobalStuff.numberOfRuns.put(TimerTaskID, 
 				GlobalStuff.numberOfRuns.get(TimerTaskID) + 1);
 	}
-	
+
 	public static TimerTask createMaintenanceTimerTask() {
 
 		Maintenance.writeLog("creating MaintenanceTimerTask");
@@ -145,7 +148,7 @@ public class TimerFactory {
 			}
 			else{
 				Maintenance.writeLog("***WARNING*** Timers not created for index: " +
-			id +" due to suspension.");
+						id +" due to suspension.");
 			}
 		}
 	}
@@ -191,10 +194,10 @@ public class TimerFactory {
 		long  TwitterRunnableInterval = GlobalStuff.TWITTER_RUNNABLE_INTERVAL;
 
 		globalTimer.scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id),
-				0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
+				0L, 1000);
 		globalTimer.scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id),
-				0L, followtime);
+				0L, 1000);
 		globalTimer.scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id),
-				0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
+				0L, 1000);
 	}
 }
