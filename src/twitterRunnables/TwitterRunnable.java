@@ -116,7 +116,7 @@ public class TwitterRunnable implements Runnable {
 
 		if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
 			canPost = false;
-		}
+		} 
 
 		//post if the random number is less than the alpha constant and we're allowed to post
 		if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
