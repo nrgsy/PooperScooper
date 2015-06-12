@@ -12,7 +12,7 @@ import twitterRunnables.bigAccRunnable;
 
 public class TimerFactory {
 
-	public static Timer globalTimer =  new Timer();
+	public static Timer globalTimer;
 
 	/**
 	 * @param Twitter created by Director
@@ -88,8 +88,10 @@ public class TimerFactory {
 				Maintenance.writeLog("BigAccRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					updateRuns(TimerTaskID);
-					if(GlobalStuff.numberOfRuns.get(TimerTaskID)==GlobalStuff.BIG_ACCOUNT_RUNS){
-						new bigAccRunnable(bird,index, DataBaseHandler.getBigAccountHarvestIndex(index)).run();
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) == GlobalStuff.BIG_ACCOUNT_RUNS) {
+						new bigAccRunnable(bird,
+								index,
+								DataBaseHandler.getBigAccountHarvestIndex(index)).run();
 					}
 				}
 				else{
@@ -102,10 +104,12 @@ public class TimerFactory {
 			}
 		};
 	}
+	
 	private static void updateRuns(String TimerTaskID){
 		GlobalStuff.numberOfRuns.put(TimerTaskID, 
-				GlobalStuff.numberOfRuns.get(TimerTaskID)+1);
+				GlobalStuff.numberOfRuns.get(TimerTaskID) + 1);
 	}
+	
 	public static TimerTask createMaintenanceTimerTask() {
 
 		Maintenance.writeLog("creating MaintenanceTimerTask");
@@ -128,7 +132,7 @@ public class TimerFactory {
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void createAllSchwergsyTimers() throws UnknownHostException, Exception {
+	public static void scheduleAllSchwergsyTimers() throws UnknownHostException, Exception {
 		Maintenance.writeLog("Creating globalTimer");
 
 		globalTimer = new Timer();
@@ -137,10 +141,11 @@ public class TimerFactory {
 
 		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			if(!DataBaseHandler.isSuspended(id)){
-				createTimers(id);
+				scheduleTimers(id);
 			}
 			else{
-				Maintenance.writeLog("***WARNING*** Timers not created for index: " + id +" due to suspension.");
+				Maintenance.writeLog("***WARNING*** Timers not created for index: " +
+			id +" due to suspension.");
 			}
 		}
 	}
@@ -151,7 +156,7 @@ public class TimerFactory {
 	 * @param id The ID of the Schwergsy accout
 	 * @throws Exception 
 	 */
-	public static void createTimers(int id) {
+	public static void scheduleTimers(int id) {
 
 		Maintenance.writeLog("Creating timers for account with id: " + id);
 
@@ -185,8 +190,11 @@ public class TimerFactory {
 		Twitter twitter = TwitterHandler.getTwitter(info);
 		long  TwitterRunnableInterval = GlobalStuff.TWITTER_RUNNABLE_INTERVAL;
 
-		globalTimer.scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id), 0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
-		globalTimer.scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id), 0L, followtime);
-		globalTimer.scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id), 0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
+		globalTimer.scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id),
+				0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
+		globalTimer.scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id),
+				0L, followtime);
+		globalTimer.scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id),
+				0L, GlobalStuff.MINUTE_IN_MILLISECONDS);
 	}
 }
