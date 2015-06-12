@@ -211,7 +211,7 @@ public class Maintenance {
 		flagSet = false;
 		
 		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.createAllSchwergsyTimers();
+		TimerFactory.scheduleAllSchwergsyTimers();
 		new Thread(new RedditScraper()).start();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)

@@ -47,16 +47,21 @@ public class GlobalStuff{
 	public static long MAX_IMAGE_DIMENSION;
 	//The directory where the logs live
 	public static String LOG_DIRECTORY;
+	//the number of times the big account timertask fires before running the big account runnable
 	public static int BIG_ACCOUNT_RUNS;
+	public static int FOLLOW_RUNS;
+	public static int TWITTER_RUNS;
+
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
 	//Other globals, non changeable via the database, but still mutable by the code
 	//the map of schwergsy account index to the last time they had a post
 	public static HashMap<Integer, Long> lastPostTimeMap;
+	//account id's + account name prefixes (e.g. 0bigacc) mapped to a counter indicating the number of
+	//times their timertask has fired without running the runnable. When it reaches a specified amount 
+	//the runnable will run and the counter will be reset to 0
 	public static HashMap<String, Integer> numberOfRuns;
-
-
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
 		int numToUnfollow = 0;
@@ -100,6 +105,8 @@ public class GlobalStuff{
 		MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
 		BIG_ACCOUNT_RUNS = globalVars.getInteger("BIG_ACCOUNT_RUNS");
+		FOLLOW_RUNS = globalVars.getInteger("FOLLOW_RUNS");
+		TWITTER_RUNS = globalVars.getInteger("TWITTER_RUNS");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -124,7 +131,13 @@ public class GlobalStuff{
 		globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 		globalVars.put("MAX_IMAGE_DIMENSION", 700L);
 		globalVars.put("LOG_DIRECTORY", "logs/");
-		globalVars.put("BIG_ACCOUNT_RUNS", 15);
+		//The number of times the timertask has to fire before actually running the runnable.
+		//the timertask fires every second and we want the runnable to run every 15 minutes
+		globalVars.put("BIG_ACCOUNT_RUNS", 15 * 60);
+		globalVars.put("FOLLOW_RUNS", ); //TODO how to implement when follow time is not fixed
+		//60 seconds between twitter runnable runs
+		globalVars.put("TWITTER_RUNS", 60);
+
 		return globalVars;
 	}
 
