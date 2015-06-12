@@ -334,9 +334,4 @@ public class bigAccRunnable implements Runnable {
 		}
 	}
 
-	public static void main(String[] args) throws UnknownHostException{
-		DataBaseHandler.findAndSetGlobalVars();
-		new Thread(new bigAccRunnable()).start();
-	}
-
 }
