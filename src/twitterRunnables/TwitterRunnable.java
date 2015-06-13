@@ -41,24 +41,6 @@ public class TwitterRunnable implements Runnable {
 	}
 
 	/**
-	 * temp testing constructor
-	 */
-	public TwitterRunnable(){
-		Maintenance.writeLog("New TwitterRunnable created");
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
-		.setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
-		.setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
-		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		bird = tf.getInstance();
-		this.index = 0;
-		Maintenance.runStatus.put(index+"twitter", true);
-	}
-
-
-	/**
 	 * handles actual uploading to twitter
 	 * 
 	 * @param file
@@ -122,7 +104,7 @@ public class TwitterRunnable implements Runnable {
 			uploadPic();
 			GlobalStuff.lastPostTimeMap.put(index, now);
 		}
-
+		Maintenance.runStatus.put(index+"twitter", false);
 	}
 
 }

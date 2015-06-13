@@ -4,7 +4,10 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import org.bson.Document;
+
+import twitter4j.GeoLocation;
 import twitter4j.Twitter;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
@@ -27,19 +30,18 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				String TimerTaskID = index+"twitter";
-				Maintenance.writeLog("TwitterRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					updateRuns(TimerTaskID);
-					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >= GlobalStuff.TWITTER_RUNS) {
+					//the number of runs before firing = the runnable interval / the fire rate 
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >=
+							GlobalStuff.TWITTER_RUNNABLE_INTERVAL/GlobalStuff.TIMER_TASK_FIRE_RATE) {
 						GlobalStuff.numberOfRuns.put(index+"twitter", 0);
 						new TwitterRunnable(bird,index).run();
 					}
-
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of TwitterRunnable because maintenance "
 							+ "flag is set, cancelling this timertask");
-					Maintenance.runStatus.put(TimerTaskID, false);
 					this.cancel();
 				}
 			}
@@ -51,7 +53,9 @@ public class TimerFactory {
 	 * @param int of SchwergsAccount index
 	 * @return
 	 */
-	private static TimerTask createFollowRunnableTimerTask(final Twitter bird, final int index){
+	private static TimerTask createFollowRunnableTimerTask(final Twitter bird,
+			final int index,
+			final long followTime) {
 
 		Maintenance.writeLog("creating FollowRunnableTimerTask");
 
@@ -59,14 +63,18 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				String TimerTaskID = index+"follow";
-				Maintenance.writeLog("FollowRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
-					new FollowRunnable(bird,index).run();
+					updateRuns(TimerTaskID);
+					//the number of runs before firing = the runnable interval / the fire rate 
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >=
+							followTime/GlobalStuff.TIMER_TASK_FIRE_RATE) {
+						GlobalStuff.numberOfRuns.put(index+"follow", 0);
+						new FollowRunnable(bird,index).run();
+					}
 				}
 				else {
 					Maintenance.writeLog("Skipped creation of FollowRunnable because maintenance "
 							+ "flag is set, cancelling this timertask");
-					Maintenance.runStatus.put(TimerTaskID, false);
 					this.cancel();
 				}
 			}
@@ -79,7 +87,7 @@ public class TimerFactory {
 	 * @param int of SchwergsAccount index
 	 * @return
 	 */
-	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index){
+	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index) {
 
 		Maintenance.writeLog("creating BigAccRunnableTimerTask");
 
@@ -87,10 +95,11 @@ public class TimerFactory {
 			@Override
 			public void run() {
 				String TimerTaskID = index+"bigAcc";
-				Maintenance.writeLog("BigAccRunnableTimerTask fired");
 				if (!Maintenance.flagSet) {
 					updateRuns(TimerTaskID);
-					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >= GlobalStuff.BIG_ACCOUNT_RUNS) {
+					//the number of runs before firing = the runnable interval / the fire rate 
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >=
+							GlobalStuff.BIG_ACCOUNT_TIME/GlobalStuff.TIMER_TASK_FIRE_RATE) {
 						GlobalStuff.numberOfRuns.put(index+"bigAcc", 0);
 						new bigAccRunnable(bird,
 								index,
@@ -100,7 +109,6 @@ public class TimerFactory {
 				else {
 					Maintenance.writeLog("Skipped creation of bigAccRunnable because maintenance "
 							+ "flag is set, cancelling this timertask");
-					Maintenance.runStatus.put(TimerTaskID, false);
 					this.cancel();
 				}
 
@@ -136,11 +144,11 @@ public class TimerFactory {
 	 * @throws Exception
 	 */
 	public static void scheduleAllSchwergsyTimers() throws UnknownHostException, Exception {
-		Maintenance.writeLog("Creating globalTimer");
+		Maintenance.writeLog("Initializing globalTimer");
 
 		globalTimer = new Timer();
 
-		Maintenance.writeLog("Creating timers for all accounts");
+		Maintenance.writeLog("Scheduling timers for all accounts");
 
 		for(int id = 0; id < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); id++) {
 			if(!DataBaseHandler.isSuspended(id)){
@@ -168,7 +176,8 @@ public class TimerFactory {
 			info = DataBaseHandler.getAuthorizationInfo(id);
 		} catch (Exception e) {
 			Maintenance.writeLog("***ERROR*** Failed to pull authorization info for account with "
-					+ "id: " + id + " from the database. Timers cannot be created. ***ERROR***");
+					+ "id: " + id + " from the database. Timers cannot be created for this account"
+							+ ". ***ERROR***");
 			e.printStackTrace();
 			return;
 		}		
@@ -177,7 +186,6 @@ public class TimerFactory {
 		long followtime_max = GlobalStuff.FOLLOW_TIME_MAX;
 		long incubated_followtime_min = GlobalStuff.FOLLOW_TIME_INCUBATED_MIN;
 		long incubated_followtime_max = GlobalStuff.FOLLOW_TIME_INCUBATED_MAX;
-		long bigacctime = GlobalStuff.BIG_ACCOUNT_TIME;
 
 		Random r = new Random();
 		long followtime = followtime_min+((long)(r.nextDouble()*(followtime_max-followtime_min)));
@@ -191,13 +199,15 @@ public class TimerFactory {
 		}
 
 		Twitter twitter = TwitterHandler.getTwitter(info);
-		long  TwitterRunnableInterval = GlobalStuff.TWITTER_RUNNABLE_INTERVAL;
 
-		globalTimer.scheduleAtFixedRate(createTwitterRunnableTimerTask(twitter, id),
-				0L, 1000);
-		globalTimer.scheduleAtFixedRate(createFollowRunnableTimerTask(twitter, id),
-				0L, 1000);
-		globalTimer.scheduleAtFixedRate(createBigAccRunnableTimerTask(twitter, id),
-				0L, 1000);
+		globalTimer.scheduleAtFixedRate(
+				createTwitterRunnableTimerTask(twitter,id),
+				0L, GlobalStuff.TIMER_TASK_FIRE_RATE);
+		globalTimer.scheduleAtFixedRate(
+				createFollowRunnableTimerTask(twitter, id ,followtime),
+				0L, GlobalStuff.TIMER_TASK_FIRE_RATE);
+		globalTimer.scheduleAtFixedRate(
+				createBigAccRunnableTimerTask(twitter, id),
+				0L, GlobalStuff.TIMER_TASK_FIRE_RATE);
 	}
 }

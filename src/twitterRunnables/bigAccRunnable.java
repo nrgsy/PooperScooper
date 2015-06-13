@@ -40,21 +40,6 @@ public class bigAccRunnable implements Runnable {
 		Maintenance.runStatus.put(index+"bigAcc", true);
 	}
 
-	public bigAccRunnable(){
-		Maintenance.writeLog("New bigAccRunnable created");
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
-		.setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
-		.setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
-		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		bird = tf.getInstance();
-		this.index = 0;
-		this.bigAccountIndex = DataBaseHandler.getBigAccountHarvestIndex(0);
-		Maintenance.runStatus.put(index+"bigAcc", true);
-	}
-
 	//This method does not put rejected candidates into the whitelist because they have the potential
 	//to become bigAccounts later on.
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
@@ -170,7 +155,6 @@ public class bigAccRunnable implements Runnable {
 			}
 		
 		for(long id : AllCandidates){
-			Maintenance.writeLog("considering candidate...", index);
 
 			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
 				break;
@@ -332,6 +316,7 @@ public class bigAccRunnable implements Runnable {
 			System.out.println(e.getStackTrace());
 			Maintenance.writeLog("Something fucked up in bigAccRunnable", index);
 		}
+		Maintenance.runStatus.put(index+"bigAcc", false);
 	}
 
 }

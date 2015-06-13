@@ -560,9 +560,7 @@ public class ApprovalGUI {
         panel.add(statsButton);
         panel.setBackground(Color.GRAY);
 
-
         frame = new JFrame("Main Menu");
-
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

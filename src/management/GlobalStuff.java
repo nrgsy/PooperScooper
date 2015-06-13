@@ -2,6 +2,7 @@ package management;
 
 
 import java.util.HashMap;
+
 import org.bson.Document;
 
 
@@ -9,25 +10,28 @@ public class GlobalStuff{
 
 	//Non-volatile globals
 	//these do not get updated by the set globals function 
-	public static final long MINUTE_IN_MILLISECONDS = 60000;
-	public static final long DAY_IN_MILLISECONDS = 86400000;
-	public static final long WEEK_IN_MILLISECONDS = 604800000;
+	public static final long MINUTE_IN_MILLISECONDS = 60000L;
+	public static final long DAY_IN_MILLISECONDS = 86400000L;
+	public static final long WEEK_IN_MILLISECONDS = 604800000L;
 	public static final String DOPEST_MAN_ALIVE = "BO JANG";
 
 	//Volatile globals
-	//These are set/updated by the findAndSetGlobalVars function in databasehandler which reads the values
-	//from the GlobalVariables collection (which we can manually edit to tweak the values) and sets the
-	//values of these to match those.
+	//These are set/updated by the findAndSetGlobalVars function in databasehandler which reads the
+	//values from the GlobalVariables collection (which we can manually edit to tweak the values) and 
+	//sets the values of these to match those.
 	//The default values can be found in the main method of Director. They are used to initialize the
 	//GlobalVariables collection when it does not exist	
 	//NOTICE****************************************NOTICE***************************************NOTICE
 	//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
 	//1: Edit GlobalStuff's setGlobalVars method (for updating its value from the db)
 	//2: Edit GlobalStuff's getGlobalVars method (for the default value)
+	
+	//the min/max times between follow runnable runs
 	public static long FOLLOW_TIME_MIN;
 	public static long FOLLOW_TIME_MAX;
 	public static long FOLLOW_TIME_INCUBATED_MIN;
 	public static long FOLLOW_TIME_INCUBATED_MAX;
+	//number of milliseconds between big account runnable runs
 	public static long BIG_ACCOUNT_TIME;
 	public static int BIG_ACCOUNT_STRIKES_FOR_OUT;
 	public static int BIG_ACCOUNT_OUTS_FOR_REMOVAL;
@@ -37,7 +41,7 @@ public class GlobalStuff{
 	public static double ALPHA;
 	//the minimum allowed time 
 	public static long MIN_POST_TIME_INTERVAL;
-	//interval between TwitterRunnable runs
+	//the number of milliseconds between TwitterRunnable runs
 	public static long TWITTER_RUNNABLE_INTERVAL;
 	//The size of the content sample in dbhandler's getRandomContent
 	public static long CONTENT_SAMPLE_SIZE;
@@ -47,11 +51,11 @@ public class GlobalStuff{
 	public static long MAX_IMAGE_DIMENSION;
 	//The directory where the logs live
 	public static String LOG_DIRECTORY;
-	//the number of times the big account timertask fires before running the big account runnable
-	public static int BIG_ACCOUNT_RUNS;
-	public static int FOLLOW_RUNS;
-	public static int TWITTER_RUNS;
-
+	//The rate at which the timer tasks fire (only for twitter, bigacc, and follow runnables)
+	public static long TIMER_TASK_FIRE_RATE;
+	//the minimum amount of time Maintenance should ever take before starting the API calling section
+	//(to ensure that rate limits cannot be exceeded)
+	public static long MAINTENANCE_SNOOZE_TIME;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -77,7 +81,8 @@ public class GlobalStuff{
 			numToUnfollow = 0;
 		}
 		else{
-			Maintenance.writeLog("***ERROR*** We have negative followers or following or Jon is an idiot ***ERROR***");
+			Maintenance.writeLog("***ERROR*** We have negative followers or following or "
+					+ "Jon is an idiot ***ERROR***");
 
 		}
 		return numToUnfollow >= 0 ? numToUnfollow : 0;
@@ -104,20 +109,20 @@ public class GlobalStuff{
 		MIN_TIME_BETWEEN_ACCESSES = globalVars.getLong("MIN_TIME_BETWEEN_ACCESSES");
 		MAX_IMAGE_DIMENSION = globalVars.getLong("MAX_IMAGE_DIMENSION");
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
-		BIG_ACCOUNT_RUNS = globalVars.getInteger("BIG_ACCOUNT_RUNS");
-		FOLLOW_RUNS = globalVars.getInteger("FOLLOW_RUNS");
-		TWITTER_RUNS = globalVars.getInteger("TWITTER_RUNS");
+		TIMER_TASK_FIRE_RATE = globalVars.getLong("TIMER_TASK_FIRE_RATE");
+		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
 		HashMap<String, Object> globalVars = new HashMap<String, Object>();
 		//to prevent exceeding the limit of following more than 1000 people per day, make sure that
-		//FOLLOW_TIME_MIN never goes below 1.44 minutes (86400 seconds)
+		//FOLLOW_TIME_MIN never goes below 1.44 minutes (86400 ms)
 		globalVars.put("FOLLOW_TIME_MIN", 86400L);
 		globalVars.put("FOLLOW_TIME_MAX", 123430L);
-		globalVars.put("FOLLOW_TIME_INCUBATED_MIN", 180000L);
-		globalVars.put("FOLLOW_TIME_INCUBATED_MAX", 240000L);
-		globalVars.put("BIG_ACCOUNT_TIME", 950000L);//This is an arbitrary time a little over 15 minutes to prevent rate limit problems
+		globalVars.put("FOLLOW_TIME_INCUBATED_MIN", GlobalStuff.MINUTE_IN_MILLISECONDS * 3);
+		globalVars.put("FOLLOW_TIME_INCUBATED_MAX", GlobalStuff.MINUTE_IN_MILLISECONDS * 4);
+		//This is an arbitrary time a little over 15 minutes to prevent rate limit problems
+		globalVars.put("BIG_ACCOUNT_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 16);
 		globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
 		globalVars.put("BIG_ACCOUNT_OUTS_FOR_REMOVAL", 3);
 		globalVars.put("FOLLOWING_BASE_CAP", 2000);
@@ -125,18 +130,21 @@ public class GlobalStuff{
 		//once every MIN_POST_TIME_INTERVAL (15 for now) minutes so 25 - 15 = 10
 		globalVars.put("ALPHA", 1.0/10.0);
 		//ie 15 minutes
-		globalVars.put("MIN_POST_TIME_INTERVAL", 900000L);
-		globalVars.put("TWITTER_RUNNABLE_INTERVAL", 60000L);
+		globalVars.put("MIN_POST_TIME_INTERVAL", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
+		//the number of milliseconds between twitter runnable runs
+		globalVars.put("TWITTER_RUNNABLE_INTERVAL", GlobalStuff.MINUTE_IN_MILLISECONDS);
 		globalVars.put("CONTENT_SAMPLE_SIZE", 100L);
 		globalVars.put("MIN_TIME_BETWEEN_ACCESSES", GlobalStuff.WEEK_IN_MILLISECONDS);
 		globalVars.put("MAX_IMAGE_DIMENSION", 700L);
 		globalVars.put("LOG_DIRECTORY", "logs/");
-		//The number of times the timertask has to fire before actually running the runnable.
-		//the timertask fires every second and we want the runnable to run every 15 minutes
-		globalVars.put("BIG_ACCOUNT_RUNS", 15 * 60);
-		globalVars.put("FOLLOW_RUNS", ); //TODO how to implement when follow time is not fixed
-		//60 seconds between twitter runnable runs
-		globalVars.put("TWITTER_RUNS", 60);
+		//timer tasks fire every 1 seconds
+		//BEWARE DO NOT EVER MAKE THIS GREATER THAN MAINTENANCE_SNOOZE_TIME OR DUPLICATE RUNNABLES MAY
+		//OCCUR IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
+		globalVars.put("TIMER_TASK_FIRE_RATE", 1000L);
+		//Maintenance waits 15 min before twitter api calling section for rate limits to reset
+		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
+		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
+		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
 
 		return globalVars;
 	}

@@ -75,16 +75,37 @@ public class Maintenance {
 		}
 	}
 
-	//shuts down the schwergsy timertasks
+	/**
+	 * Sets the flag to true and waits for the schwergsy timertasks to cancel.
+	 * 
+	 * 
+	 */
 	public static void safeShutDownAccounts() {
 
-		Maintenance.writeLog("Shutting down", "maintenance");
+		Maintenance.writeLog("Shutting down accounts", "maintenance");
+		
+		flagSet = true;
+		boolean somethingStillRunning = true;
+		while (somethingStillRunning) {
 
-		//TODO Add Safe Shut Down Procedures to not fuck up dbs
-		//be sure to put infinite snooze loops to wait for all the timers to cancel.
-		//DO NOT exit this method until the global timer has cancelled all its timertasks, and they finish like 1 second later
-		//because we have them running once a second.
+			//look for a status that's true (indicating that something's still running)
+			somethingStillRunning = false;
+			for (Entry<String, Boolean> status : runStatus.entrySet()) {
+				if (status.getValue()) {
+					somethingStillRunning = true;
+					break;
+				}
+			}
 
+			if (somethingStillRunning) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		Maintenance.writeLog("All account shut down successfull", "maintenance");
 	}
 
 	//wait for e verything to stop
@@ -96,11 +117,12 @@ public class Maintenance {
 			while (flagSet) {
 				Thread.sleep(1000);
 			}
-
+			
 			System.exit(0);
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("YOLO", "maintenance");
+			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway",
+					"maintenance");
 			System.exit(0);
 		}
 	}
@@ -118,31 +140,9 @@ public class Maintenance {
 
 		Maintenance.writeLog("Maintenance Started", "maintenance");
 		long ogStartTime = new Date().getTime();
-		flagSet = true;
 
-		//TODO replace this whole loop with a call to safeShutdownAccounts
-		//chill in an infinite loop until all the threads kill themselves
-		boolean somethingStillRunning = true;
-		while (somethingStillRunning) {
-
-			//look for a status that's true (indicating that something's still running)
-			somethingStillRunning = false;
-			for (Entry<String, Boolean> status : runStatus.entrySet()) {
-				if (status.getValue()) {
-					Maintenance.writeLog(status.getKey()+ " is still running. Waiting for it to end...", "maintenance");
-					somethingStillRunning = true;
-					break;
-				}
-			}
-
-			if (somethingStillRunning) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		//also sets the maintenance flag
+		safeShutDownAccounts();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
 				+ " ms for all the timers to die", "maintenance");
@@ -192,7 +192,7 @@ public class Maintenance {
 
 		//don't start api call section until 15 minutes from start has passed
 		Maintenance.writeLog("Waiting 15 minutes for rate limits to reset", "maintenance");
-		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
+		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MAINTENANCE_SNOOZE_TIME) {
 			//wait 10 seconds before trying again
 			Thread.sleep(10000);
 		}
