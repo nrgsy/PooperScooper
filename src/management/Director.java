@@ -54,7 +54,7 @@ public class Director {
 			Maintenance.runStatus = new HashMap<>();
 			Maintenance.doomedAccounts = new ArrayList<>();
 			GlobalStuff.numberOfRuns = new HashMap<>();
-
+			TimerFactory.globalTimer = new Timer();
 			Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
 			//The timer who's task fires once a day to do the maintenance tasks
 			new Timer().scheduleAtFixedRate(

@@ -118,7 +118,8 @@ public class TimerFactory {
 
 	private static void updateRuns(String TimerTaskID){
 		GlobalStuff.numberOfRuns.put(TimerTaskID, 
-				GlobalStuff.numberOfRuns.get(TimerTaskID) + 1);
+				GlobalStuff.numberOfRuns.get(TimerTaskID)==null ? 0 : GlobalStuff.numberOfRuns.get(TimerTaskID)
+				);
 	}
 
 	public static TimerTask createMaintenanceTimerTask() {
