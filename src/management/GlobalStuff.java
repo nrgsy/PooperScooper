@@ -66,6 +66,8 @@ public class GlobalStuff{
 	//times their timertask has fired without running the runnable. When it reaches a specified amount 
 	//the runnable will run and the counter will be reset to 0
 	public static HashMap<String, Integer> numberOfRuns;
+	//subreddit url mapped to specific content pools to put the scraped content into.
+	public static Document redditScraping;
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
 		int numToUnfollow = 0;
@@ -111,6 +113,7 @@ public class GlobalStuff{
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
 		TIMER_TASK_FIRE_RATE = globalVars.getLong("TIMER_TASK_FIRE_RATE");
 		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
+		redditScraping = (Document) globalVars.get("redditScraping");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -145,6 +148,10 @@ public class GlobalStuff{
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
 		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
+
+		Document reddit = new Document();
+		reddit.append("http://www.reddit.com/r/blackpeopletwitter", "pendingass");
+		globalVars.put("redditScraping", reddit);
 
 		return globalVars;
 	}

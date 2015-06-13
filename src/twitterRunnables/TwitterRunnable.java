@@ -50,9 +50,9 @@ public class TwitterRunnable implements Runnable {
 	 * @throws Exception
 	 */
 	public void uploadPicTwitter(File file, String message) throws TwitterException{
-			StatusUpdate status = new StatusUpdate(message);
-			status.setMedia(file);
-			TwitterHandler.updateStatus(bird, status, index);
+		StatusUpdate status = new StatusUpdate(message);
+		status.setMedia(file);
+		TwitterHandler.updateStatus(bird, status, index);
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class TwitterRunnable implements Runnable {
 	public void uploadPic(){
 
 		Maintenance.writeLog("uploading pic", index);
-		
+
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
@@ -91,20 +91,26 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for TwitterRunnable");
-		long now = new Date().getTime();
-		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
-		boolean canPost = true;
+		try{
+			long now = new Date().getTime();
+			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
+			boolean canPost = true;
 
-		if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
-			canPost = false;
+			if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
+				canPost = false;
+			} 
+
+			//post if the random number is less than the alpha constant and we're allowed to post
+			if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
+				uploadPic();
+				GlobalStuff.lastPostTimeMap.put(index, now);
+			}
+		}
+		catch(Exception e){
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), index);
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), "KP");
 		}
 
-		//post if the random number is less than the alpha constant and we're allowed to post
-		if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
-			uploadPic();
-			GlobalStuff.lastPostTimeMap.put(index, now);
-		}
 		Maintenance.runStatus.put(index+"twitter", false);
 	}
-
 }

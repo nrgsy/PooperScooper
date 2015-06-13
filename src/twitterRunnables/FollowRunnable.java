@@ -95,10 +95,11 @@ public class FollowRunnable implements Runnable{
 		try {
 			unfollowUsers();
 			followAndFavoriteUsers();
-		} catch (UnknownHostException | TwitterException e) {
-			System.out.println(e.getStackTrace());
-			Maintenance.writeLog("FollowRunnable fucked up somewhere", index);
-		}	
+		} catch (Exception e) {
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), index);
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), "KP");
+
+		}
 		Maintenance.runStatus.put(index+"follow", false);
 	}
 
