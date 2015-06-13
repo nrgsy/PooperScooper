@@ -35,36 +35,6 @@ public class FollowRunnable implements Runnable{
 		Maintenance.runStatus.put(index+"follow", true);	
 	}
 	
-	//this constructor only for testing
-	/**
-	 * @param lol
-	 */
-	public FollowRunnable(int lol){
-		Maintenance.writeLog("New FollowRunnable created");
-		if(lol == 0){
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		  .setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
-		  .setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
-		  .setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
-		  .setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		bird = tf.getInstance();
-		index = 0;
-		Maintenance.runStatus.put(index+"follow", true);
-		}
-		else{
-			ConfigurationBuilder cb = new ConfigurationBuilder();
-			cb.setDebugEnabled(true)
-			  .setOAuthConsumerKey("42sz3hIV8JRBSLFPfF1VTQ")
-			  .setOAuthConsumerSecret("sXcWyF4BoJMSxbEZu4lAgGBabBgPQndiRhB35zQWk")
-			  .setOAuthAccessToken("2227975866-3TyxFxzLhQOqFpmlHZdZrvnp9ygl10Un41Tq1Dk")
-			  .setOAuthAccessTokenSecret("e9cmTKAMWiLzkfdf4RwzhcmaE1I1gccKEcUxbpVUZugY4");
-			TwitterFactory tf = new TwitterFactory(cb.build());
-			bird = tf.getInstance();
-		}
-	}	
-	
 	/**
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
@@ -121,14 +91,17 @@ public class FollowRunnable implements Runnable{
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for FollowRunnable");
+
 		try {
 			unfollowUsers();
 			followAndFavoriteUsers();
-		} catch (UnknownHostException | TwitterException e) {
-			System.out.println(e.getStackTrace());
-			Maintenance.writeLog("FollowRunnable fucked up somewhere", index);
-		}
+		} catch (Exception e) {
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), index);
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), "KP");
 
+		}
+		Maintenance.runStatus.put(index+"follow", false);
 	}
+
 }
 

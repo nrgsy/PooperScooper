@@ -31,22 +31,22 @@ public class Maintenance {
 	public static boolean flagSet;
 
 	private static void resetBigAccountHarvestIndexes() throws UnknownHostException {
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			DataBaseHandler.editBigAccountHarvestIndex(index, 0);
 		}
 	}
 
-	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException{
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException {
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
 			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
-			if(DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList") != null){
-				bigAccWhiteListSet = new HashSet((ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
+			if (DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList") != null) {
+				bigAccWhiteListSet = new HashSet((ArrayList<Long>) DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
 			}
 			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
 
-			for(Document bigAccount : bigAcc){
-				if(!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))){
+			for (Document bigAccount : bigAcc) {
+				if (!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))) {
 					toAddToBigAccWhiteList.add(bigAccount.getLong("user_id"));
 				}
 			}
@@ -55,27 +55,83 @@ public class Maintenance {
 		}
 	}
 
-	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException{
-		for(int index = 0; index<DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++){
+	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException {
+		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			ArrayList<Long> toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow");
 			ArrayList<Long> whiteList = DataBaseHandler.getSchwergsyAccountArray(index, "whiteList");
 			HashSet<Long> toAddToWhiteList = new HashSet<Long>();
 			HashSet<Long> whiteListSet = new HashSet<Long>();
 
-			for(Long id : whiteList){
+			for (Long id : whiteList) {
 				whiteListSet.add(id);
 			}
 
-			for(Long id : toFollow){
-				if(!whiteListSet.contains(id)){
+			for (Long id : toFollow) {
+				if (!whiteListSet.contains(id)) {
 					toAddToWhiteList.add(id);
 				}
 			}
-			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toAddToWhiteList));	
+			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toAddToWhiteList));
+		}
+	}
+
+	/**
+	 * Sets the flag to true and waits for the schwergsy timertasks to cancel.
+	 * 
+	 * 
+	 */
+	public static void safeShutDownAccounts() {
+
+		Maintenance.writeLog("Shutting down accounts", "maintenance");
+		
+		flagSet = true;
+		boolean somethingStillRunning = true;
+		while (somethingStillRunning) {
+
+			//look for a status that's true (indicating that something's still running)
+			somethingStillRunning = false;
+			for (Entry<String, Boolean> status : runStatus.entrySet()) {
+				if (status.getValue()) {
+					somethingStillRunning = true;
+					break;
+				}
+			}
+
+			if (somethingStillRunning) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		Maintenance.writeLog("All account shut down successfull", "maintenance");
+	}
+
+	//wait for e verything to stop
+	public static void safeShutdownSystem() {
+		try {
+			safeShutDownAccounts();
+
+			//wait for maintenance to complete if running;
+			while (flagSet) {
+				Thread.sleep(1000);
+			}
+			
+			System.exit(0);
+		}
+		catch (Exception e) {
+			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway",
+					"maintenance");
+			System.exit(0);
 		}
 	}
 
 	public static void performMaintenance() throws Exception {
+		try{
+		
+		TimerFactory.globalTimer.cancel();
+		TimerFactory.globalTimer.purge();
 
 		if (flagSet) {
 			Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
@@ -85,30 +141,9 @@ public class Maintenance {
 
 		Maintenance.writeLog("Maintenance Started", "maintenance");
 		long ogStartTime = new Date().getTime();
-		flagSet = true;
 
-		//chill in an infinite loop until all the threads kill themselves
-		boolean somethingStillRunning = true;
-		while (somethingStillRunning) {
-
-			//look for a status that's true (indicating that something's still running)
-			somethingStillRunning = false;
-			for (Entry<String, Boolean> status : runStatus.entrySet()) {
-				if (status.getValue()) {
-					Maintenance.writeLog(status.getKey()+ " is still running. Waiting for it to end...", "maintenance");
-					somethingStillRunning = true;
-					break;
-				}
-			}
-
-			if (somethingStillRunning) {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		//also sets the maintenance flag
+		safeShutDownAccounts();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
 				+ " ms for all the timers to die", "maintenance");
@@ -158,7 +193,7 @@ public class Maintenance {
 
 		//don't start api call section until 15 minutes from start has passed
 		Maintenance.writeLog("Waiting 15 minutes for rate limits to reset", "maintenance");
-		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MINUTE_IN_MILLISECONDS * 15) {
+		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MAINTENANCE_SNOOZE_TIME) {
 			//wait 10 seconds before trying again
 			Thread.sleep(10000);
 		}
@@ -176,7 +211,7 @@ public class Maintenance {
 		flagSet = false;
 		
 		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.createTimers();
+		TimerFactory.scheduleAllSchwergsyTimers();
 		new Thread(new RedditScraper()).start();
 
 		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
@@ -185,6 +220,10 @@ public class Maintenance {
 
 		Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
 				(new Date().getTime() - ogStartTime) + " ms", "maintenance");
+		}
+		catch(Exception e){
+			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+e.toString(), "KP");
+		}
 	}
 
 	/**

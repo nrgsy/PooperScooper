@@ -41,24 +41,6 @@ public class TwitterRunnable implements Runnable {
 	}
 
 	/**
-	 * temp testing constructor
-	 */
-	public TwitterRunnable(){
-		Maintenance.writeLog("New TwitterRunnable created");
-		ConfigurationBuilder cb = new ConfigurationBuilder();
-		cb.setDebugEnabled(true)
-		.setOAuthConsumerKey("uHQV3x8pHZD7jzteRwUIw")
-		.setOAuthConsumerSecret("OxfLKbnhfvPB8cpe5Rthex1yDR5l0I7ztHLaZXnXhmg")
-		.setOAuthAccessToken("2175141374-5Gg6WRBpW1NxRMNt5UsEUA95sPVaW3a566naNVI")
-		.setOAuthAccessTokenSecret("Jz2nLsKm59bbGwCxtg7sXDyfqIo7AqO6JsvWpGoEEux8t");
-		TwitterFactory tf = new TwitterFactory(cb.build());
-		bird = tf.getInstance();
-		this.index = 0;
-		Maintenance.runStatus.put(index+"twitter", true);
-	}
-
-
-	/**
 	 * handles actual uploading to twitter
 	 * 
 	 * @param file
@@ -68,9 +50,9 @@ public class TwitterRunnable implements Runnable {
 	 * @throws Exception
 	 */
 	public void uploadPicTwitter(File file, String message) throws TwitterException{
-			StatusUpdate status = new StatusUpdate(message);
-			status.setMedia(file);
-			TwitterHandler.updateStatus(bird, status, index);
+		StatusUpdate status = new StatusUpdate(message);
+		status.setMedia(file);
+		TwitterHandler.updateStatus(bird, status, index);
 	}
 
 	/**
@@ -79,7 +61,7 @@ public class TwitterRunnable implements Runnable {
 	public void uploadPic(){
 
 		Maintenance.writeLog("uploading pic", index);
-		
+
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
@@ -109,23 +91,26 @@ public class TwitterRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for TwitterRunnable");
-		long now = new Date().getTime();
-		Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
-		boolean canPost = true;
+		try{
+			long now = new Date().getTime();
+			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
+			boolean canPost = true;
 
-		if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
-			canPost = false;
+			if (lastPostTime != null && now - lastPostTime < GlobalStuff.MIN_POST_TIME_INTERVAL) {
+				canPost = false;
+			} 
+
+			//post if the random number is less than the alpha constant and we're allowed to post
+			if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
+				uploadPic();
+				GlobalStuff.lastPostTimeMap.put(index, now);
+			}
+		}
+		catch(Exception e){
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), index);
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), "KP");
 		}
 
-		//post if the random number is less than the alpha constant and we're allowed to post
-		if (canPost == true && Math.random() < GlobalStuff.ALPHA) {
-			uploadPic();
-			GlobalStuff.lastPostTimeMap.put(index, now);
-		}
-
-	}
-
-	public static void main(String[] args){
-		new Thread(new TwitterRunnable()).start();
+		Maintenance.runStatus.put(index+"twitter", false);
 	}
 }

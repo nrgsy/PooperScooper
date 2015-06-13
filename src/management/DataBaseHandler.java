@@ -35,10 +35,10 @@ public class DataBaseHandler{
 	/**TODO BOJANG TEST
 	 * @param type The type of content, types are "ass", "pendingass", "workout", "weed"
 	 * @param index The index of the Schwergs account that wants the content
-	 * @return a Document that is the random content, or null if none found
+	 * @return a Document that is the random content, OR NULL IF NONE FOUND
 	 * @throws UnknownHostException
 	 */
-	public static  Document getRandomContent(String type, long index) throws UnknownHostException {
+	public static Document getRandomContent(String type, long index) throws UnknownHostException {
 
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = getCollection(type, db);
