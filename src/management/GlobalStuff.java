@@ -151,6 +151,9 @@ public class GlobalStuff{
 
 		Document reddit = new Document();
 		reddit.append("http://www.reddit.com/r/blackpeopletwitter", "pendingass");
+		reddit.append("http://www.reddit.com/r/gymmemes", "pendingass");
+		reddit.append("http://www.reddit.com/r/gymfails", "pendingass");
+		reddit.append("http://www.reddit.com/r/memes", "pendingass");
 		globalVars.put("redditScraping", reddit);
 
 		return globalVars;
