@@ -56,7 +56,7 @@ public class RedditScraper implements Runnable{
 				try {
 					document = Jsoup.connect(url).userAgent("Mozilla").get();
 				} 
-				catch (IOException e) {
+				catch (Exception e) {
 					e.printStackTrace();
 					throw new FuckinUpKPException("can't get to reddit.com");
 				}
