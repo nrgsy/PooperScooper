@@ -127,7 +127,6 @@ public class TwitterRunnable implements Runnable {
 		catch(Exception e){
 			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), index);
 			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+e.toString(), "KP");
-
 		}
 
 	}

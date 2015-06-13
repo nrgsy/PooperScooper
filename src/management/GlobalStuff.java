@@ -62,6 +62,8 @@ public class GlobalStuff{
 	//times their timertask has fired without running the runnable. When it reaches a specified amount 
 	//the runnable will run and the counter will be reset to 0
 	public static HashMap<String, Integer> numberOfRuns;
+	//subreddit url mapped to specific content pools to put the scraped content into.
+	public static Document redditScraping;
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
 		int numToUnfollow = 0;
@@ -107,6 +109,7 @@ public class GlobalStuff{
 		BIG_ACCOUNT_RUNS = globalVars.getInteger("BIG_ACCOUNT_RUNS");
 		FOLLOW_RUNS = globalVars.getInteger("FOLLOW_RUNS");
 		TWITTER_RUNS = globalVars.getInteger("TWITTER_RUNS");
+		redditScraping = (Document) globalVars.get("redditScraping");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -137,6 +140,10 @@ public class GlobalStuff{
 		globalVars.put("FOLLOW_RUNS", ); //TODO how to implement when follow time is not fixed
 		//60 seconds between twitter runnable runs
 		globalVars.put("TWITTER_RUNS", 60);
+		
+		Document reddit = new Document();
+		reddit.append("http://www.reddit.com/r/blackpeopletwitter", "pendingass");
+		globalVars.put("redditScraping", reddit);
 
 		return globalVars;
 	}
