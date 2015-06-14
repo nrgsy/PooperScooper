@@ -1434,19 +1434,14 @@ public class DataBaseHandler{
 	public static  void prettyPrintStatistics(String schwergsyAccountName) {		
 
 		try {
-			MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-			MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
-			Document query = new Document("name", schwergsyAccountName);
-			FindIterable<Document> findIter = dbCollection.find(query);
-			MongoCursor<Document> cursor = findIter.iterator();
-			Document account = (Document) cursor.next();
+			Document account = getSchwergsyAccount(schwergsyAccountName);
 			ArrayList<Document> statList = (ArrayList<Document>) account.get("statistics");
 
 			if (statList.size() > 0) {
 
 				Maintenance.writeLog("Creating Statistic");
 
-				System.out.println("Statistics for account " + account.get("name") + ":\n");
+				System.out.println("\nStatistics for account " + account.get("name") + ":\n");
 				Set<Entry<String, Object>> entrySet = ((Document) statList.get(0)).entrySet();
 				int columnWidth = 32;
 
@@ -1531,6 +1526,10 @@ public class DataBaseHandler{
 			else {
 				Maintenance.writeLog("Cannot print stats. No stats have been entered yet");
 			}
+			System.out.println("\n------------------------------------------------------------------"
+					+ "-----------------------------------------------------------------------------"
+					+ "-----------------------------------------------------------------------------"
+					+ "--------------------------------------------------------------------------\n");
 		} 		
 		catch (Exception e) {
 			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***");

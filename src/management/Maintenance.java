@@ -77,13 +77,14 @@ public class Maintenance {
 
 	/**
 	 * Sets the flag to true and waits for the schwergsy timertasks to cancel.
+	 * WARNING DOES NOT UNSET MAINTENACE FLAG
 	 * 
 	 * 
 	 */
 	public static void safeShutDownAccounts() {
 
 		Maintenance.writeLog("Shutting down accounts", "maintenance");
-		
+
 		flagSet = true;
 		boolean somethingStillRunning = true;
 		while (somethingStillRunning) {
@@ -105,19 +106,24 @@ public class Maintenance {
 				}
 			}
 		}
-		Maintenance.writeLog("All account shut down successfull", "maintenance");
+		Maintenance.writeLog("All accounts shut down successfully", "maintenance");
 	}
 
 	//wait for e verything to stop
 	public static void safeShutdownSystem() {
 		try {
-			safeShutDownAccounts();
-
+			
+			if (flagSet) {
+				Maintenance.writeLog("Waiting for Maintenance flag to become false", "maintenance");
+			}			
 			//wait for maintenance to complete if running;
 			while (flagSet) {
 				Thread.sleep(1000);
 			}
 			
+			safeShutDownAccounts();
+			
+			Maintenance.writeLog("Exiting program", "maintenance");
 			System.exit(0);
 		}
 		catch (Exception e) {
@@ -129,97 +135,97 @@ public class Maintenance {
 
 	public static void performMaintenance() throws Exception {
 		try{
-		
-		TimerFactory.globalTimer.cancel();
-		TimerFactory.globalTimer.purge();
 
-		if (flagSet) {
-			Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
-					+ " running (flagSet was true). Exiting performMaintenance", "maintenance");
-			return;
-		}
+			TimerFactory.globalTimer.cancel();
+			TimerFactory.globalTimer.purge();
 
-		Maintenance.writeLog("Maintenance Started", "maintenance");
-		long ogStartTime = new Date().getTime();
+			if (flagSet) {
+				Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
+						+ " running (flagSet was true). Exiting performMaintenance", "maintenance");
+				return;
+			}
 
-		//also sets the maintenance flag
-		safeShutDownAccounts();
+			Maintenance.writeLog("Maintenance Started", "maintenance");
+			long ogStartTime = new Date().getTime();
 
-		Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
-				+ " ms for all the timers to die", "maintenance");
+			//Sets maintenance flag to true
+			safeShutDownAccounts();
 
-		//Section that doesn't use api calls (runs first because we wait 15 min before using any api calls)
-		///////////////////////////////////////////////////////////////////////////////////////////////
-		long nonAPIstartTime = new Date().getTime();
+			Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
+					+ " ms for all the timers to die", "maintenance");
 
-		DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
+			//Section that doesn't use api calls (runs first because we wait 15 min before using any api calls)
+			///////////////////////////////////////////////////////////////////////////////////////////////
+			long nonAPIstartTime = new Date().getTime();
 
-		//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
-		try {
-			DataBaseHandler.findAndSetGlobalVars();
-		} catch (UnknownHostException e) {
-			Maintenance.writeLog("***ERROR*** failed to find ***ERROR***", "maintenance");
-			e.printStackTrace();
-		}
+			DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
 
-		//cleans up and syncs bigAccounts with bigAccountsWhiteList
-		try {
-			cleanBigAccs();
-		} catch (UnknownHostException | FuckinUpKPException e) {
-			Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
-			e.printStackTrace();
-		}
+			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
+			try {
+				DataBaseHandler.findAndSetGlobalVars();
+			} catch (UnknownHostException e) {
+				Maintenance.writeLog("***ERROR*** failed to find ***ERROR***", "maintenance");
+				e.printStackTrace();
+			}
 
-		//cleans up and syncs toFollow with whiteList
-		try {
-			cleanToFollows();
-		} catch (UnknownHostException | FuckinUpKPException e) {
-			Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***", "maintenance");
-			e.printStackTrace();
-		}
+			//cleans up and syncs bigAccounts with bigAccountsWhiteList
+			try {
+				cleanBigAccs();
+			} catch (UnknownHostException | FuckinUpKPException e) {
+				Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
+				e.printStackTrace();
+			}
 
-		//resets bigAccountHarvestIndexes to 0
-		try {
-			resetBigAccountHarvestIndexes();
-		} catch (UnknownHostException e) {
-			Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***",
-					"maintenance");
-			e.printStackTrace();
-		}
+			//cleans up and syncs toFollow with whiteList
+			try {
+				cleanToFollows();
+			} catch (UnknownHostException | FuckinUpKPException e) {
+				Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***", "maintenance");
+				e.printStackTrace();
+			}
 
-		Maintenance.writeLog("It took " + (new Date().getTime() - nonAPIstartTime)
-				+ " ms for the non-API-calling section to complete", "maintenance");
-		///////////////////////////////////////////////////////////////////////////////////////////////
+			//resets bigAccountHarvestIndexes to 0
+			try {
+				resetBigAccountHarvestIndexes();
+			} catch (UnknownHostException e) {
+				Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***",
+						"maintenance");
+				e.printStackTrace();
+			}
 
-		//don't start api call section until 15 minutes from start has passed
-		Maintenance.writeLog("Waiting 15 minutes for rate limits to reset", "maintenance");
-		while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MAINTENANCE_SNOOZE_TIME) {
-			//wait 10 seconds before trying again
-			Thread.sleep(10000);
-		}
+			Maintenance.writeLog("It took " + (new Date().getTime() - nonAPIstartTime)
+					+ " ms for the non-API-calling section to complete", "maintenance");
+			///////////////////////////////////////////////////////////////////////////////////////////////
 
-		//Section that uses api calls
-		///////////////////////////////////////////////////////////////////////////////////////////////
-		long APIstartTime = new Date().getTime();
+			//don't start api call section until 15 minutes from start has passed
+			Maintenance.writeLog("Waiting 15 minutes for rate limits to reset", "maintenance");
+			while ((new Date().getTime()) < nonAPIstartTime + GlobalStuff.MAINTENANCE_SNOOZE_TIME) {
+				//wait 10 seconds before trying again
+				Thread.sleep(10000);
+			}
 
-		//update followers for each schwergsy account
-		long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
-		for (int i = 0; i < size; i++) {
-			DataBaseHandler.updateFollowers(i);
-		}
+			//Section that uses api calls
+			///////////////////////////////////////////////////////////////////////////////////////////////
+			long APIstartTime = new Date().getTime();
 
-		flagSet = false;
-		
-		//start all the timers because they all suicide when they see maintenance flag is set
-		TimerFactory.scheduleAllSchwergsyTimers();
-		new Thread(new RedditScraper()).start();
+			//update followers for each schwergsy account
+			long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
+			for (int i = 0; i < size; i++) {
+				DataBaseHandler.updateFollowers(i);
+			}
 
-		Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
-				+ " ms for the API-calling section to complete", "maintenance");
-		///////////////////////////////////////////////////////////////////////////////////////////////
+			flagSet = false;
 
-		Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
-				(new Date().getTime() - ogStartTime) + " ms", "maintenance");
+			//start all the timers because they all suicide when they see maintenance flag is set
+			TimerFactory.scheduleAllSchwergsyTimers();
+			new Thread(new RedditScraper()).start();
+
+			Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
+					+ " ms for the API-calling section to complete", "maintenance");
+			///////////////////////////////////////////////////////////////////////////////////////////////
+
+			Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
+					(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 		}
 		catch(Exception e){
 			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+e.toString(), "KP");

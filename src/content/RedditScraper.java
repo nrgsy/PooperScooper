@@ -51,7 +51,7 @@ public class RedditScraper implements Runnable{
 			String contentPool = linkAndContentPool.get(1);
 			String url = linkAndContentPool.get(0);
 			//Loop through reddit and gathers title + image link
-			for(int j = 0; j<pages; j++){
+			for(int j = 0; j<pages; j++) {
 				Document document = null;
 
 				try {
@@ -64,10 +64,15 @@ public class RedditScraper implements Runnable{
 				}
 				catch (SocketTimeoutException e) {
 					//do nothing
+					continue;
 				}
 				catch (Exception e) {
 					e.printStackTrace();
 					throw new FuckinUpKPException("can't get to reddit.com");
+				}
+				
+				if (document == null) {
+					continue;
 				}
 
 				//Must end with jpg or png
