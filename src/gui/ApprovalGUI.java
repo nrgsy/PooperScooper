@@ -318,7 +318,7 @@ public class ApprovalGUI {
             while (i >= 0) {
                 Document account = DataBaseHandler.getSchwergsyAccount(i);
                 DataBaseHandler.prettyPrintStatistics((String) account.get("name"));
-
+                i--;
             }
         }
     }

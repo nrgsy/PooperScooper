@@ -2,6 +2,7 @@ package content;
 
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -56,6 +57,14 @@ public class RedditScraper implements Runnable{
 				try {
 					document = Jsoup.connect(url).userAgent("Mozilla").get();
 				} 
+				catch(IllegalArgumentException e) {
+					//do nothing
+					Maintenance.writeLog("Found invalid url, skipping.", "content");
+					continue;	
+				}
+				catch (SocketTimeoutException e) {
+					//do nothing
+				}
 				catch (Exception e) {
 					e.printStackTrace();
 					throw new FuckinUpKPException("can't get to reddit.com");
