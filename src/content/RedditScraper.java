@@ -74,6 +74,9 @@ public class RedditScraper implements Runnable{
 				if (document == null) {
 					continue;
 				}
+				
+				document.select("link[title=applied_subreddit_stylesheet]").first().remove();
+				
 
 				//Must end with jpg or png
 				Elements titles = document.select("a.title[href$=.jpg]");
