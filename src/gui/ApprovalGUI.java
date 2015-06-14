@@ -77,6 +77,7 @@ public class ApprovalGUI {
 	private static JTextField authKeyField;
 	private static JTextField incubatedField;
 	private static JTextField suspendedField;
+	private static JTextField seedField;
 	//the thing that has a run method which runs when clicking the x button in the gui
 	private static WindowAdapter guiExitAdapter;
 
@@ -115,7 +116,7 @@ public class ApprovalGUI {
 		}
 	}
 
-	private static class AddListener implements ActionListener {
+	private static class AddContentListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -191,7 +192,7 @@ public class ApprovalGUI {
 			frame.setVisible(false);
 			frame.dispose();
 
-			JPanel mainPanel = new JPanel(new GridLayout(9, 2));
+			JPanel mainPanel = new JPanel(new GridLayout(11, 2));
 			mainPanel.add(new JLabel("Name"));
 			mainPanel.add(nameField);
 			mainPanel.add(new JLabel("Customer Secret"));
@@ -202,19 +203,24 @@ public class ApprovalGUI {
 			mainPanel.add(authSecField);
 			mainPanel.add(new JLabel("Authorization Key"));
 			mainPanel.add(authKeyField);
-			mainPanel.add(new JLabel("Is Incubated? (True/False)"));
+			mainPanel.add(new JLabel("Is Incubated? (true/false)"));
 			mainPanel.add(incubatedField);
-			mainPanel.add(new JLabel("Is Suspended? (True/False)"));
+			mainPanel.add(new JLabel("Is Suspended? (true/false)"));
 			mainPanel.add(suspendedField);
+			mainPanel.add(new JLabel("Seed (big account id)"));
+			mainPanel.add(seedField);
 			JButton addButton = new JButton("Add");
 			addButton.addActionListener(new AddAccountListener());
 			mainPanel.add(addButton);
 			JButton removeButton = new JButton("Remove (Only fill in Name)");
 			removeButton.addActionListener(new RemoveAccountListener());
 			mainPanel.add(removeButton);
-			JButton replaceButton = new JButton("Replace (Fill in Name and info)");
+			JButton replaceButton = new JButton("Replace (Fill in name and info)");
 			replaceButton.addActionListener(new ReplaceInfoListener());
 			mainPanel.add(replaceButton);
+			JButton addSeedButton = new JButton("Add Seed (Fill in name and seed)");
+			addSeedButton.addActionListener(new AddSeedListener());
+			mainPanel.add(addSeedButton);
 			mainPanel.add(backToMainButton);
 			mainPanel.setBackground(Color.GRAY);
 
@@ -222,7 +228,7 @@ public class ApprovalGUI {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.addWindowListener(guiExitAdapter);
 			frame.setContentPane(mainPanel);
-			frame.setSize(500, 500);
+			frame.setSize(600, 500);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
 		}
@@ -248,7 +254,6 @@ public class ApprovalGUI {
 				return;
 			}
 
-
 			try {
 				//insertSchwergsyAccount return returns a boolean indicating success. Exits if insertion
 				//failed so the timers aren't created below
@@ -269,6 +274,9 @@ public class ApprovalGUI {
 				System.exit(0);
 				e1.printStackTrace();
 			}
+		
+			//adds seed to Schwergsy account if one was entered
+			addSeedToSchwergsyAccount();
 		}
 	}
 
@@ -364,6 +372,38 @@ public class ApprovalGUI {
 		return parsedBoolean;
 	}
 
+
+	//The listener for the add seed button in the Schwergsy account section of the GUI
+	private static class AddSeedListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			addSeedToSchwergsyAccount();
+		}
+	}
+	
+	/**
+	 * This looks at the seed and name text fields and adds the seed if anything was entered.
+	 * Does nothing if seed field is empty
+	 * 
+	 */
+	private static void addSeedToSchwergsyAccount() {
+				
+		String name = nameField.getText();
+		String seedText = seedField.getText();
+		//add the seed if one was entered
+		if (!seedText.equals("")) {
+			long seed = Long.parseLong(seedText);
+			
+			try {
+				DataBaseHandler.addBigAccount(DataBaseHandler.getSchwergsyAccountIndex(name),
+						seed, 0, 0, -1);
+			} catch (UnknownHostException | FuckinUpKPException e) {
+				Maintenance.writeLog("***ERROR*** Could not add big account ***ERROR***", "gui");
+				e.printStackTrace();
+			}			
+		}
+	}
+
 	//The listener for the perform maintenance button
 	private static class MaintenanceListener implements ActionListener {
 		@Override
@@ -433,12 +473,11 @@ public class ApprovalGUI {
 			panel.add(backToMainButton);
 			panel.setBackground(Color.GRAY);
 			panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-			panel.setOpaque(true); //content panes must be opaque
+			panel.setOpaque(true);
 			frame = new JFrame("Select Content Type");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.addWindowListener(guiExitAdapter);
 			frame.setContentPane(panel);
-			//Display the window.
 			frame.setSize(300, 100);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
@@ -510,7 +549,7 @@ public class ApprovalGUI {
 					captionTextField.setPreferredSize(new Dimension(333, 30));
 
 					JButton addButton = new JButton("Add");
-					addButton.addActionListener(new AddListener());
+					addButton.addActionListener(new AddContentListener());
 					JButton trashButton = new JButton("Trash");
 					trashButton.addActionListener(new TrashListener());
 					JButton undoButton = new JButton("Undo");
@@ -636,7 +675,6 @@ public class ApprovalGUI {
 
 	public static void main(String[] args) throws Exception {
 
-
 		Director.runDirector();
 
 		//initialize these
@@ -647,6 +685,7 @@ public class ApprovalGUI {
 		authKeyField = new JTextField();
 		incubatedField = new JTextField();
 		suspendedField = new JTextField();
+		seedField = new JTextField();
 		backToMainButton = new JButton("Back");
 		backToMainButton.addActionListener(new BackToMainListener());
 		guiExitAdapter = new WindowAdapter() {
