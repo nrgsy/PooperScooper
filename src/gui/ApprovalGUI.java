@@ -270,6 +270,25 @@ public class ApprovalGUI {
 			}
 		}
 	}
+	
+
+	//the listener for the remove button in Schwergsy account interface
+	private static class RemoveAccountListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			String name = nameField.getText();
+			Document doc = DataBaseHandler.getSchwergsyAccount(name);
+			if (doc == null) {
+				Maintenance.writeLog("Could not find account with name: " + name +
+						". Nothing was flagged for removal.");
+			} else {
+				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
+				int _id = (int) doc.get("_id");
+				DataBaseHandler.flagAccountForRemoval(_id);
+			}
+		}
+	}
 
 	//the listener for the replace button in Schwergsy account interface
 	private static class ReplaceInfoListener implements ActionListener {
@@ -290,9 +309,22 @@ public class ApprovalGUI {
 				e2.printStackTrace();
 				return;
 			}
-
-
 			
+			Document doc = DataBaseHandler.getSchwergsyAccount(name);
+			if (doc == null) {
+				Maintenance.writeLog("Could not find account with name: " + name +
+						". Cannot replace its info.");
+				return;
+			}
+			
+			
+				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
+				int _id = (int) doc.get("_id");
+				DataBaseHandler.flagAccountForRemoval(_id);
+			
+			
+			
+			//gsdfgdf
 			
 			
 			
@@ -384,24 +416,6 @@ public class ApprovalGUI {
 			frame.dispose();
 
 			drawMain();
-		}
-	}
-
-	//the listener for the remove button in Schwergsy account interface
-	private static class RemoveAccountListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-
-			String name = nameField.getText();
-			Document doc = DataBaseHandler.getSchwergsyAccount(name);
-			if (doc == null) {
-				Maintenance.writeLog("Could not find account with name: " + name +
-						". Nothing was flagged for removal.");
-			} else {
-				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
-				int _id = (int) doc.get("_id");
-				DataBaseHandler.flagAccountForRemoval(_id);
-			}
 		}
 	}
 
