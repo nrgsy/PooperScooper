@@ -40,11 +40,8 @@ public class DataBaseHandler{
 	 */
 	public static Document getRandomContent(String type, long index) throws UnknownHostException {
 
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> collection = getCollection(type, db);
-
+		MongoCollection<Document> collection = getCollection(type);
 		double collectionSize = collection.count();
-
 		HashSet<Document> contentSample = new HashSet<>();
 
 		if (collectionSize < GlobalStuff.CONTENT_SAMPLE_SIZE) {
@@ -178,8 +175,7 @@ public class DataBaseHandler{
 	 */
 	public static  void removeContent(String sourceType, String sourceLink)
 			throws UnknownHostException {		
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> sourceCollection = getCollection(sourceType, db);	
+		MongoCollection<Document> sourceCollection = getCollection(sourceType);	
 		Document query = new Document("imglink", sourceLink);
 		sourceCollection.deleteOne(query);
 	}
@@ -259,7 +255,6 @@ public class DataBaseHandler{
 	//ass should have all attributes as shown belows
 
 	public static void newContent(String caption, String imglink, String type) throws UnknownHostException, InterruptedException{
-		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
 		//the type without the "pending" or "schwag" prefix, e.g. schwagweed become weed
 		String baseType;
@@ -276,11 +271,11 @@ public class DataBaseHandler{
 			baseType = type;
 		}
 
-		MongoCollection<Document> MongoCollection1 = getCollection(baseType, db);
-		MongoCollection<Document> MongoCollection2 = getCollection("pending" + baseType, db);
-		MongoCollection<Document> MongoCollection3 = getCollection("schwag" + baseType, db);
+		MongoCollection<Document> MongoCollection1 = getCollection(baseType);
+		MongoCollection<Document> MongoCollection2 = getCollection("pending" + baseType);
+		MongoCollection<Document> MongoCollection3 = getCollection("schwag" + baseType);
 
-		MongoCollection<Document> trueCollection = getCollection(type, db);
+		MongoCollection<Document> trueCollection = getCollection(type);
 
 		long now = new Date().getTime();
 		//to ensure no two contents can have the same _id
@@ -327,7 +322,9 @@ public class DataBaseHandler{
 	 * @param db
 	 * @return
 	 */
-	public static MongoCollection<Document> getCollection(String type, MongoDatabase db) {
+	public static MongoCollection<Document> getCollection(String type) {
+		
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 
 		MongoCollection<Document> dbCollection = null;
 		switch (type.toLowerCase()) {

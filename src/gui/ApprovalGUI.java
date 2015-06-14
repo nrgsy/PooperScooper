@@ -470,11 +470,8 @@ public class ApprovalGUI {
 				approvedContent = new HashMap<>();
 				schwagLinks = new LinkedList<>();
 
-				mongoClient = new MongoClient();
-				MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-
 				MongoCollection<Document> collection =
-						DataBaseHandler.getCollection("pending" + kind, db);
+						DataBaseHandler.getCollection("pending" + kind);
 				try {
 					numRemaining = (int) DataBaseHandler.getCollectionSize(
 							collection.getNamespace().getCollectionName()) - 1;
