@@ -637,8 +637,7 @@ public class ApprovalGUI {
 	public static void main(String[] args) throws Exception {
 
 
-		//TODO uncomment
-		//Director.runDirector();
+		Director.runDirector();
 
 		//initialize these
 		nameField = new JTextField();
