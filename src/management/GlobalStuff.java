@@ -1,7 +1,10 @@
 package management;
 
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.bson.Document;
 
@@ -150,10 +153,26 @@ public class GlobalStuff{
 		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
 
 		Document reddit = new Document();
-		reddit.append("http://www.reddit.com/r/blackpeopletwitter", "pendingass");
-		reddit.append("http://www.reddit.com/r/gymmemes", "pendingass");
-		reddit.append("http://www.reddit.com/r/gymfails", "pendingass");
-		reddit.append("http://www.reddit.com/r/memes", "pendingass");
+		ArrayList<String> links  = new ArrayList<String>();
+		links.add("http://www.reddit.com/r/blackpeopletwitter");
+		links.add("pendingass");
+		reddit.append("0",links);
+		
+		links  = new ArrayList<String>();
+		links.add("http://www.reddit.com/r/gymmemes");
+		links.add("pendingass");
+		reddit.append("1",links);
+
+		links  = new ArrayList<String>();
+		links.add("http://www.reddit.com/r/gymfails");
+		links.add("pendingass");
+		reddit.append("2",links);
+
+		links  = new ArrayList<String>();
+		links.add("http://www.reddit.com/r/memes");
+		links.add("pendingass");
+		reddit.append("3",links);
+
 		globalVars.put("redditScraping", reddit);
 
 		return globalVars;
