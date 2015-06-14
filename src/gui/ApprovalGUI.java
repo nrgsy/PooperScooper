@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -270,23 +271,15 @@ public class ApprovalGUI {
 			}
 		}
 	}
-	
+
 
 	//the listener for the remove button in Schwergsy account interface
 	private static class RemoveAccountListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
 			String name = nameField.getText();
-			Document doc = DataBaseHandler.getSchwergsyAccount(name);
-			if (doc == null) {
-				Maintenance.writeLog("Could not find account with name: " + name +
-						". Nothing was flagged for removal.");
-			} else {
-				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
-				int _id = (int) doc.get("_id");
-				DataBaseHandler.flagAccountForRemoval(_id);
-			}
+			DataBaseHandler.flagAccountForRemoval(DataBaseHandler.getSchwergsyAccountIndex(name));
+			Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
 		}
 	}
 
@@ -294,55 +287,60 @@ public class ApprovalGUI {
 	private static class ReplaceInfoListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
+
 			String name = nameField.getText();
+			int index = DataBaseHandler.getSchwergsyAccountIndex(name);
 			String customerSecret = cusSecField.getText();
 			String customerKey = cusKeyField.getText();
 			String authorizationSecret = authSecField.getText();
-			String authorizationKey = authKeyField.getText();
-			boolean isIncubated;
-			boolean isSuspended;
+			String authorizationKey = authKeyField.getText();		
+			String incubatedString = incubatedField.getText();
+			String suspendedString = suspendedField.getText();			
+
 			try {
-				isSuspended = getAccountBoolean("isSuspended");
-				isIncubated = getAccountBoolean("isIncubated");
+
+				if (!customerSecret.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, customerSecret, "customerSecret");
+				}
+				if (!customerKey.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, customerKey, "customerKey");
+				}
+				if (!authorizationSecret.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, authorizationSecret,
+							"authorizationSecret");
+				}
+				if (!authorizationKey.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, authorizationKey, "authorizationKey");
+				}
+				if (!incubatedString.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, getAccountBoolean("isIncubated"),
+							"isIncubated");
+				}
+				if (!suspendedString.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, getAccountBoolean("isSuspended"),
+							"isSuspended");
+				}
 			} catch (FuckinUpKPException e2) {
 				e2.printStackTrace();
 				return;
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
 			}
-			
-			Document doc = DataBaseHandler.getSchwergsyAccount(name);
-			if (doc == null) {
-				Maintenance.writeLog("Could not find account with name: " + name +
-						". Cannot replace its info.");
-				return;
-			}
-			
-			
-				Maintenance.writeLog("Flagging account with name: " + name + " for removal", "gui");
-				int _id = (int) doc.get("_id");
-				DataBaseHandler.flagAccountForRemoval(_id);
-			
-			
-			
-			//gsdfgdf
-			
-			
-			
 		}
 	}
-	
+
 	/**
-	 * attempts to get a boolean from the Schwergsy Account interface
+	 * attempts to get a boolean from the Schwergsy Account interface in the gui
 	 * 
 	 * @param fieldType the boolean to get, so "isIncubated or isSuspended"
 	 * @return
 	 * @throws FuckinUpKPException 
 	 */
 	public static boolean getAccountBoolean (String fieldType) throws FuckinUpKPException {
-		
+
 		JTextField textField;
 		boolean parsedBoolean;
-		
+
 		if (fieldType.equals("isIncubated")) {
 			textField = incubatedField;
 		}
@@ -353,7 +351,7 @@ public class ApprovalGUI {
 			Maintenance.writeLog("***ERROR*** bad field string passed in ***ERROR***", "gui");
 			throw new FuckinUpKPException("");
 		}
-		
+
 		if (textField.getText().toLowerCase().equals("true")) {
 			parsedBoolean = true;
 		} else if (textField.getText().toLowerCase().equals("false")) {
@@ -362,7 +360,7 @@ public class ApprovalGUI {
 			Maintenance.writeLog("***ERROR*** Cannot parse boolean text field ***ERROR***", "gui");
 			throw new FuckinUpKPException("");
 		}	
-		
+
 		return parsedBoolean;
 	}
 
@@ -642,7 +640,8 @@ public class ApprovalGUI {
 	public static void main(String[] args) throws Exception {
 
 
-		Director.runDirector();
+		//TODO uncomment
+		//Director.runDirector();
 
 		//initialize these
 		nameField = new JTextField();

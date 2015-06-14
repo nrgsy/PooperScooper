@@ -424,24 +424,34 @@ public class DataBaseHandler{
 	 * 
 	 * @param index the index of the schwergsy account we're referring to
 	 * @param StringArr
-	 * @param column
+	 * @param column The name of the field (whitelist, tofollow, etc)
 	 * @throws UnknownHostException
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static  void replaceSchwergsArray(int index, HashSet<Long> Set, String column) throws UnknownHostException{
-
+	public static  void replaceSchwergsyArray(int index, HashSet<Long> Set, String column) throws UnknownHostException{
 		BasicDBList freshList = new BasicDBList();
-
 		freshList.addAll(Set);
+		replaceSchwergsyField(index, freshList, column);
+	}
 
+	/**
+	 * replaces the data of the given field with the replacement object
+	 * 
+	 * @param index The index of the Schwergsy account
+	 * @param replacement
+	 * @param column
+	 * @throws UnknownHostException
+	 */
+	public static  void replaceSchwergsyField(int index, Object replacement, String fieldName) throws UnknownHostException{
+	
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");		
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		dbCollection.findOneAndUpdate(
 				new Document("_id", index),
-				new Document("$set", new Document(column, freshList)));
+				new Document("$set", new Document(fieldName, replacement)));
 
-		Maintenance.writeLog("successfully replaced array: " + column, index);
+		Maintenance.writeLog("successfully replaced Schwergsy Account field: " + fieldName, index);
 	}
 
 	/**TODO BOJANG TEST
@@ -623,7 +633,7 @@ public class DataBaseHandler{
 		int unfollows = storedFollowerSet.size();
 
 		addNewStatistic(index, unfollows, newFollows, retainedFollowers, OGsize);
-		replaceSchwergsArray(index, OGFreshFollowerSet, "followers");
+		replaceSchwergsyArray(index, OGFreshFollowerSet, "followers");
 	}
 
 
@@ -1029,7 +1039,7 @@ public class DataBaseHandler{
 		}
 		catch (NoSuchElementException e) {
 			Maintenance.writeLog("***ERROR*** Schwergsy Account with _id: " + index +
-					" not found. Cannot remove from db. ***ERROR***");
+					" not found. ***ERROR***");
 			e.printStackTrace();
 			return null;
 		}
@@ -1043,8 +1053,8 @@ public class DataBaseHandler{
 	 * @param name The name of the Schwergsy Account
 	 * @return
 	 */
-	public static synchronized Document getSchwergsyAccount(String name) {
-
+	public static Document getSchwergsyAccount(String name) {
+		
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
 		Document query = new Document("name", name);
@@ -1056,11 +1066,20 @@ public class DataBaseHandler{
 		}
 		catch (NoSuchElementException e) {
 			Maintenance.writeLog("***ERROR*** Schwergsy Account with name: " + name +
-					" not found. Cannot remove from db. ***ERROR***");
+					" not found. ***ERROR***");
 			return null;
 		}
 		cursor.close();
 		return doc;
+	}
+	
+	/**
+	 * returns the index of the Schwergsy account with the given name
+	 * 
+	 * @return
+	 */
+	public static int getSchwergsyAccountIndex(String name) {
+		return (int) DataBaseHandler.getSchwergsyAccount(name).get("_id");
 	}
 
 	/**
