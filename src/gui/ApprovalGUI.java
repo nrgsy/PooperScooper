@@ -209,7 +209,7 @@ public class ApprovalGUI {
 			mainPanel.add(suspendedField);
 			mainPanel.add(new JLabel("Seed (big account id)"));
 			mainPanel.add(seedField);
-			JButton addButton = new JButton("Add");
+			JButton addButton = new JButton("Add Account");
 			addButton.addActionListener(new AddAccountListener());
 			mainPanel.add(addButton);
 			JButton removeButton = new JButton("Remove (Only fill in Name)");

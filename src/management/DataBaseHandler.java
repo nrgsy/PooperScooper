@@ -504,17 +504,6 @@ public class DataBaseHandler{
 
 	/**
 	 * @param index
-	 * @param followersArr
-	 * @throws UnknownHostException
-	 * 
-	 * Tested and given the Bojangles Seal of Approval
-	 */
-	public static  void addFollowers(int index, ArrayList<Long> followersArr) throws UnknownHostException{
-		addArrayToSchwergsArray(index,followersArr,"followers");
-	}
-
-	/**
-	 * @param index
 	 * @param followingArr
 	 * @throws UnknownHostException
 	 * 
@@ -579,7 +568,7 @@ public class DataBaseHandler{
 	}
 
 	/**TODO Bojang Test
-	 * This should be called once a day for each Schwergsy account.
+	 * This should be called once a day for each Schwergsy account and on startup
 	 * @param index The id of the Schwergsy account
 	 * @throws Exception 
 	 */
@@ -1277,7 +1266,7 @@ public class DataBaseHandler{
 				.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance());
 				//Makes sure that the account's following is synced in the database.
 				initUpdateFollowing(bird,_id);
-				initUpdateFollowers(bird,_id);
+				updateFollowers(_id);
 			}
 			catch (Exception e) {
 				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
@@ -1420,12 +1409,6 @@ public class DataBaseHandler{
 	public static void initUpdateFollowing(Twitter bird, int index) throws UnknownHostException{
 
 		addFollowing(index, new ArrayList<Long>(TwitterHandler.initUpdateFollowing(bird, index)));
-
-	}
-
-	public static void initUpdateFollowers(Twitter bird, int index) throws UnknownHostException{
-
-		addFollowers(index, new ArrayList<Long>(TwitterHandler.getFollowers(bird, index)));
 
 	}
 
