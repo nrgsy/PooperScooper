@@ -12,9 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
-
 import org.bson.Document;
-
 import content.RedditScraper;
 
 //sets the global maintenance flag for director
