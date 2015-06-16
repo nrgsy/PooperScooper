@@ -255,26 +255,22 @@ public class ApprovalGUI {
 			}
 
 			try {
-				//insertSchwergsyAccount return returns a boolean indicating success. Exits if insertion
+				//insertSchwergsyAccount returns a boolean indicating success. Exits if insertion
 				//failed so the timers aren't created below
+				//isFlaggedForDeletion is set to false by default
 				if (DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
-						authorizationSecret, authorizationKey, isIncubated, isSuspended) == false) {
+						authorizationSecret, authorizationKey, isIncubated, isSuspended, false)
+						== false) {
 					return;
 				}
-			} catch (UnknownHostException | TwitterException e1) {
+			} catch (TwitterException e1) {
 				e1.printStackTrace();
 			}
 
-			try {
-				//SchwergsyAccount is already added at this point, so you must - 1 to get index
-				TimerFactory.scheduleTimers((int) DataBaseHandler.getCollectionSize("SchwergsyAccounts") - 1);
-			} catch (UnknownHostException e1) {
-				Maintenance.writeLog("***ERROR*** Unknown Host, timers failed to be created, for "
-						+ "account: " + name + ". Exiting... ***ERROR***", "gui");
-				System.exit(0);
-				e1.printStackTrace();
-			}
-		
+			//SchwergsyAccount is already added at this point, so you must - 1 to get index
+			TimerFactory.scheduleTimers(
+					(int) DataBaseHandler.getCollectionSize("SchwergsyAccounts") - 1);
+
 			//adds seed to Schwergsy account if one was entered
 			addSeedToSchwergsyAccount();
 		}
@@ -331,8 +327,6 @@ public class ApprovalGUI {
 			} catch (FuckinUpKPException e2) {
 				e2.printStackTrace();
 				return;
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
 			}
 		}
 	}
@@ -380,24 +374,24 @@ public class ApprovalGUI {
 			addSeedToSchwergsyAccount();
 		}
 	}
-	
+
 	/**
 	 * This looks at the seed and name text fields and adds the seed if anything was entered.
 	 * Does nothing if seed field is empty
 	 * 
 	 */
 	private static void addSeedToSchwergsyAccount() {
-				
+
 		String name = nameField.getText();
 		String seedText = seedField.getText();
 		//add the seed if one was entered
 		if (!seedText.equals("")) {
 			long seed = Long.parseLong(seedText);
-			
+
 			try {
 				DataBaseHandler.addBigAccount(DataBaseHandler.getSchwergsyAccountIndex(name),
 						seed, 0, 0, -1);
-			} catch (UnknownHostException | FuckinUpKPException e) {
+			} catch (FuckinUpKPException e) {
 				Maintenance.writeLog("***ERROR*** Could not add big account ***ERROR***", "gui");
 				e.printStackTrace();
 			}			
@@ -511,13 +505,10 @@ public class ApprovalGUI {
 
 				MongoCollection<Document> collection =
 						DataBaseHandler.getCollection("pending" + kind);
-				try {
-					numRemaining = (int) DataBaseHandler.getCollectionSize(
-							collection.getNamespace().getCollectionName()) - 1;
-				} catch (UnknownHostException e1) {
-					Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
-					e1.printStackTrace();
-				}
+
+				numRemaining = (int) DataBaseHandler.getCollectionSize(
+						collection.getNamespace().getCollectionName()) - 1;
+
 
 				FindIterable<Document> findIter = collection.find();
 				cursor = findIter.iterator();

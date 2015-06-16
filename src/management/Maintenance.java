@@ -21,10 +21,6 @@ public class Maintenance {
 	//The key is index + runnable type
 	public static HashMap<String, Boolean> runStatus;
 
-	//a list containing _id's of Schwergsy Accounts that will be deleted on
-	//the next maintenance run
-	public static ArrayList<Integer> doomedAccounts;
-
 	//flag that determines whether maintenance is occuring (runnables check this and pause themselves)
 	public static boolean flagSet;
 
@@ -34,7 +30,7 @@ public class Maintenance {
 		}
 	}
 
-	private static void cleanBigAccs() throws UnknownHostException, FuckinUpKPException {
+	private static void cleanBigAccs() throws FuckinUpKPException {
 		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
 			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
@@ -110,7 +106,7 @@ public class Maintenance {
 	//wait for e verything to stop
 	public static void safeShutdownSystem() {
 		try {
-			
+
 			if (flagSet) {
 				Maintenance.writeLog("Waiting for Maintenance flag to become false", "maintenance");
 			}			
@@ -118,9 +114,9 @@ public class Maintenance {
 			while (flagSet) {
 				Thread.sleep(1000);
 			}
-			
+
 			safeShutDownAccounts();
-			
+
 			Maintenance.writeLog("Exiting program", "maintenance");
 			System.exit(0);
 		}
@@ -159,17 +155,13 @@ public class Maintenance {
 			DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
 
 			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
-			try {
-				DataBaseHandler.findAndSetGlobalVars();
-			} catch (UnknownHostException e) {
-				Maintenance.writeLog("***ERROR*** failed to find ***ERROR***", "maintenance");
-				e.printStackTrace();
-			}
+
+			DataBaseHandler.findAndSetGlobalVars();
 
 			//cleans up and syncs bigAccounts with bigAccountsWhiteList
 			try {
 				cleanBigAccs();
-			} catch (UnknownHostException | FuckinUpKPException e) {
+			} catch (FuckinUpKPException e) {
 				Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***", "maintenance");
 				e.printStackTrace();
 			}
