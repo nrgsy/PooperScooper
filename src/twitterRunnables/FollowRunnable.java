@@ -2,6 +2,7 @@ package twitterRunnables;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
 import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
@@ -96,8 +97,13 @@ public class FollowRunnable implements Runnable{
 			unfollowUsers();
 			followAndFavoriteUsers();
 		} catch (Exception e) {
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), index);
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+e.toString(), "KP");
+			String error = "";
+			for(StackTraceElement elem : e.getStackTrace()){
+				error += elem.toString();
+				error += "\n";
+			}
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+error, index);
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+error, "KP");
 
 		}
 		Maintenance.runStatus.put(index+"follow", false);

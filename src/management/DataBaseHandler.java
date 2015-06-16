@@ -1003,9 +1003,15 @@ public class DataBaseHandler{
 			doc = cursor.next();
 		}
 		catch (NoSuchElementException e) {
+			String error = "";
+			for(StackTraceElement elem : e.getStackTrace()){
+				error += elem.toString();
+				error += "\n";
+			}
 			Maintenance.writeLog("***ERROR*** Schwergsy Account with _id: " + index +
-					" not found. ***ERROR***");
-			e.printStackTrace();
+					" not found. ***ERROR***\n"+error);
+			
+			
 			return null;
 		}
 		cursor.close();
@@ -1030,8 +1036,13 @@ public class DataBaseHandler{
 			doc = cursor.next();
 		}
 		catch (NoSuchElementException e) {
+			String error = "";
+			for(StackTraceElement elem : e.getStackTrace()){
+				error += elem.toString();
+				error += "\n";
+			}
 			Maintenance.writeLog("***ERROR*** Schwergsy Account with name: " + name +
-					" not found. ***ERROR***");
+					" not found. ***ERROR***\n"+error);
 			return null;
 		}
 		cursor.close();
@@ -1243,8 +1254,13 @@ public class DataBaseHandler{
 				updateFollowers(_id);
 			}
 			catch (Exception e) {
+				String error = "";
+				for(StackTraceElement elem : e.getStackTrace()){
+					error += elem.toString();
+					error += "\n";
+				}
 				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
-						+ " removing from db");	
+						+ " removing from db\n"+error);	
 				//Can remove without the need to remap id's because we know this schwergsy account was
 				//the last to be added, so the ids of the others with still be in order without the
 				//need to remap.
@@ -1505,7 +1521,12 @@ public class DataBaseHandler{
 					+ "--------------------------------------------------------------------------\n");
 		} 		
 		catch (Exception e) {
-			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***");
+			String error = "";
+			for(StackTraceElement elem : e.getStackTrace()){
+				error += elem.toString();
+				error += "\n";
+			}
+			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***\n"+error);
 			e.printStackTrace();
 		}
 
