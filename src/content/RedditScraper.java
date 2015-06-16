@@ -100,7 +100,7 @@ public class RedditScraper implements Runnable{
 					captions.remove(i);
 				}
 				else {
-					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), contentPool);
+					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), contentPool, null);
 				}
 			}
 		}

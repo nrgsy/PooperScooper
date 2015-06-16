@@ -27,29 +27,37 @@ public class MongoFuckAround {
 		//		System.out.println(bird.getId());
 
 
-		TimerTask task = new TimerTask() {
+//		TimerTask task = new TimerTask() {
+//
+//			@Override
+//			public void run() {
+//
+//				System.out.println("running");
+//				try {
+//					Thread.sleep(5000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				System.out.println("done running");
+//
+//
+//			}
+//		};
+//
+//
+//
+//		new Timer().scheduleAtFixedRate(task, 0L, 1000);
+		
+		String type = "pendingass";
+		String baseType;
+		String prefix;
+		
+		baseType = type.substring(6);
+		prefix = type.substring(6, type.length());
 
-			@Override
-			public void run() {
-
-				System.out.println("running");
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("done running");
-
-
-			}
-		};
-
-
-
-		new Timer().scheduleAtFixedRate(task, 0L, 1000);
-
-
+		System.out.println(baseType);
+		System.out.println(prefix);
 
 
 

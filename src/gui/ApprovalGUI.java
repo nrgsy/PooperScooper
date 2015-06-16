@@ -45,7 +45,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
-//NOTICE: for this to work, you must pass in the content type (ass, workout, weed, etc)
 public class ApprovalGUI {
 
 	private static Boolean lastWasApproved;
@@ -64,9 +63,10 @@ public class ApprovalGUI {
 	private static Document currentContent;
 	private static int numRemaining;
 	//the type of content we're dealing with (ass, workout, etc, but not Pending anything)
-	private static String kind;
+	private static String type;
 	//maps a link to its caption, link is key, caption is value
-	private static HashMap<String, String> approvedContent;
+	private static HashMap<String, String> approvedNormalContent;
+	private static HashMap<String, String> approvedTimeLessContent;
 	private static LinkedList<String> schwagLinks;
 
 	//The text fields for the Schwergsy account adder
@@ -89,7 +89,7 @@ public class ApprovalGUI {
 
 			captionTextField.setText(currentContent.get("caption").toString());
 			numRemaining--;
-			String labelText = "number of pending " + kind +
+			String labelText = "number of pending " + type +
 					" images remaining: " + numRemaining;
 			JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
 			labelPanel.removeAll();
@@ -97,7 +97,7 @@ public class ApprovalGUI {
 			labelPanel.setBackground(Color.GRAY);
 
 			picPanel.removeAll();
-			picPanel.add(getPicLabel());
+			picPanel.add(getNextPicLabel());
 			picPanel.setBackground(Color.GRAY);
 
 			topPanel.removeAll();
@@ -116,20 +116,38 @@ public class ApprovalGUI {
 		}
 	}
 
-	private static class AddContentListener implements ActionListener {
+	private static class AddNormalContentListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String link = currentContent.get("imglink").toString();
-			approvedContent.put(link, captionTextField.getText());
-			lastWasApproved = true;
-			lastApprovedLink = link;
-			try {
-				ApprovalGUI.loadNext();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			addContent(approvedNormalContent);
 		}
+	}
+
+	private static class AddTimelessContentListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			addContent(approvedTimeLessContent);
+		}
+	}
+
+	/**
+	 * adds the current content to the given map
+	 * 
+	 * @param approvedTimeLessContent the hashmap to add it to
+	 */
+	private static void addContent(HashMap<String, String> map) {
+		String link = currentContent.get("imglink").toString();
+		map.put(link, captionTextField.getText());
+		lastWasApproved = true;
+		lastApprovedLink = link;
+		try {
+			ApprovalGUI.loadNext();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			Maintenance.writeLog("***ERROR*** addContent fucked up ***ERRROR***", "gui");
+		}	
 	}
 
 	private static class TrashListener implements ActionListener {
@@ -141,6 +159,7 @@ public class ApprovalGUI {
 				ApprovalGUI.loadNext();
 			} catch (IOException e1) {
 				e1.printStackTrace();
+				Maintenance.writeLog("***ERROR*** trash button fucked up ***ERRROR***", "gui");
 			}
 		}
 	}
@@ -151,14 +170,14 @@ public class ApprovalGUI {
 
 			if (lastWasApproved != null && !undoClicked) {
 				if (lastWasApproved) {
-					approvedContent.remove(lastApprovedLink);
+					//try to remove it from both because we're not sure which it was in
+					approvedNormalContent.remove(lastApprovedLink);
+					approvedTimeLessContent.remove(lastApprovedLink);
 				} else {
 					schwagLinks.removeLast();
 				}
 				undoClicked = true;
-
 				Maintenance.writeLog("Undo completed", "gui");
-
 			}
 		}
 	}
@@ -166,22 +185,20 @@ public class ApprovalGUI {
 	private static class DoneListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			for (Entry<String, String> entry : approvedContent.entrySet()) {
-				try {
-					DataBaseHandler.removeContent("pending" + kind, entry.getKey());
-					DataBaseHandler.newContent(entry.getValue(), entry.getKey(), kind);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+			for (Entry<String, String> entry : approvedNormalContent.entrySet()) {
+				DataBaseHandler.removeContent("pending" + type, entry.getKey());
+				DataBaseHandler.newContent(entry.getValue(), entry.getKey(), type, false);	
+			}
+			for (Entry<String, String> entry : approvedTimeLessContent.entrySet()) {
+				DataBaseHandler.removeContent("pending" + type, entry.getKey());
+				DataBaseHandler.newContent(entry.getValue(), entry.getKey(), type, true);
 			}
 			for (String link : schwagLinks) {
-				try {
-					DataBaseHandler.removeContent("pending" + kind, link);
-					DataBaseHandler.newContent(null, link, "schwagass");
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
+				DataBaseHandler.removeContent("pending" + type, link);
+				DataBaseHandler.newContent(null, link, "schwag" + type, null);
 			}
+			//reset the content reviewer section of the gui
+			buildContentReviewer(type);
 		}
 	}
 
@@ -250,6 +267,7 @@ public class ApprovalGUI {
 				isSuspended = getAccountBoolean("isSuspended");
 				isIncubated = getAccountBoolean("isIncubated");
 			} catch (FuckinUpKPException e2) {
+				Maintenance.writeLog("***ERROR*** add account button fucked up ***ERRROR***", "gui");
 				e2.printStackTrace();
 				return;
 			}
@@ -264,6 +282,7 @@ public class ApprovalGUI {
 					return;
 				}
 			} catch (TwitterException e1) {
+				Maintenance.writeLog("***ERROR*** add account button fucked up ***ERRROR***", "gui");
 				e1.printStackTrace();
 			}
 
@@ -325,6 +344,7 @@ public class ApprovalGUI {
 							"isSuspended");
 				}
 			} catch (FuckinUpKPException e2) {
+				Maintenance.writeLog("***ERROR*** replace button fucked up ***ERRROR***", "gui");
 				e2.printStackTrace();
 				return;
 			}
@@ -427,7 +447,7 @@ public class ApprovalGUI {
 			try {
 				i = (int) DataBaseHandler.getCollectionSize("SchwergsyAccounts") - 1;
 			} catch (Exception e2) {
-
+				Maintenance.writeLog("***ERROR*** stats button fucked up ***ERRROR***", "gui");
 				e2.printStackTrace();
 			}
 
@@ -451,6 +471,10 @@ public class ApprovalGUI {
 		}
 	}
 
+	/**
+	 * Listener for the Review content button on the main page
+	 *
+	 */
 	private static class ContentListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -482,122 +506,132 @@ public class ApprovalGUI {
 	private static class ListSelectListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
 			@SuppressWarnings("unchecked")
 			JComboBox<Object> cb = (JComboBox<Object>) e.getSource();
+			type = (String) cb.getSelectedItem();
+			buildContentReviewer(type);
+		}
+	}
 
-			kind = (String) cb.getSelectedItem();
+	/**
+	 * The method that actually draws the content reviewer section of the GUI from scratch
+	 * 
+	 * @param contentType The type of content to review
+	 */
+	public static void buildContentReviewer(String contentType) {
 
-			if (!kind.equals("ass") &&
-					!kind.equals("workout") &&
-					!kind.equals("weed") &&
-					!kind.equals("college") &&
-					!kind.equals("canimals") &&
-					!kind.equals("space")) {
-				Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
-						+ "workout, etc ***ERROR***",
-						"gui");
-			} else {
-				lastWasApproved = null;
-				undoClicked = false;
-				approvedContent = new HashMap<>();
-				schwagLinks = new LinkedList<>();
+		if (!contentType.equals("ass") &&
+				!contentType.equals("workout") &&
+				!contentType.equals("weed") &&
+				!contentType.equals("college") &&
+				!contentType.equals("canimals") &&
+				!contentType.equals("space")) {
+			Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
+					+ "workout, etc ***ERROR***",
+					"gui");
+		} else {
+			lastWasApproved = null;
+			undoClicked = false;
+			approvedNormalContent = new HashMap<>();
+			approvedTimeLessContent = new HashMap<>();
+			schwagLinks = new LinkedList<>();
 
-				MongoCollection<Document> collection =
-						DataBaseHandler.getCollection("pending" + kind);
+			MongoCollection<Document> collection =
+					DataBaseHandler.getCollection("pending" + contentType);
 
-				numRemaining = (int) DataBaseHandler.getCollectionSize(
-						collection.getNamespace().getCollectionName()) - 1;
+			numRemaining = (int) DataBaseHandler.getCollectionSize(
+					collection.getNamespace().getCollectionName()) - 1;
 
+			FindIterable<Document> findIter = collection.find();
+			cursor = findIter.iterator();
 
-				FindIterable<Document> findIter = collection.find();
-				cursor = findIter.iterator();
+			if (cursor.hasNext()) {
 
-				if (cursor.hasNext()) {
+				currentContent = cursor.next();
 
-					currentContent = cursor.next();
-
-					picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-					try {
-						picPanel.add(getPicLabel());
-					} catch (IOException e1) {
-						Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
-						e1.printStackTrace();
-					}
-					picPanel.setBackground(Color.GRAY);
-
-					String labelText = "number of pending " + kind +
-							" images remaining: " + numRemaining;
-					JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
-					labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-					labelPanel.add(numRemainingLabel);
-					labelPanel.setBackground(Color.GRAY);
-
-					Font font = new Font("SansSerif", Font.BOLD, 25);
-					captionTextField = new JTextField();
-					captionTextField.setFont(font);
-					captionTextField.setText(currentContent.get("caption").toString());
-					captionTextField.setPreferredSize(new Dimension(333, 30));
-
-					JButton addButton = new JButton("Add");
-					addButton.addActionListener(new AddContentListener());
-					JButton trashButton = new JButton("Trash");
-					trashButton.addActionListener(new TrashListener());
-					JButton undoButton = new JButton("Undo");
-					undoButton.addActionListener(new UndoListener());
-					JButton doneButton = new JButton("Done");
-					doneButton.addActionListener(new DoneListener());
-
-					buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-					buttonPanel.add(addButton);
-					buttonPanel.add(trashButton);
-					buttonPanel.add(undoButton);
-					buttonPanel.add(doneButton);
-					buttonPanel.add(backToMainButton);
-					buttonPanel.setBackground(Color.GRAY);
-
-					topPanel = new JPanel();
-					topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-					topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
-					topPanel.add(labelPanel);
-					topPanel.add(buttonPanel);
-					topPanel.add(captionTextField);
-					topPanel.add(picPanel);
-					topPanel.setPreferredSize(new Dimension(333, 780));
-					topPanel.setBackground(Color.GRAY);
-
-					JPanel bottomPanel = new JPanel();
-					bottomPanel.setBackground(Color.GRAY);
-
-
-					JPanel containerPanel = new JPanel();
-					containerPanel.setLayout(new BorderLayout());
-					containerPanel.add(topPanel, BorderLayout.NORTH);
-					containerPanel.add(bottomPanel, BorderLayout.CENTER);
-
-					JScrollPane scrPane = new JScrollPane(containerPanel);
-
-					frame.setVisible(false);
-					frame.dispose();
-					frame = new JFrame("Content Reviewer");
-					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					frame.addWindowListener(guiExitAdapter);
-					//So that these things close when we end the program
-					frame.addWindowListener(new WindowAdapter() {
-						public void windowClosing(WindowEvent e) {
-							cursor.close();
-							mongoClient.close();
-						}
-					});
-					frame.getContentPane().add(scrPane);
-					frame.pack();
-					frame.setMinimumSize(new Dimension(300, 300));
-					frame.setSize(800, 900);
-					frame.setLocationRelativeTo(null);
-					frame.setVisible(true);
-				} else {
-					Maintenance.writeLog("No content found in pending" + kind, "gui");
+				picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				try {
+					picPanel.add(getNextPicLabel());
+				} catch (IOException e1) {
+					Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
+					e1.printStackTrace();
 				}
+				picPanel.setBackground(Color.GRAY);
+
+				String labelText = "number of pending " + contentType +
+						" images remaining: " + numRemaining;
+				JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
+				labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				labelPanel.add(numRemainingLabel);
+				labelPanel.setBackground(Color.GRAY);
+
+				Font font = new Font("SansSerif", Font.BOLD, 25);
+				captionTextField = new JTextField();
+				captionTextField.setFont(font);
+				captionTextField.setText(currentContent.get("caption").toString());
+				captionTextField.setPreferredSize(new Dimension(333, 30));
+
+				JButton addNormalButton = new JButton("Add Normal");
+				addNormalButton.addActionListener(new AddNormalContentListener());
+				JButton addTimelessButton = new JButton("Add Timeless");
+				addTimelessButton.addActionListener(new AddTimelessContentListener());
+				JButton trashButton = new JButton("Trash");
+				trashButton.addActionListener(new TrashListener());
+				JButton undoButton = new JButton("Undo");
+				undoButton.addActionListener(new UndoListener());
+				JButton doneButton = new JButton("Done");
+				doneButton.addActionListener(new DoneListener());
+
+				buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				buttonPanel.add(addNormalButton);
+				buttonPanel.add(addTimelessButton);
+				buttonPanel.add(trashButton);
+				buttonPanel.add(undoButton);
+				buttonPanel.add(doneButton);
+				buttonPanel.add(backToMainButton);
+				buttonPanel.setBackground(Color.GRAY);
+
+				topPanel = new JPanel();
+				topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+				topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
+				topPanel.add(labelPanel);
+				topPanel.add(buttonPanel);
+				topPanel.add(captionTextField);
+				topPanel.add(picPanel);
+				topPanel.setPreferredSize(new Dimension(333, 780));
+				topPanel.setBackground(Color.GRAY);
+
+				JPanel bottomPanel = new JPanel();
+				bottomPanel.setBackground(Color.GRAY);
+
+
+				JPanel containerPanel = new JPanel();
+				containerPanel.setLayout(new BorderLayout());
+				containerPanel.add(topPanel, BorderLayout.NORTH);
+				containerPanel.add(bottomPanel, BorderLayout.CENTER);
+
+				JScrollPane scrPane = new JScrollPane(containerPanel);
+
+				frame.setVisible(false);
+				frame.dispose();
+				frame = new JFrame("Content Reviewer");
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.addWindowListener(guiExitAdapter);
+				//So that these things close when we end the program
+				frame.addWindowListener(new WindowAdapter() {
+					public void windowClosing(WindowEvent e) {
+						cursor.close();
+						mongoClient.close();
+					}
+				});
+				frame.getContentPane().add(scrPane);
+				frame.pack();
+				frame.setMinimumSize(new Dimension(300, 300));
+				frame.setSize(800, 900);
+				frame.setLocationRelativeTo(null);
+				frame.setVisible(true);
+			} else {
+				Maintenance.writeLog("No content found in pending" + contentType, "gui");
 			}
 		}
 	}
@@ -608,8 +642,7 @@ public class ApprovalGUI {
 	 * @return the JLabel
 	 * @throws IOException
 	 */
-	public static JLabel getPicLabel() throws IOException {
-
+	public static JLabel getNextPicLabel() throws IOException {
 		URL url = new URL(currentContent.get("imglink").toString());
 		BufferedImage bufferedImage = ImageIO.read(url);
 		double newHeight = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
@@ -620,9 +653,8 @@ public class ApprovalGUI {
 		if (newWidth > (double) GlobalStuff.MAX_IMAGE_DIMENSION) {
 			newWidth = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
 			ratio = newWidth / ((double) bufferedImage.getWidth());
-			newHeight = ((double) bufferedImage.getWidth()) * ratio;
+			newHeight = ((double) bufferedImage.getHeight()) * ratio;
 		}
-
 		Image scaledImage =
 				bufferedImage.getScaledInstance(
 						(int) newWidth, (int) newHeight, Image.SCALE_SMOOTH);
