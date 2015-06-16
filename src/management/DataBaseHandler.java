@@ -238,37 +238,37 @@ public class DataBaseHandler{
 	/**
 	 * @param caption
 	 * @param imglink
-	 * @param type see getCollection below for content types (ass, pendingass, etc)
+	 * @param type
+	 * @param isTimeless Where the content is timeless, input null if irrelevant because
+	 * the type prefix is pending or schwag
+	 * @throws InterruptedException
 	 */
+	public static void newContent(String caption, String imglink, String type, Boolean isTimeless) {
 
-
-	//TODO, add specialization such that content that's created depends on the type
-	//e.g. pendingass should only have link and caption, schwagass should only have link, and regular
-	//ass should have all attributes as shown belows
-
-	public static void newContent(String caption, String imglink, String type) throws InterruptedException{
-
-		//the type without the "pending" or "schwag" prefix, e.g. schwagweed become weed
+		//the type without the "pending" or "schwag" prefix, e.g. schwagweed becomes weed
 		String baseType;
+		//the prefix of the type e.g. "" (empty String), schwag, and pending 
+		String prefix;
 
 		//determine whether we're dealing with a pending content, schwag content, or a regular content
 		//and set baseType accordingly
 		if (type.length() >= 6 && type.substring(0, 6).equals("schwag")) {
 			baseType = type.substring(6);
+			prefix = "schwag";
 		}
 		else if (type.length() >= 7 && type.substring(0, 7).equals("pending")) {
 			baseType = type.substring(7);
+			prefix = "pending";
+
 		}
 		else {
 			baseType = type;
+			prefix = "";
 		}
 
-		MongoCollection<Document> MongoCollection1 = getCollection(baseType);
-		MongoCollection<Document> MongoCollection2 = getCollection("pending" + baseType);
-		MongoCollection<Document> MongoCollection3 = getCollection("schwag" + baseType);
-
-		MongoCollection<Document> trueCollection = getCollection(type);
-
+		MongoCollection<Document> normalCollection = getCollection(baseType);
+		MongoCollection<Document> pendingCollection = getCollection("pending" + baseType);
+		MongoCollection<Document> schwagCollection = getCollection("schwag" + baseType);
 		long now = new Date().getTime();
 		//to ensure no two contents can have the same _id
 		//(occurs when something tries to create two contents in the same millisecond)
@@ -276,14 +276,20 @@ public class DataBaseHandler{
 
 		boolean timeOK = false;
 		while (!timeOK) {
-			//make sure that the image link is not in the pending, schwag, or regular collections of the base type
-			if (!MongoCollection1.find(creationTimeCheck).iterator().hasNext() &&
-					!MongoCollection2.find(creationTimeCheck).iterator().hasNext() &&
-					!MongoCollection3.find(creationTimeCheck).iterator().hasNext()) {
+			//make sure that the image link is not in the pending, schwag, or regular collections
+			//of the base type
+			if (!normalCollection.find(creationTimeCheck).iterator().hasNext() &&
+					!pendingCollection.find(creationTimeCheck).iterator().hasNext() &&
+					!schwagCollection.find(creationTimeCheck).iterator().hasNext()) {
 				timeOK = true;
 			}
 			else {
-				Thread.sleep(1);
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					Maintenance.writeLog("***ERROR*** thread snooze interrupted ***ERRROR***", "gui");
+					e.printStackTrace();
+				}
 				now = new Date().getTime();
 				creationTimeCheck = new Document("_id", now);
 			}
@@ -292,17 +298,33 @@ public class DataBaseHandler{
 		//to ensure no two contents can have the same link
 		Document linkCheck = new Document("imglink", imglink);
 		//make sure that the image link is not in the pending, schwag, or regular collections of the base type
-		if (!MongoCollection1.find(linkCheck).iterator().hasNext() &&
-				!MongoCollection2.find(linkCheck).iterator().hasNext() &&
-				!MongoCollection3.find(linkCheck).iterator().hasNext()) {
-			Document newAss = new Document("_id", now);
-			newAss.append("caption", caption);
-			newAss.append("imglink", imglink);
-			//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
-			newAss.append("accessInfo", new BasicDBList());
+		if (!normalCollection.find(linkCheck).iterator().hasNext() &&
+				!pendingCollection.find(linkCheck).iterator().hasNext() &&
+				!schwagCollection.find(linkCheck).iterator().hasNext()) {
 
-			trueCollection.insertOne(newAss);
-			Maintenance.writeLog("Successfully added new content of type " + type, "content");
+			Document newContent = new Document("_id", now);
+			newContent.append("imglink", imglink);
+
+			switch (prefix) {
+			case "": //add to normal content collection
+				newContent.append("caption", caption);
+				newContent.append("isTimeless", isTimeless);
+				//accessInfo is a list of BasicBObjects, [{index : ..., timesAccessed : ..., lastAccess : ...},{...}]
+				newContent.append("accessInfo", new BasicDBList());
+				normalCollection.insertOne(newContent);
+				Maintenance.writeLog("Successfully added new content of type " + type, "content");		
+				break;
+			case "pending": //add to pending content collection
+				newContent.append("caption", caption);
+				pendingCollection.insertOne(newContent);
+				Maintenance.writeLog("Successfully added new content of type " + type, "content");		
+				break;
+			case "schwag": //add to schwag content collection, needs nothing more than id and link
+				schwagCollection.insertOne(newContent);
+				Maintenance.writeLog("Successfully added new content of type " + type, "content");
+				break;
+			default: Maintenance.writeLog("***ERROR*** invalid content type***ERROR***", "content");
+			}
 		}
 		else {
 			Maintenance.writeLog("Image is not unique: "+ imglink, "content");
@@ -317,7 +339,6 @@ public class DataBaseHandler{
 	public static MongoCollection<Document> getCollection(String type) {
 
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
-
 		MongoCollection<Document> dbCollection = null;
 		switch (type.toLowerCase()) {
 		case "ass" :
@@ -451,7 +472,7 @@ public class DataBaseHandler{
 
 		Maintenance.writeLog("congratulations, SchwergsyAccount #"+index+" has graduated from incubation");
 	}
-	
+
 	public static void incubate (int index){
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccount");
@@ -573,7 +594,7 @@ public class DataBaseHandler{
 		if(freshFollowerSet.size()>=2000){
 			finishedIncubation(index);
 		}
-		
+
 		if(freshFollowerSet.size()<2000){
 			incubate(index);
 		}
@@ -646,7 +667,7 @@ public class DataBaseHandler{
 		}
 		return unfollowed;
 	}
-	
+
 	public static ArrayList<Long> getToFollowList(int index){
 		return (ArrayList<Long>) getSchwergsyAccount(index).get("toFollow");
 	}
