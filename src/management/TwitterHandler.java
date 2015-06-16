@@ -232,13 +232,8 @@ public class TwitterHandler {
 	}
 
 	private static void errorHandling(TwitterException e, int index){
-		String error = "";
-		for(StackTraceElement elem : e.getStackTrace()){
-			error += elem.toString();
-			error += "\n";
-		}
-		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERRROR***\n"+error, "KP");
-		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERROR***\n"+error,index);
+		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERRROR***\n"+Maintenance.writeStackTrace(e), "KP");
+		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERROR***\n"+Maintenance.writeStackTrace(e),index);
 		switch(e.getErrorCode()){
 		case 64:
 			Maintenance.writeLog("***ERROR*** This account has been suspended", index);

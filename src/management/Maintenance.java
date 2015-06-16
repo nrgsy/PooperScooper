@@ -98,12 +98,7 @@ public class Maintenance {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					String error = "";
-					for(StackTraceElement elem : e.getStackTrace()){
-						error += elem.toString();
-						error += "\n";
-					}
-					Maintenance.writeLog("***ERROR*** Something fucked up in Maintenance ***ERRROR*** \n"+error, "KP");
+					Maintenance.writeLog("***ERROR*** Something fucked up in Maintenance ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 				}
 			}
 		}
@@ -128,12 +123,7 @@ public class Maintenance {
 			System.exit(0);
 		}
 		catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway\n"+error,
+			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway\n"+Maintenance.writeStackTrace(e),
 					"maintenance");
 			System.exit(0);
 		}
@@ -174,12 +164,7 @@ public class Maintenance {
 			try {
 				cleanBigAccs();
 			} catch (FuckinUpKPException e) {
-				String error = "";
-				for(StackTraceElement elem : e.getStackTrace()){
-					error += elem.toString();
-					error += "\n";
-				}
-				Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***\n"+error, "maintenance");
+				Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***\n"+Maintenance.writeStackTrace(e), "maintenance");
 				e.printStackTrace();
 			}
 
@@ -187,12 +172,7 @@ public class Maintenance {
 			try {
 				cleanToFollows();
 			} catch (UnknownHostException | FuckinUpKPException e) {
-				String error = "";
-				for(StackTraceElement elem : e.getStackTrace()){
-					error += elem.toString();
-					error += "\n";
-				}
-				Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***\n"+error, "maintenance");
+				Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***\n"+Maintenance.writeStackTrace(e), "maintenance");
 				e.printStackTrace();
 			}
 
@@ -200,12 +180,7 @@ public class Maintenance {
 			try {
 				resetBigAccountHarvestIndexes();
 			} catch (UnknownHostException e) {
-				String error = "";
-				for(StackTraceElement elem : e.getStackTrace()){
-					error += elem.toString();
-					error += "\n";
-				}
-				Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***\n"+error,
+				Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***\n"+Maintenance.writeStackTrace(e),
 						"maintenance");
 				e.printStackTrace();
 			}
@@ -245,12 +220,7 @@ public class Maintenance {
 					(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 		}
 		catch(Exception e){
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+error, "KP");
+			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+Maintenance.writeStackTrace(e), "KP");
 		}
 	}
 
@@ -314,4 +284,13 @@ public class Maintenance {
 	public static void writeLog(String message) { writeLog(message, null); }
 
 	public static void writeLog() { writeLog(""); }
+	
+	public static String writeStackTrace(Exception e){
+		String error = "";
+		for(StackTraceElement elem : e.getStackTrace()){
+			error += elem.toString();
+			error += "\n";
+		}
+		return error;
+	}
 }

@@ -115,12 +115,7 @@ public class RedditScraper implements Runnable{
 		try {
 			contentSnatch();
 		} catch (FuckinUpKPException | InterruptedException e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("***ERROR*** Something fucked up in RedditScraper ***ERRROR*** \n"+error, "KP");
+			Maintenance.writeLog("***ERROR*** Something fucked up in RedditScraper ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 		}
 	}
 }

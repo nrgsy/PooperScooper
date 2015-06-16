@@ -53,12 +53,7 @@ public class ImageManipulator {
 			}
 		}
 		catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+error, "KP");
+			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 			return false;
 		}
 		finally{
@@ -113,12 +108,7 @@ public class ImageManipulator {
 				//The receiver must delete the file after posting to Twitter
 			}
 			catch (IOException e) {
-				String error = "";
-				for(StackTraceElement elem : e.getStackTrace()){
-					error += elem.toString();
-					error += "\n";
-				}
-				Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+error, "KP");
+				Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 				throw new FuckinUpKPException("ERROR: Did not get image file with string"+imgsrc);
 			}
 	}

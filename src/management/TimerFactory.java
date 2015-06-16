@@ -133,12 +133,7 @@ public class TimerFactory {
 				try {
 					Maintenance.performMaintenance();
 				} catch (Exception e) {
-					String error = "";
-					for(StackTraceElement elem : e.getStackTrace()){
-						error += elem.toString();
-						error += "\n";
-					}
-					Maintenance.writeLog("***ERROR*** Something fucked up in TimerFactory ***ERRROR*** \n"+error, "KP");
+					Maintenance.writeLog("***ERROR*** Something fucked up in TimerFactory ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 				}
 			}};
 	}
@@ -181,14 +176,9 @@ public class TimerFactory {
 		try {
 			info = DataBaseHandler.getAuthorizationInfo(id);
 		} catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
 			Maintenance.writeLog("***ERROR*** Failed to pull authorization info for account with "
 					+ "id: " + id + " from the database. Timers cannot be created for this account"
-							+ ". ***ERROR***\n"+error,"KP");
+							+ ". ***ERROR***\n"+Maintenance.writeStackTrace(e),"KP");
 			e.printStackTrace();
 			return;
 		}		

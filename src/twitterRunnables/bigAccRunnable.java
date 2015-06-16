@@ -317,13 +317,8 @@ public class bigAccRunnable implements Runnable {
 				harvestBigAccounts();
 			}
 		} catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+error, index);
-			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+error, "KP");
+			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+Maintenance.writeStackTrace(e), index);
+			Maintenance.writeLog("Something fucked up in bigAccRunnable\n"+Maintenance.writeStackTrace(e), "KP");
 		}
 		Maintenance.runStatus.put(index+"bigAcc", false);
 	}

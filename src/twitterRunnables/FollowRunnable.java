@@ -97,13 +97,8 @@ public class FollowRunnable implements Runnable{
 			unfollowUsers();
 			followAndFavoriteUsers();
 		} catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+error, index);
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+error, "KP");
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), index);
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), "KP");
 
 		}
 		Maintenance.runStatus.put(index+"follow", false);

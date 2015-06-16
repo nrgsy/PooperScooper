@@ -77,12 +77,7 @@ public class TwitterRunnable implements Runnable {
 			uploadPicTwitter(image, caption);
 		}
 		catch (Exception e) {
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("Temp download of pic failed " + image + "\n" +error, index);
+			Maintenance.writeLog("Temp download of pic failed " + image + "\n" +Maintenance.writeStackTrace(e), index);
 			e.printStackTrace();
 		}
 		finally{
@@ -112,13 +107,8 @@ public class TwitterRunnable implements Runnable {
 			}
 		}
 		catch(Exception e){
-			String error = "";
-			for(StackTraceElement elem : e.getStackTrace()){
-				error += elem.toString();
-				error += "\n";
-			}
-			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+error, index);
-			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+error, "KP");
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+Maintenance.writeStackTrace(e), index);
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+Maintenance.writeStackTrace(e), "KP");
 		}
 
 		Maintenance.runStatus.put(index+"twitter", false);
