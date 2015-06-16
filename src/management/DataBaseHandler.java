@@ -463,6 +463,14 @@ public class DataBaseHandler{
 
 		Maintenance.writeLog("congratulations, SchwergsyAccount #"+index+" has graduated from incubation");
 	}
+	
+	public static void incubate (int index){
+		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
+		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccount");
+		dbCollection.findOneAndUpdate(
+				new Document("_id", index),
+				new Document("$set", new Document("isIncubated", true)));
+	}
 
 	/**
 	 * Adds the given object to the given list in the a particular schwergsy account
@@ -579,8 +587,12 @@ public class DataBaseHandler{
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter, index);
 
-		if(freshFollowerSet.size()>2000){
+		if(freshFollowerSet.size()>=2000){
 			finishedIncubation(index);
+		}
+		
+		if(freshFollowerSet.size()<2000){
+			incubate(index);
 		}
 
 		int OGsize = freshFollowerSet.size();
