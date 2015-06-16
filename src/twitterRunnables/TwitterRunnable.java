@@ -60,7 +60,7 @@ public class TwitterRunnable implements Runnable {
 	 */
 	public void uploadPic(){
 
-		Maintenance.writeLog("uploading pic", index);
+		Maintenance.writeLog("uploading pic for account with index: " + index, index);
 
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;

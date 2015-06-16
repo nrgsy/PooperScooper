@@ -52,7 +52,6 @@ public class Director {
 			DataBaseHandler.mongoClient = new MongoClient();
 			GlobalStuff.lastPostTimeMap = new HashMap<>();
 			Maintenance.runStatus = new HashMap<>();
-			Maintenance.doomedAccounts = new ArrayList<>();
 			GlobalStuff.numberOfRuns = new HashMap<>();
 			TimerFactory.globalTimer = new Timer();
 			Date nextOccurrenceOf3am = getNextTime(new Date(), 3);

@@ -35,7 +35,7 @@ public class RedditScraper implements Runnable{
 	 * @throws InterruptedException 
 	 */
 	public void contentSnatch() throws FuckinUpKPException, InterruptedException {
-		
+
 
 		org.bson.Document reddits = GlobalStuff.redditScraping;
 
@@ -44,7 +44,7 @@ public class RedditScraper implements Runnable{
 		for(Entry<String, Object> entry : reddits.entrySet()){
 			ArrayList<String> captions = new ArrayList<String>();
 			ArrayList<String> imglinks = new ArrayList<String>(); 
-			
+
 			ArrayList<String> linkAndContentPool = (ArrayList<String>) entry.getValue();
 			String contentPool = linkAndContentPool.get(1);
 			String url = linkAndContentPool.get(0);
@@ -68,13 +68,13 @@ public class RedditScraper implements Runnable{
 					e.printStackTrace();
 					throw new FuckinUpKPException("can't get to reddit.com");
 				}
-				
+
 				if (document == null) {
 					continue;
 				}
-				
+
 				document.select("link[title=applied_subreddit_stylesheet]").first().remove();
-				
+
 				//Must end with jpg or png
 				Elements titles = document.select("a.title[href$=.jpg]");
 				titles.addAll(document.select("a.title[href$=.png]"));
@@ -94,19 +94,13 @@ public class RedditScraper implements Runnable{
 			//Calls ImageManipulator to check if is within filesize limits (3MB)
 			//If good, put into database
 			ImageManipulator reviewer = new ImageManipulator();
-			for(int i =0; i<imglinks.size();i++){
-				if(!reviewer.isValid(imglinks.get(i))){
+			for (int i =0; i<imglinks.size();i++){
+				if (!reviewer.isValid(imglinks.get(i))){
 					imglinks.remove(i);
 					captions.remove(i);
 				}
-				else{
-					try {
-						DataBaseHandler.newContent(captions.get(i),imglinks.get(i), contentPool);
-					} catch (UnknownHostException e) {
-						Maintenance.writeLog("Could not insert content:\n" + 
-								captions.get(i)+"\n"+imglinks.get(i), "content");
-						e.printStackTrace();
-					}
+				else {
+					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), contentPool);
 				}
 			}
 		}
