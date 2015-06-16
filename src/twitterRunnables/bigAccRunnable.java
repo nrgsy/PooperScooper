@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import management.DataBaseHandler;
 import management.FuckinUpKPException;
 import management.GlobalStuff;
@@ -43,13 +44,11 @@ public class bigAccRunnable implements Runnable {
 	//This method does not put rejected candidates into the whitelist because they have the potential
 	//to become bigAccounts later on.
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
-		//TODO add latestTweet capability to bigAccount in DBH
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		ArrayList<Long> bigAccounts = new ArrayList<Long>();
 		Iterator<Long> AllCandidatesIterator;
 		int maxCandidates = 100;
 
-		//if the schwergsaccount has no bigaccounts and doesn't have enough followers to find more bigaccounts
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
@@ -86,16 +85,20 @@ public class bigAccRunnable implements Runnable {
 			for(Status tweet : OwnTweets){
 				//gathers all retweeters' ids from tweets
 				if(tweet.getRetweetCount()!=0){
-					long[] RTerIDs = TwitterHandler.getRetweeterIds(bird, tweet.getId(), 100, -1, index);
+					ArrayList<Long> RTerIDs = TwitterHandler.getRetweeterIds(bird, tweet.getId(), 100, -1, index);
 					for(long id : RTerIDs){
 						AllRTerIDs.add(id);
 					}
 				}
 			}
+			
+			if(AllRTerIDs.size()==0){
+				AllRTerIDs = DataBaseHandler.getToFollowList(index);
+			}
 
 			while(AllRTerIDs.size()>50){
 				//limits to only 50 retweeters
-				AllRTerIDs.remove(50);
+				AllRTerIDs = (ArrayList<Long>) AllRTerIDs.subList(0, 50);
 			}
 
 			for(long id : AllRTerIDs){
@@ -254,8 +257,8 @@ public class bigAccRunnable implements Runnable {
 		//Gets ids of retweeters and puts it into toFollowSet and updates latestTweet for bigAccount
 		//By using a HashSet, you get only unique retweeter ids.
 		for(Status tweet :NoRTTweets){
-			long[] toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1, index);
-			if(toFollows.length != 0){
+			ArrayList<Long> toFollows = TwitterHandler.getRetweeterIds(bird,tweet.getId(), 100, -1, index);
+			if(toFollows.size() != 0){
 				for(long id : toFollows){
 					toFollowSet.add(id);
 				}
@@ -305,7 +308,9 @@ public class bigAccRunnable implements Runnable {
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable");
 		try {
-			if(DataBaseHandler.getToFollowSize(index)>11900 || DataBaseHandler.getBigAccountsSize(index) < 30){
+			if(((DataBaseHandler.getToFollowSize(index) > 3000) && 
+					(DataBaseHandler.getBigAccountsSize(index) < 30||DataBaseHandler.getFollowersSize(index) > 100))
+					 ||DataBaseHandler.getBigAccountsSize(index) == 0){
 				findBigAccounts();
 			}
 			else{

@@ -3,6 +3,7 @@ package management;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import twitter4j.IDs;
@@ -168,17 +169,22 @@ public class TwitterHandler {
 
 	}
 
-	public static long[] getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
+	public static ArrayList<Long> getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
 		if(!TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
 			try {
-				return twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
+				long[] rtids = twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
+				ArrayList<Long> returnValue = new ArrayList<Long>();
+				for(long ids : rtids){
+					returnValue.add(ids);
+				}
+				return returnValue;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return new long[0];
+				return new ArrayList<Long>();
 			}
 		}
 		else{
-			return new long[0];
+			return new ArrayList<Long>();
 		}
 	}
 

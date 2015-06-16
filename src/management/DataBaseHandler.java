@@ -634,6 +634,10 @@ public class DataBaseHandler{
 		}
 		return unfollowed;
 	}
+	
+	public static ArrayList<Long> getToFollowList(int index){
+		return (ArrayList<Long>) getSchwergsyAccount(index).get("toFollow");
+	}
 
 	/**
 	 * @param index
