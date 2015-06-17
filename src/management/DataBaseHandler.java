@@ -844,30 +844,26 @@ public class DataBaseHandler{
 	 */
 
 	public static  void addBigAccount(int index, long bigAccountID, int strikes, int outs, long latestTweet) throws FuckinUpKPException{
-
 		Document bigAccount = new Document("user_id", bigAccountID);
 		bigAccount.append("strikes", strikes);
 		bigAccount.append("outs", outs);
 		bigAccount.append("latestTweet", latestTweet);
-
-		DataBaseHandler.addElementToSchwergsArray(0, bigAccount, "bigAccounts");
+		ArrayList<Long> listWithOneElement = new ArrayList<Long>();
+		listWithOneElement.add(bigAccountID);	
+		addBigAccountsWhiteList(index, listWithOneElement);
+		DataBaseHandler.addElementToSchwergsArray(index, bigAccount, "bigAccounts");
 		Maintenance.writeLog("successfully added an element to bigAccounts", index);
 	}
 
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountsArray
+	 * @throws FuckinUpKPException 
 	 */
-	public static  void addBigAccounts(int index, ArrayList<Long> bigAccountsArray) {
-		ArrayList<Document> bigAccountDocuments = new ArrayList<Document>();
-		for(long id : bigAccountsArray){
-			Document bigAccount = new Document("user_id", id);
-			bigAccount.append("strikes", 0);
-			bigAccount.append("outs", 0);
-			bigAccount.append("latestTweet", -1L);
-			bigAccountDocuments.add(bigAccount);
+	public static  void addBigAccounts(int index, ArrayList<Long> bigAccountsArray) throws FuckinUpKPException {
+		for(long id : bigAccountsArray) {			
+			addBigAccount(index, id, 0, 0, -1L);
 		}
-		addArrayToSchwergsArray(index, bigAccountDocuments, "bigAccounts");
 	}
 
 	/**TODO BOJANG TEST

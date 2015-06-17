@@ -211,7 +211,6 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 		DataBaseHandler.addBigAccounts(index, bigAccounts);
-		DataBaseHandler.addBigAccountsWhiteList(index, bigAccounts);
 	}
 
 	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException{

@@ -29,7 +29,7 @@ public class ImageManipulator {
 	 * @return
 	 * @throws FuckinUpKPException
 	 */
-	public HashMap<String,String> isValid(HashMap<String,String> content) throws FuckinUpKPException{
+	public HashMap<String,String> validateContent(HashMap<String,String> content) throws FuckinUpKPException{
 		Image image = null;
 		int count = 0;
 		String dir = "pics/";
@@ -40,7 +40,13 @@ public class ImageManipulator {
 			for(Entry<String,String> entry : content.entrySet()) {
 				String URI = entry.getKey();
 				URL url = new URL(URI);
-				image = ImageIO.read(url);
+				try {	
+					image = ImageIO.read(url);
+				}
+				catch (IIOException e) {
+					Maintenance.writeLog("Skipped a bad url, when validating content", "content");
+					continue;
+				}
 				BufferedImage bi = (BufferedImage) image;
 
 				if (!new File(dir).exists()) {
@@ -60,10 +66,6 @@ public class ImageManipulator {
 				}
 			}
 		}
-		catch (IIOException e) {
-			Maintenance.writeLog("Skipped a url, it probably doesn't matter but here's the error"
-					+ " anyway: " + e.toString(), "content");
-		}
 		catch (Exception e) {
 			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
 		}
@@ -74,11 +76,9 @@ public class ImageManipulator {
 				--count;
 			}
 		}
-		
+
 		return retVal;
 	}
-
-
 
 	//Converts weird-ass png to plain-ass jpg
 	private BufferedImage convertCMYK2RGB(BufferedImage image) throws IOException{
@@ -91,10 +91,8 @@ public class ImageManipulator {
 		return rgbImage;
 	}
 
-
-
 	/**
-	 * Gets image link, saves image, returns image location
+	 * Gets image link, saves image, returns image location OR NULL IF THE URL IS BAD
 	 * 
 	 * @param imgsrc
 	 * @return
@@ -121,6 +119,11 @@ public class ImageManipulator {
 			imgsrc = "pics/"+unique+".jpg";
 			return imgsrc;
 			//The receiver must delete the file after posting to Twitter
+		}
+		catch (IIOException e) {
+			Maintenance.writeLog("Bad URL found when trying to fetch an image, returning null. It's"
+					+ "probably whatever, but here's the error anyway" + e.toString(), "content");
+			return null;
 		}
 		catch (IOException e) {
 			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");

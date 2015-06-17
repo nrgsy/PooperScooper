@@ -88,11 +88,10 @@ public class RedditScraper implements Runnable{
 				url = link.attr("href");
 			}
 
-
 			//Calls ImageManipulator to check if is within filesize limits (3MB)
 			//If good, put into database
 			ImageManipulator reviewer = new ImageManipulator();
-			content = reviewer.isValid(content);
+			content = reviewer.validateContent(content);
 			for (Entry<String,String> contentEntry : content.entrySet()){
 				DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(), contentPool, null);
 			}

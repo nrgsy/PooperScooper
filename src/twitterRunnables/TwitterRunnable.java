@@ -14,9 +14,6 @@ import content.ImageManipulator;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
-
 
 /**
  * @author Bojangles and McChrpchrp
@@ -66,7 +63,7 @@ public class TwitterRunnable implements Runnable {
 		File image = null;
 		try {
 			//TODO assContent structure may have been changed since writing this method.
-			Document assContent = DataBaseHandler.getRandomContent("ass", 0);
+			Document assContent = DataBaseHandler.getRandomContent("ass", index);
 			if(assContent == null) {
 				Maintenance.writeLog("Tried to post, but could not pull content from db."
 						+ "This is not necessarily an error", index);
@@ -76,8 +73,16 @@ public class TwitterRunnable implements Runnable {
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();
 
+			String location = imgman.getImageFile(link);
+			
+			if (location == null) {
+				Maintenance.writeLog("Tried to upload but link was bad, calling "
+						+ "uploadPic again", index);
+				uploadPic();
+				return;
+			}	
 			//creates temp image and puts file location in "image"
-			image = new File(imgman.getImageFile(link));
+			image = new File(location);
 
 			//calls uploadPicTwitter to upload to twitter and deletes locally saved image
 			uploadPicTwitter(image, caption);

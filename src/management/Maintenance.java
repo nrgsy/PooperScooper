@@ -32,25 +32,6 @@ public class Maintenance {
 		}
 	}
 
-	private static void cleanBigAccs() throws FuckinUpKPException {
-		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
-			HashSet<Long> bigAccWhiteListSet = new HashSet<Long>();
-			ArrayList<Document> bigAcc = DataBaseHandler.getSchwergsyAccountArray(index, "bigAccounts");
-			if (DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList") != null) {
-				bigAccWhiteListSet = new HashSet((ArrayList<Long>) DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
-			}
-			HashSet<Long> toAddToBigAccWhiteList = new HashSet<Long>();
-
-			for (Document bigAccount : bigAcc) {
-				if (!bigAccWhiteListSet.contains(bigAccount.getLong("user_id"))) {
-					toAddToBigAccWhiteList.add(bigAccount.getLong("user_id"));
-				}
-			}
-
-			DataBaseHandler.addBigAccountsWhiteList(index, new ArrayList<Long>(toAddToBigAccWhiteList));
-		}
-	}
-
 	private static void cleanToFollows() throws UnknownHostException, FuckinUpKPException {
 		for (int index = 0; index < DataBaseHandler.getCollectionSize("SchwergsyAccounts"); index++) {
 			ArrayList<Long> toFollow = DataBaseHandler.getSchwergsyAccountArray(index, "toFollow");
@@ -160,14 +141,6 @@ public class Maintenance {
 			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 
 			DataBaseHandler.findAndSetGlobalVars();
-
-			//cleans up and syncs bigAccounts with bigAccountsWhiteList
-			try {
-				cleanBigAccs();
-			} catch (FuckinUpKPException e) {
-				Maintenance.writeLog("***ERROR*** failed to clean BigAccs ***ERROR***\n"+Maintenance.writeStackTrace(e), "maintenance");
-				e.printStackTrace();
-			}
 
 			//cleans up and syncs toFollow with whiteList
 			try {

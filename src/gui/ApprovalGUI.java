@@ -386,7 +386,6 @@ public class ApprovalGUI {
 		return parsedBoolean;
 	}
 
-
 	//The listener for the add seed button in the Schwergsy account section of the GUI
 	private static class AddSeedListener implements ActionListener {
 		@Override
