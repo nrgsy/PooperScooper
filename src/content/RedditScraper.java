@@ -4,6 +4,7 @@ package content;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map.Entry;
 
 import management.DataBaseHandler;
@@ -36,14 +37,12 @@ public class RedditScraper implements Runnable{
 	 */
 	public void contentSnatch() throws FuckinUpKPException, InterruptedException {
 
-
 		org.bson.Document reddits = GlobalStuff.redditScraping;
 
 		int pages = 35;
 
 		for(Entry<String, Object> entry : reddits.entrySet()){
-			ArrayList<String> captions = new ArrayList<String>();
-			ArrayList<String> imglinks = new ArrayList<String>(); 
+			HashMap<String, String> content = new HashMap<String, String>();
 
 			ArrayList<String> linkAndContentPool = (ArrayList<String>) entry.getValue();
 			String contentPool = linkAndContentPool.get(1);
@@ -81,8 +80,7 @@ public class RedditScraper implements Runnable{
 
 				//Populate ArrayList with gathered content
 				for (Element title : titles){
-					captions.add(title.text());
-					imglinks.add(title.attr("href"));
+					content.put(title.attr("href"), title.text());
 				}
 
 				//"Clicks" button to next page to start loop at next page
@@ -94,15 +92,11 @@ public class RedditScraper implements Runnable{
 			//Calls ImageManipulator to check if is within filesize limits (3MB)
 			//If good, put into database
 			ImageManipulator reviewer = new ImageManipulator();
-			for (int i =0; i<imglinks.size();i++){
-				if (!reviewer.isValid(imglinks.get(i))){
-					imglinks.remove(i);
-					captions.remove(i);
-				}
-				else {
-					DataBaseHandler.newContent(captions.get(i),imglinks.get(i), contentPool, null);
-				}
+			content = reviewer.isValid(content);
+			for (Entry<String,String> contentEntry : content.entrySet()){
+				DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(), contentPool, null);
 			}
+		
 		}
 	}
 

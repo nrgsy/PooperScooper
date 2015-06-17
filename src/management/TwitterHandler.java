@@ -157,7 +157,7 @@ public class TwitterHandler {
 
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, Paging query, int index){
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
-
+		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 		try {
 			ListWrapper.add(twitter.getUserTimeline(id, query));
 			return ListWrapper;
@@ -165,8 +165,10 @@ public class TwitterHandler {
 			errorHandling(e,index);
 			return ListWrapper;
 		}
-
-
+		}
+		else{
+			return ListWrapper;
+		}
 	}
 
 	public static ArrayList<Long> getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
