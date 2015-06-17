@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 import management.FuckinUpKPException;
@@ -35,8 +36,8 @@ public class ImageManipulator {
 		File img = null;
 		HashMap<String,String> retVal = new HashMap<String,String>();
 
-		try{
-			for(Entry<String,String> entry : content.entrySet()){
+		try {
+			for(Entry<String,String> entry : content.entrySet()) {
 				String URI = entry.getKey();
 				URL url = new URL(URI);
 				image = ImageIO.read(url);
@@ -50,14 +51,18 @@ public class ImageManipulator {
 				count++;
 				ImageIO.write(bi, "jpg", img);
 				//Checks to see img size is less than ~3MB
-				if(img.length()<3000000){
+				if(img.length() < 3000000) {
 					Maintenance.writeLog("Image size: "+img.length()+" | Image Link: "+URI+" scooped.", "content");
 					retVal.put(entry.getKey(), entry.getValue());
 				}
-				else{
+				else {
 					Maintenance.writeLog("Image size for " + URI + " is larger than 3MB", "content");
 				}
 			}
+		}
+		catch (IIOException e) {
+			Maintenance.writeLog("Skipped a url, it probably doesn't matter but here's the error"
+					+ " anyway: " + e.toString(), "content");
 		}
 		catch (Exception e) {
 			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");

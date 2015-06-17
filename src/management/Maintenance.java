@@ -287,7 +287,7 @@ public class Maintenance {
 	public static void writeLog() { writeLog(""); }
 	
 	public static String writeStackTrace(Exception e){
-		String error = "";
+		String error = e.toString() + "\n";
 		for(StackTraceElement elem : e.getStackTrace()){
 			error += elem.toString();
 			error += "\n";

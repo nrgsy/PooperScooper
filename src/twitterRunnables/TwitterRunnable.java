@@ -67,6 +67,12 @@ public class TwitterRunnable implements Runnable {
 		try {
 			//TODO assContent structure may have been changed since writing this method.
 			Document assContent = DataBaseHandler.getRandomContent("ass", 0);
+			if(assContent == null) {
+				Maintenance.writeLog("Tried to post, but could not pull content from db."
+						+ "This is not necessarily an error", index);
+				return;
+			}	
+
 			String caption = assContent.get("caption").toString();
 			String link = assContent.get("imglink").toString();
 
@@ -81,7 +87,9 @@ public class TwitterRunnable implements Runnable {
 			e.printStackTrace();
 		}
 		finally{
-			image.delete();
+			if (image != null) {
+				image.delete();
+			}
 		}
 	}
 

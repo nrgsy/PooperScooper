@@ -576,7 +576,7 @@ public class DataBaseHandler{
 		.append("totalFollowers", totalFollowers);
 
 		addElementToSchwergsArray(index, stat, "statistics");
-		Maintenance.writeLog("Finished addint statistic", index);
+		Maintenance.writeLog("Finished adding statistic", index);
 	}
 
 	/**TODO Bojang Test
@@ -1434,8 +1434,6 @@ public class DataBaseHandler{
 
 			if (statList.size() > 0) {
 
-				Maintenance.writeLog("Creating Statistic");
-
 				System.out.println("\nStatistics for account " + account.get("name") + ":\n");
 				Set<Entry<String, Object>> entrySet = ((Document) statList.get(0)).entrySet();
 				int columnWidth = 32;
@@ -1523,8 +1521,7 @@ public class DataBaseHandler{
 			}
 			System.out.println("\n------------------------------------------------------------------"
 					+ "-----------------------------------------------------------------------------"
-					+ "-----------------------------------------------------------------------------"
-					+ "--------------------------------------------------------------------------\n");
+					+ "---------------------------------------------------------------------------\n");
 		} 		
 		catch (Exception e) {
 			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***\n"+Maintenance.writeStackTrace(e));
@@ -1541,7 +1538,5 @@ public class DataBaseHandler{
 		}
 	}
 }
-
-
 
 
