@@ -43,7 +43,7 @@ public class ImageManipulator {
 				try {	
 					image = ImageIO.read(url);
 				}
-				catch (IIOException e) {
+				catch (Exception e) {
 					Maintenance.writeLog("Skipped a bad url, when validating content", "content");
 					continue;
 				}
