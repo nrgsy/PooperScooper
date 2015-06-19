@@ -6,7 +6,6 @@ import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -42,28 +41,30 @@ public class ImageManipulator {
 				URL url = new URL(URI);
 				try {	
 					image = ImageIO.read(url);
+
+					BufferedImage bi = (BufferedImage) image;
+
+					if (!new File(dir).exists()) {
+						new File(dir).mkdirs();
+					}
+
+					img = new File(dir + count + ".jpg");
+					ImageIO.write(bi, "jpg", img);
+					count++;
+					//Checks to see img size is less than ~3MB
+					if(img.length() < 3000000) {
+						Maintenance.writeLog("Image size: "+img.length()+" | Image Link: "+URI+" scooped.", "content");
+						retVal.put(entry.getKey(), entry.getValue());
+					}
+					else {
+						Maintenance.writeLog("Image size for " + URI + " is larger than 3MB", "content");
+					}
 				}
 				catch (Exception e) {
 					Maintenance.writeLog("Skipped a bad url, when validating content", "content");
 					continue;
 				}
-				BufferedImage bi = (BufferedImage) image;
 
-				if (!new File(dir).exists()) {
-					new File(dir).mkdirs();
-				}
-
-				img = new File(dir + count + ".jpg");
-				count++;
-				ImageIO.write(bi, "jpg", img);
-				//Checks to see img size is less than ~3MB
-				if(img.length() < 3000000) {
-					Maintenance.writeLog("Image size: "+img.length()+" | Image Link: "+URI+" scooped.", "content");
-					retVal.put(entry.getKey(), entry.getValue());
-				}
-				else {
-					Maintenance.writeLog("Image size for " + URI + " is larger than 3MB", "content");
-				}
 			}
 		}
 		catch (Exception e) {
