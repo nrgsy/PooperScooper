@@ -498,7 +498,6 @@ public class ApprovalGUI {
 			frame.setSize(300, 100);
 			frame.setLocationRelativeTo(null);
 			frame.setVisible(true);
-
 		}
 	}
 

@@ -71,6 +71,7 @@ public class GlobalStuff{
 	public static HashMap<String, Integer> numberOfRuns;
 	//subreddit url mapped to specific content pools to put the scraped content into.
 	public static Document redditScraping;
+	
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
 		int numToUnfollow = 0;
@@ -88,7 +89,6 @@ public class GlobalStuff{
 		else{
 			Maintenance.writeLog("***ERROR*** We have negative followers or following or "
 					+ "Jon is an idiot ***ERROR***");
-
 		}
 		return numToUnfollow >= 0 ? numToUnfollow : 0;
 	}
@@ -177,5 +177,4 @@ public class GlobalStuff{
 
 		return globalVars;
 	}
-
 }
