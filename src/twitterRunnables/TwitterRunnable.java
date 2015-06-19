@@ -62,30 +62,51 @@ public class TwitterRunnable implements Runnable {
 		ImageManipulator imgman = new ImageManipulator();
 		File image = null;
 		try {
-			//TODO assContent structure may have been changed since writing this method.
-			Document assContent = DataBaseHandler.getRandomContent("ass", index);
-			if(assContent == null) {
+			//TODO content structure may have been changed since writing this method.
+			String contentType;
+			if(Math.random()<=DataBaseHandler.getAssRatio(index)){
+				contentType = "ass";
+			}
+			else{
+				contentType = DataBaseHandler.getAccountType(index);
+			}
+			Document content = DataBaseHandler.getRandomContent(contentType, index);
+			if(content == null) {
 				Maintenance.writeLog("Tried to post, but could not pull content from db."
 						+ "This is not necessarily an error", index);
 				return;
 			}	
 
-			String caption = assContent.get("caption").toString();
-			String link = assContent.get("imglink").toString();
-
-			String location = imgman.getImageFile(link);
+			String caption = content.getString("caption");
+			String link = content.getString("imglink");
 			
-			if (location == null) {
-				Maintenance.writeLog("Tried to upload but link was bad, calling "
-						+ "uploadPic again", index);
-				uploadPic();
-				return;
-			}	
-			//creates temp image and puts file location in "image"
-			image = new File(location);
+			if(link!=null){
+				if(caption==null){
+					caption = "";
+				}
+				String location = imgman.getImageFile(link);
+				
+				if (location == null) {
+					Maintenance.writeLog("Tried to upload but link was bad, calling "
+							+ "uploadPic again", index);
+					uploadPic();
+					return;
+				}	
+				//creates temp image and puts file location in "image"
+				image = new File(location);
 
-			//calls uploadPicTwitter to upload to twitter and deletes locally saved image
-			uploadPicTwitter(image, caption);
+				//calls uploadPicTwitter to upload to twitter and deletes locally saved image
+				uploadPicTwitter(image, caption);
+			}
+			else if(caption!=null){
+				//TODO new method which posts only caption
+			}
+			else{
+				//both caption and link were null for some reason
+				uploadPic();
+			}
+
+			
 		}
 		catch (Exception e) {
 			Maintenance.writeLog("Temp download of pic failed " + image + "\n" +Maintenance.writeStackTrace(e), index);

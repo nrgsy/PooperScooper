@@ -671,6 +671,14 @@ public class DataBaseHandler{
 	public static ArrayList<Long> getToFollowList(int index){
 		return (ArrayList<Long>) getSchwergsyAccount(index).get("toFollow");
 	}
+	
+	public static String getAccountType(int index){
+		return getSchwergsyAccount(index).getString("accountType");
+	}
+	
+	public static double getAssRatio(int index){
+		return getSchwergsyAccount(index).getDouble("assRatio");
+	}
 
 	/**
 	 * @param index
@@ -1156,6 +1164,8 @@ public class DataBaseHandler{
 			String customerKey,
 			String authorizationSecret,
 			String authorizationKey,
+			String accountType,
+			double assRatio,
 			boolean isIncubated,
 			boolean isSuspended,
 			boolean isFlaggedForDeletion) throws TwitterException {
@@ -1166,6 +1176,8 @@ public class DataBaseHandler{
 				customerKey,
 				authorizationSecret,
 				authorizationKey,
+				accountType,
+				assRatio,
 				isIncubated,
 				isSuspended,
 				isFlaggedForDeletion,
@@ -1204,6 +1216,8 @@ public class DataBaseHandler{
 			String customerKey,
 			String authorizationSecret,
 			String authorizationKey,
+			String accountType,
+			double assRatio,
 			boolean isIncubated,
 			boolean isSuspended,
 			boolean isFlaggedForDeletion,
@@ -1236,6 +1250,8 @@ public class DataBaseHandler{
 			.append("customerKey", customerKey)
 			.append("authorizationSecret", authorizationSecret)
 			.append("authorizationKey", authorizationKey)
+			.append("accountType", accountType)
+			.append("assRatio", assRatio)
 			.append("isIncubated", isIncubated)
 			.append("isSuspended", isSuspended)
 			.append("isFlaggedForDeletion", isFlaggedForDeletion)
