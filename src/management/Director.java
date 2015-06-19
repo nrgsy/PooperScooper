@@ -11,6 +11,7 @@ import java.util.TimerTask;
 
 import com.mongodb.MongoClient;
 
+import content.ContentDirectory;
 import content.RedditScraper;
 
 /**
@@ -49,6 +50,7 @@ public class Director {
 			DataBaseHandler.initGlobalVars();
 			DataBaseHandler.findAndSetGlobalVars();
 			Maintenance.writeLog("Starting Director");
+			ContentDirectory.init();
 			DataBaseHandler.mongoClient = new MongoClient();
 			GlobalStuff.lastPostTimeMap = new HashMap<>();
 			Maintenance.runStatus = new HashMap<>();
