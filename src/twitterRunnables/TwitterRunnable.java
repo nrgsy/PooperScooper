@@ -10,7 +10,9 @@ import management.DataBaseHandler;
 import management.GlobalStuff;
 import management.Maintenance;
 import management.TwitterHandler;
+
 import content.ImageManipulator;
+
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
