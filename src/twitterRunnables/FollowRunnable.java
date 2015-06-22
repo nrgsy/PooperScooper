@@ -62,12 +62,10 @@ public class FollowRunnable implements Runnable{
 					break;
 				}
 			}
-			//Follows the person
+			//Follows the person and adds it to the database.
+			//only adds to database if twitter allows it, so
+			//the logic is in TwitterHandler
 			TwitterHandler.follow(bird,id, index);
-			ArrayList<Long> followed = new ArrayList<Long>();
-			followed.add(id);
-			
-			DataBaseHandler.addFollowing(index, followed);
 		}
 	}
 	
@@ -94,8 +92,8 @@ public class FollowRunnable implements Runnable{
 		Maintenance.writeLog("run method called for FollowRunnable");
 
 		try {
-			unfollowUsers();
 			followAndFavoriteUsers();
+			unfollowUsers();
 		} catch (Exception e) {
 			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), index);
 			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), "KP");

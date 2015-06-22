@@ -69,7 +69,7 @@ public class GlobalStuff{
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
 		int numToUnfollow = 0;
-		if (sizeFollowing > FOLLOWING_BASE_CAP){
+		if (sizeFollowing >= FOLLOWING_BASE_CAP){
 			if(sizeFollowers < 100*FOLLOWING_BASE_CAP){
 				numToUnfollow = sizeFollowing - 2000;
 			}

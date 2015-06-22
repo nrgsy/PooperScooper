@@ -122,6 +122,9 @@ public class TwitterHandler {
 
 		try {
 			twitter.createFriendship(id);
+			ArrayList<Long> oneFollow = new ArrayList<Long>();
+			oneFollow.add(id);
+			DataBaseHandler.addFollowing(index, oneFollow);
 		} catch (TwitterException e) {
 			errorHandling(e,index);
 		}
