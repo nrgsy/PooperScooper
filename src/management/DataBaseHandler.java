@@ -38,7 +38,7 @@ public class DataBaseHandler{
 	 */
 	public static Document getRandomContent(String type, long index) {
 
-		MongoCollection<Document> collection = getCollection(type);
+		MongoCollection<Document> collection = getContentCollection(type);
 		double collectionSize = collection.count();
 		HashSet<Document> contentSample = new HashSet<>();
 
@@ -171,7 +171,7 @@ public class DataBaseHandler{
 	 * @param sourceLink the link of the content to remove
 	 */
 	public static  void removeContent(String sourceType, String sourceLink) {		
-		MongoCollection<Document> sourceCollection = getCollection(sourceType);	
+		MongoCollection<Document> sourceCollection = getContentCollection(sourceType);	
 		Document query = new Document("imglink", sourceLink);
 		sourceCollection.deleteOne(query);
 	}
@@ -266,9 +266,9 @@ public class DataBaseHandler{
 			prefix = "";
 		}
 
-		MongoCollection<Document> normalCollection = getCollection(baseType);
-		MongoCollection<Document> pendingCollection = getCollection("pending" + baseType);
-		MongoCollection<Document> schwagCollection = getCollection("schwag" + baseType);
+		MongoCollection<Document> normalCollection = getContentCollection(baseType);
+		MongoCollection<Document> pendingCollection = getContentCollection("pending" + baseType);
+		MongoCollection<Document> schwagCollection = getContentCollection("schwag" + baseType);
 		long now = new Date().getTime();
 		//to ensure no two contents can have the same _id
 		//(occurs when something tries to create two contents in the same millisecond)
@@ -332,74 +332,13 @@ public class DataBaseHandler{
 	}
 
 	/**TODO BOJANG TEST
-	 * @param type
-	 * @param db
+	 * @param type the type of content
 	 * @return
 	 */
-	public static MongoCollection<Document> getCollection(String type) {
-
+	public static MongoCollection<Document> getContentCollection(String type) {
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = null;
-		switch (type.toLowerCase()) {
-		case "ass" :
-			dbCollection = db.getCollection("AssContent");
-			break;
-		case "pendingass" :
-			dbCollection = db.getCollection("PendingAssContent");
-			break;
-		case "schwagass" :
-			dbCollection = db.getCollection("SchwagAssContent");
-			break;
-		case "workout" :
-			dbCollection = db.getCollection("Workout");
-			break;
-		case "pendingworkout" :
-			dbCollection = db.getCollection("PendingWorkout");
-			break;
-		case "schwagworkout" :
-			dbCollection = db.getCollection("SchwagWorkout");
-			break;
-		case "weed" :
-			dbCollection = db.getCollection("Weed");
-			break;
-		case "pendingweed" :
-			dbCollection = db.getCollection("PendingWeed");
-			break;
-		case "schwagweed" :
-			dbCollection = db.getCollection("SchwagWeed");
-			break;
-		case "college" :
-			dbCollection = db.getCollection("College");
-			break;
-		case "pendingcollege" :
-			dbCollection = db.getCollection("PendingCollege");
-			break;
-		case "schwagcollege" :
-			dbCollection = db.getCollection("SchwagCollege");
-			break;
-		case "canimals" :
-			dbCollection = db.getCollection("Canimals");
-			break;
-		case "pendingcanimals" :
-			dbCollection = db.getCollection("PendingCanimals");
-			break;
-		case "schwagcanimals" :
-			dbCollection = db.getCollection("SchwagCanimals");
-			break;
-		case "space" :
-			dbCollection = db.getCollection("Space");
-			break;
-		case "pendingspace" :
-			dbCollection = db.getCollection("PendingSpace");
-			break;
-		case "schwagspace" :
-			dbCollection = db.getCollection("SchwagSpace");
-			break;
-		default:
-			Maintenance.writeLog("***ERROR*** Tears, " + type + " is schwag. Doesn't match an "
-					+ "expected collection name ***ERROR***");
-		}
-
+		dbCollection = db.getCollection(type.toLowerCase() + "content");
 		return dbCollection;
 	}
 
@@ -671,11 +610,11 @@ public class DataBaseHandler{
 	public static ArrayList<Long> getToFollowList(int index){
 		return (ArrayList<Long>) getSchwergsyAccount(index).get("toFollow");
 	}
-	
+
 	public static String getAccountType(int index){
 		return getSchwergsyAccount(index).getString("accountType");
 	}
-	
+
 	public static double getAssRatio(int index){
 		return getSchwergsyAccount(index).getDouble("assRatio");
 	}
@@ -1030,8 +969,8 @@ public class DataBaseHandler{
 		catch (NoSuchElementException e) {
 			Maintenance.writeLog("***ERROR*** Schwergsy Account with _id: " + index +
 					" not found. ***ERROR***\n"+Maintenance.writeStackTrace(e));
-			
-			
+
+
 			return null;
 		}
 		cursor.close();

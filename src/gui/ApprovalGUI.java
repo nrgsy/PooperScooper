@@ -45,6 +45,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
+import content.ContentDirectory;
+
 public class ApprovalGUI {
 
 	private static Boolean lastWasApproved;
@@ -75,6 +77,8 @@ public class ApprovalGUI {
 	private static JTextField cusKeyField;
 	private static JTextField authSecField;
 	private static JTextField authKeyField;
+	private static JTextField accountTypeField;
+	private static JTextField assRatioField;
 	private static JTextField incubatedField;
 	private static JTextField suspendedField;
 	private static JTextField seedField;
@@ -202,6 +206,10 @@ public class ApprovalGUI {
 		}
 	}
 
+	/**
+	 * Creates the interface for 
+	 *
+	 */
 	private static class SchwergsListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -209,7 +217,7 @@ public class ApprovalGUI {
 			frame.setVisible(false);
 			frame.dispose();
 
-			JPanel mainPanel = new JPanel(new GridLayout(11, 2));
+			JPanel mainPanel = new JPanel(new GridLayout(13, 2));
 			mainPanel.add(new JLabel("Name"));
 			mainPanel.add(nameField);
 			mainPanel.add(new JLabel("Customer Secret"));
@@ -220,6 +228,10 @@ public class ApprovalGUI {
 			mainPanel.add(authSecField);
 			mainPanel.add(new JLabel("Authorization Key"));
 			mainPanel.add(authKeyField);
+			mainPanel.add(new JLabel("Account Type"));
+			mainPanel.add(accountTypeField);
+			mainPanel.add(new JLabel("Ass Ratio"));
+			mainPanel.add(assRatioField);
 			mainPanel.add(new JLabel("Is Incubated? (true/false)"));
 			mainPanel.add(incubatedField);
 			mainPanel.add(new JLabel("Is Suspended? (true/false)"));
@@ -261,6 +273,8 @@ public class ApprovalGUI {
 			String customerKey = cusKeyField.getText();
 			String authorizationSecret = authSecField.getText();
 			String authorizationKey = authKeyField.getText();
+			String accountType = accountTypeField.getText();
+			double assRatio = Double.parseDouble(assRatioField.getText());
 			boolean isIncubated;
 			boolean isSuspended;
 			try {
@@ -277,7 +291,8 @@ public class ApprovalGUI {
 				//failed so the timers aren't created below
 				//isFlaggedForDeletion is set to false by default
 				if (DataBaseHandler.insertSchwergsyAccount(name, customerSecret, customerKey,
-						authorizationSecret, authorizationKey, isIncubated, isSuspended, false)
+						authorizationSecret, authorizationKey, accountType, assRatio, isIncubated,
+						isSuspended, false)
 						== false) {
 					return;
 				}
@@ -316,7 +331,9 @@ public class ApprovalGUI {
 			String customerSecret = cusSecField.getText();
 			String customerKey = cusKeyField.getText();
 			String authorizationSecret = authSecField.getText();
-			String authorizationKey = authKeyField.getText();		
+			String authorizationKey = authKeyField.getText();
+			String accountType = accountTypeField.getText();
+			double assRatio = Double.parseDouble(assRatioField.getText());
 			String incubatedString = incubatedField.getText();
 			String suspendedString = suspendedField.getText();			
 
@@ -334,6 +351,12 @@ public class ApprovalGUI {
 				}
 				if (!authorizationKey.equals("")) {
 					DataBaseHandler.replaceSchwergsyField(index, authorizationKey, "authorizationKey");
+				}
+				if (!authorizationKey.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, accountType, "accountType");
+				}
+				if (!authorizationKey.equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, assRatio, "assRatio");
 				}
 				if (!incubatedString.equals("")) {
 					DataBaseHandler.replaceSchwergsyField(index, getAccountBoolean("isIncubated"),
@@ -482,7 +505,7 @@ public class ApprovalGUI {
 			frame.dispose();
 
 			JComponent panel = new JPanel();
-			String[] contentTypes = {"ass", "workout", "weed", "college", "canimals", "space"};
+			Object[] contentTypes = ContentDirectory.getContentTypes().toArray();
 			JComboBox<Object> petList = new JComboBox<Object>(contentTypes);
 			petList.setSelectedIndex(0);
 			petList.addActionListener(new ListSelectListener());
@@ -518,119 +541,109 @@ public class ApprovalGUI {
 	 */
 	public static void buildContentReviewer(String contentType) {
 
-		if (!contentType.equals("ass") &&
-				!contentType.equals("workout") &&
-				!contentType.equals("weed") &&
-				!contentType.equals("college") &&
-				!contentType.equals("canimals") &&
-				!contentType.equals("space")) {
-			Maintenance.writeLog("***ERROR*** invalid argument, must be ass,"
-					+ "workout, etc ***ERROR***",
-					"gui");
-		} else {
-			lastWasApproved = null;
-			undoClicked = false;
-			approvedNormalContent = new HashMap<>();
-			approvedTimeLessContent = new HashMap<>();
-			schwagLinks = new LinkedList<>();
+		lastWasApproved = null;
+		undoClicked = false;
+		approvedNormalContent = new HashMap<>();
+		approvedTimeLessContent = new HashMap<>();
+		schwagLinks = new LinkedList<>();
 
-			MongoCollection<Document> collection =
-					DataBaseHandler.getCollection("pending" + contentType);
+		MongoCollection<Document> collection =
+				DataBaseHandler.getContentCollection("pending" + contentType);
 
-			numRemaining = (int) DataBaseHandler.getCollectionSize(
-					collection.getNamespace().getCollectionName()) - 1;
+		numRemaining = (int) DataBaseHandler.getCollectionSize(
+				collection.getNamespace().getCollectionName()) - 1;
 
-			FindIterable<Document> findIter = collection.find();
-			cursor = findIter.iterator();
+		FindIterable<Document> findIter = collection.find();
+		cursor = findIter.iterator();
 
-			if (cursor.hasNext()) {
+		if (cursor.hasNext()) {
 
-				currentContent = cursor.next();
+			currentContent = cursor.next();
 
-				picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-				try {
-					picPanel.add(getNextPicLabel());
-				} catch (IOException e1) {
-					Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
-					e1.printStackTrace();
-				}
-				picPanel.setBackground(Color.GRAY);
-
-				String labelText = "number of pending " + contentType +
-						" images remaining: " + numRemaining;
-				JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
-				labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-				labelPanel.add(numRemainingLabel);
-				labelPanel.setBackground(Color.GRAY);
-
-				Font font = new Font("SansSerif", Font.BOLD, 25);
-				captionTextField = new JTextField();
-				captionTextField.setFont(font);
-				captionTextField.setText(currentContent.get("caption").toString());
-				captionTextField.setPreferredSize(new Dimension(333, 30));
-
-				JButton addNormalButton = new JButton("Add Normal");
-				addNormalButton.addActionListener(new AddNormalContentListener());
-				JButton addTimelessButton = new JButton("Add Timeless");
-				addTimelessButton.addActionListener(new AddTimelessContentListener());
-				JButton trashButton = new JButton("Trash");
-				trashButton.addActionListener(new TrashListener());
-				JButton undoButton = new JButton("Undo");
-				undoButton.addActionListener(new UndoListener());
-				JButton doneButton = new JButton("Done");
-				doneButton.addActionListener(new DoneListener());
-
-				buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-				buttonPanel.add(addNormalButton);
-				buttonPanel.add(addTimelessButton);
-				buttonPanel.add(trashButton);
-				buttonPanel.add(undoButton);
-				buttonPanel.add(doneButton);
-				buttonPanel.add(backToMainButton);
-				buttonPanel.setBackground(Color.GRAY);
-
-				topPanel = new JPanel();
-				topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-				topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
-				topPanel.add(labelPanel);
-				topPanel.add(buttonPanel);
-				topPanel.add(captionTextField);
-				topPanel.add(picPanel);
-				topPanel.setPreferredSize(new Dimension(333, 780));
-				topPanel.setBackground(Color.GRAY);
-
-				JPanel bottomPanel = new JPanel();
-				bottomPanel.setBackground(Color.GRAY);
-
-
-				JPanel containerPanel = new JPanel();
-				containerPanel.setLayout(new BorderLayout());
-				containerPanel.add(topPanel, BorderLayout.NORTH);
-				containerPanel.add(bottomPanel, BorderLayout.CENTER);
-
-				JScrollPane scrPane = new JScrollPane(containerPanel);
-
-				frame.setVisible(false);
-				frame.dispose();
-				frame = new JFrame("Content Reviewer");
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.addWindowListener(guiExitAdapter);
-				//So that these things close when we end the program
-				frame.addWindowListener(new WindowAdapter() {
-					public void windowClosing(WindowEvent e) {
-						cursor.close();
-						mongoClient.close();
-					}
-				});
-				frame.getContentPane().add(scrPane);
-				frame.pack();
-				frame.setMinimumSize(new Dimension(300, 300));
-				frame.setSize(800, 900);
-				frame.setLocationRelativeTo(null);
-				frame.setVisible(true);
-			} else {
-				Maintenance.writeLog("No content found in pending" + contentType, "gui");
+			picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			try {
+				picPanel.add(getNextPicLabel());
+			} catch (IOException e1) {
+				Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
+				e1.printStackTrace();
 			}
+			picPanel.setBackground(Color.GRAY);
+
+			String labelText = "number of pending " + contentType +
+					" images remaining: " + numRemaining;
+			JLabel numRemainingLabel = new JLabel(labelText, SwingConstants.CENTER);
+			labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			labelPanel.add(numRemainingLabel);
+			labelPanel.setBackground(Color.GRAY);
+
+			Font font = new Font("SansSerif", Font.BOLD, 25);
+			captionTextField = new JTextField();
+			captionTextField.setFont(font);
+			captionTextField.setText(currentContent.get("caption").toString());
+			captionTextField.setPreferredSize(new Dimension(333, 30));
+
+			JButton addNormalButton = new JButton("Add Normal");
+			addNormalButton.addActionListener(new AddNormalContentListener());
+			JButton addTimelessButton = new JButton("Add Timeless");
+			addTimelessButton.addActionListener(new AddTimelessContentListener());
+			JButton trashButton = new JButton("Trash");
+			trashButton.addActionListener(new TrashListener());
+			JButton undoButton = new JButton("Undo");
+			undoButton.addActionListener(new UndoListener());
+			JButton doneButton = new JButton("Done");
+			doneButton.addActionListener(new DoneListener());
+
+			buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			buttonPanel.add(addNormalButton);
+			buttonPanel.add(addTimelessButton);
+			buttonPanel.add(trashButton);
+			buttonPanel.add(undoButton);
+			buttonPanel.add(doneButton);
+			buttonPanel.add(backToMainButton);
+			buttonPanel.setBackground(Color.GRAY);
+
+			topPanel = new JPanel();
+			topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+			topPanel.setAlignmentX(Container.LEFT_ALIGNMENT);
+			topPanel.add(labelPanel);
+			topPanel.add(buttonPanel);
+			topPanel.add(captionTextField);
+			topPanel.add(picPanel);
+			topPanel.setPreferredSize(new Dimension(333, 780));
+			topPanel.setBackground(Color.GRAY);
+
+			JPanel bottomPanel = new JPanel();
+			bottomPanel.setBackground(Color.GRAY);
+
+
+			JPanel containerPanel = new JPanel();
+			containerPanel.setLayout(new BorderLayout());
+			containerPanel.add(topPanel, BorderLayout.NORTH);
+			containerPanel.add(bottomPanel, BorderLayout.CENTER);
+
+			JScrollPane scrPane = new JScrollPane(containerPanel);
+
+			frame.setVisible(false);
+			frame.dispose();
+			frame = new JFrame("Content Reviewer");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.addWindowListener(guiExitAdapter);
+			//So that these things close when we end the program
+			frame.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					cursor.close();
+					mongoClient.close();
+				}
+			});
+			frame.getContentPane().add(scrPane);
+			frame.pack();
+			frame.setMinimumSize(new Dimension(300, 300));
+			frame.setSize(800, 900);
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
+		}
+		else {
+			Maintenance.writeLog("No content found in pending" + contentType, "gui");
 		}
 	}
 
@@ -704,6 +717,8 @@ public class ApprovalGUI {
 		cusKeyField = new JTextField();
 		authSecField = new JTextField();
 		authKeyField = new JTextField();
+		accountTypeField = new JTextField();
+		assRatioField = new JTextField();
 		incubatedField = new JTextField();
 		suspendedField = new JTextField();
 		seedField = new JTextField();

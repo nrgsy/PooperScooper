@@ -1,10 +1,6 @@
 package management;
 
-
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.bson.Document;
 
@@ -69,8 +65,6 @@ public class GlobalStuff{
 	//times their timertask has fired without running the runnable. When it reaches a specified amount 
 	//the runnable will run and the counter will be reset to 0
 	public static HashMap<String, Integer> numberOfRuns;
-	//subreddit url mapped to specific content pools to put the scraped content into.
-	public static Document redditScraping;
 	
 	//This is the formula to determine how many accounts to follow
 	public static int getNumToUnfollow(int sizeFollowers, int sizeFollowing){
@@ -116,7 +110,6 @@ public class GlobalStuff{
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
 		TIMER_TASK_FIRE_RATE = globalVars.getLong("TIMER_TASK_FIRE_RATE");
 		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
-		redditScraping = (Document) globalVars.get("redditScraping");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -151,29 +144,6 @@ public class GlobalStuff{
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
 		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
-
-		Document reddit = new Document();
-		ArrayList<String> links  = new ArrayList<String>();
-		links.add("http://www.reddit.com/r/blackpeopletwitter");
-		links.add("pendingass");
-		reddit.append("0",links);
-		
-		links  = new ArrayList<String>();
-		links.add("http://www.reddit.com/r/gymmemes");
-		links.add("pendingass");
-		reddit.append("1",links);
-
-		links  = new ArrayList<String>();
-		links.add("http://www.reddit.com/r/gymfails");
-		links.add("pendingass");
-		reddit.append("2",links);
-
-		links  = new ArrayList<String>();
-		links.add("http://www.reddit.com/r/memes");
-		links.add("pendingass");
-		reddit.append("3",links);
-
-		globalVars.put("redditScraping", reddit);
 
 		return globalVars;
 	}

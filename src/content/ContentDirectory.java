@@ -22,15 +22,15 @@ public class ContentDirectory {
 	//each document is a content type (ass, weed, workout, etc) mapped a list of documents
 	//each of those documents is a scraper site (reddit, imgur, etc) mapped to a list of links
 	//So the link groups are specific a scraper site and a content type
-	public static ArrayList<Document> contentDirectory;
+	public static Document contentDirectory;
 
 	/**
 	 * Initialize the contentDirectory variable with these hard coded links.
 	 */
 	public static void init() {
-		
-		contentDirectory = new ArrayList<>();
-		
+
+		contentDirectory = new Document();
+
 		//For ass
 		//////////////////////////////////////////////////////////////////////////////////////////
 		//list of links to places (on reddit for example) to scrape from
@@ -39,13 +39,8 @@ public class ContentDirectory {
 		redditAssLinks.add("http://www.reddit.com/r/memes");
 		Document redditAssDoc = new Document();
 		redditAssDoc.append("reddit", redditAssLinks);
-		
-		ArrayList<Document> assScraperSiteList = new ArrayList<>();
-		assScraperSiteList.add(redditAssDoc); //could also add something like imgurAssDoc in the future
-		
-		Document assDoc = new Document();
-		assDoc.append("ass", assScraperSiteList);
-		contentDirectory.add(assDoc);
+
+		contentDirectory.append("ass", redditAssDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		//for workout
@@ -55,29 +50,41 @@ public class ContentDirectory {
 		redditWorkoutLinks.add("http://www.reddit.com/r/gymmemes");
 		Document redditWorkoutDoc = new Document();
 		redditWorkoutDoc.append("reddit", redditWorkoutLinks);
-		
-		ArrayList<Document> workoutScraperSiteList = new ArrayList<>();
-		workoutScraperSiteList.add(redditWorkoutDoc);
-		
-		Document workoutDoc = new Document();
-		workoutDoc.append("workout", workoutScraperSiteList);
-		contentDirectory.add(workoutDoc);
+
+		contentDirectory.append("workout", redditWorkoutDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
+
+		//for minecraft
+		//////////////////////////////////////////////////////////////////////////////////////////
+		ArrayList<String> redditMinecraftLinks = new ArrayList<>();
+		redditMinecraftLinks.add("http://www.reddit.com/r/Minecraft/");
+		redditMinecraftLinks.add("http://www.reddit.com/r/MinecraftSuggestions");
+		Document redditMinecraftDoc = new Document();
+		redditMinecraftDoc.append("reddit", redditMinecraftLinks);
+
+		contentDirectory.append("minecraft", redditMinecraftDoc);
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+		//for minecraft
+		//////////////////////////////////////////////////////////////////////////////////////////
+		ArrayList<String> redditKSPLinks = new ArrayList<>();
+		redditKSPLinks.add("https://www.reddit.com/r/KerbalSpaceProgram/");
+		redditKSPLinks.add("https://www.reddit.com/r/KSPMemes");
+		redditKSPLinks.add("http://www.reddit.com/r/KerbalAcademy");
+		redditKSPLinks.add("https://www.reddit.com/r/RealSolarSystem/");
+		Document redditKSPDoc = new Document();
+		redditKSPDoc.append("reddit", redditKSPLinks);
+
+		contentDirectory.append("KSP", redditKSPDoc);
+		//////////////////////////////////////////////////////////////////////////////////////////
+
 	}
-	
+
 	public static ArrayList<String> getContentTypes() {	
-		ArrayList<String> contentTypes = new ArrayList<>();
-		
-		for (Document doc : contentDirectory) {
-			
-			HashSet<Entry<String, Object>> entrySet = (HashSet<Entry<String, Object>>) doc.entrySet();		
-			if (entrySet.size() != 1) {
-				Maintenance.writeLog("***ERROR*** Tears, invalid element in"
-						+ "Content Directory ***ERROR***","KP");
-				return null;
-			}		
+		ArrayList<String> contentTypes = new ArrayList<>();	
+		for (String type: contentDirectory.keySet()) {		
 			//adds the content String to the list, e.g. "ass" or "workout"
-			contentTypes.add(entrySet.iterator().next().getKey());
+			contentTypes.add(type);
 		}
 		return contentTypes;
 	}

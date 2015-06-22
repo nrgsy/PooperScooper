@@ -50,15 +50,19 @@ public class MongoFuckAround {
 //
 //		new Timer().scheduleAtFixedRate(task, 0L, 1000);
 		
-		String type = "pendingass";
-		String baseType;
-		String prefix;
+//		String type = "pendingass";
+//		String baseType;
+//		String prefix;
+//		
+//		baseType = type.substring(6);
+//		prefix = type.substring(6, type.length());
+//
+//		System.out.println(baseType);
+//		System.out.println(prefix);
 		
-		baseType = type.substring(6);
-		prefix = type.substring(6, type.length());
-
-		System.out.println(baseType);
-		System.out.println(prefix);
+		System.out.println(DataBaseHandler.getFollowingSize(0));
+		System.out.println(DataBaseHandler.getFollowingSize(1));
+		System.out.println(DataBaseHandler.getFollowingSize(2));
 
 
 	}
