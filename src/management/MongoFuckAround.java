@@ -60,9 +60,9 @@ public class MongoFuckAround {
 //		System.out.println(baseType);
 //		System.out.println(prefix);
 		
-		System.out.println(DataBaseHandler.getFollowingSize(0));
-		System.out.println(DataBaseHandler.getFollowingSize(1));
-		System.out.println(DataBaseHandler.getFollowingSize(2));
+//		System.out.println(DataBaseHandler.getFollowingSize(0));
+//		System.out.println(DataBaseHandler.getFollowingSize(1));
+//		System.out.println(DataBaseHandler.getFollowingSize(2));
 
 
 	}
