@@ -109,13 +109,13 @@ public class TwitterHandler {
 	}
 
 	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
-
+		
 		try {
 			twitter.updateStatus(status);
 		} catch (TwitterException e) {
 			errorHandling(e,index);
 		}
-
+		
 	}
 
 	public static void follow(Twitter twitter, long id, int index){

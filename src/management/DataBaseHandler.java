@@ -801,7 +801,7 @@ public class DataBaseHandler{
 		DataBaseHandler.addElementToSchwergsArray(index, bigAccount, "bigAccounts");
 		Maintenance.writeLog("successfully added an element to bigAccounts", index);
 	}
-
+	
 	/**TODO BOJANG TEST
 	 * @param index
 	 * @param bigAccountsArray

@@ -17,9 +17,7 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.User;
-import twitter4j.conf.ConfigurationBuilder;
+
 
 
 public class bigAccRunnable implements Runnable {
@@ -46,8 +44,7 @@ public class bigAccRunnable implements Runnable {
 	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		ArrayList<Long> bigAccounts = new ArrayList<Long>();
-		Iterator<Long> AllCandidatesIterator;
-		int maxCandidates = 100;
+		int maxCandidates = 300;
 
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
@@ -102,9 +99,6 @@ public class bigAccRunnable implements Runnable {
 			}
 
 			for(long id : AllRTerIDs){
-				if(AllCandidates.size() == 100){
-					break;
-				}
 				//gets 50 tweets from each retweeter
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
@@ -113,7 +107,7 @@ public class bigAccRunnable implements Runnable {
 				ArrayList<ResponseList<Status>> ListPotentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
 				if(ListPotentialBigAccs.isEmpty()){
 					Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
-					return;
+					break;
 				}
 				else{
 					potentialBigAccs = ListPotentialBigAccs.get(0);
@@ -133,16 +127,15 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 
-		//TODO make this part better
+		//This is usually called when a new SchwergsyAccount has run out of bigAccounts to use.
+		//It re-adds the whitelisted bigaccounts into the regular bigaccount pool
+		//it resets bigAccountsWhiteList, but the bigAccounts will be readded later in this method
+		//to the bigAccountsWhiteList
 		else{
-			ResponseList<User> suggestedUsers = bird.getUserSuggestions("funny");
-			int limit = 1;
-			for(User user : suggestedUsers){
-				if(limit != 0){
-					limit--;
-					AllCandidates.add(user.getId());
-				}
-			}
+
+			AllCandidates.addAll((ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
+			DataBaseHandler.replaceSchwergsyArray(index, new HashSet<Long>(), "bigAccountsWhiteList");
+			
 		}
 
 		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
@@ -152,15 +145,10 @@ public class bigAccRunnable implements Runnable {
 			}
 		}
 		
-		AllCandidatesIterator = AllCandidates.iterator(); 
-			while(AllCandidates.size() > 300){
-				AllCandidatesIterator.remove();
-			}
-		
 		for(long id : AllCandidates){
 
 			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
-				break;
+				continue;
 			}
 
 			Paging query = new Paging();
@@ -311,6 +299,7 @@ public class bigAccRunnable implements Runnable {
 					(DataBaseHandler.getBigAccountsSize(index) < 30||DataBaseHandler.getFollowersSize(index) > 100))
 					 ||DataBaseHandler.getBigAccountsSize(index) == 0){
 				findBigAccounts();
+				
 			}
 			else{
 				harvestBigAccounts();
