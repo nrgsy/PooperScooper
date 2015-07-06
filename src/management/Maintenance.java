@@ -55,8 +55,6 @@ public class Maintenance {
 	/**
 	 * Sets the flag to true and waits for the schwergsy timertasks to cancel.
 	 * WARNING DOES NOT UNSET MAINTENACE FLAG
-	 * 
-	 * 
 	 */
 	public static void safeShutDownAccounts() {
 
@@ -79,14 +77,38 @@ public class Maintenance {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					Maintenance.writeLog("***ERROR*** Something fucked up in Maintenance ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
+					Maintenance.writeLog("Something fucked up in safeShutDownAccounts\n" + 
+							Maintenance.getStackTrace(e), -1);
 				}
 			}
 		}
 		Maintenance.writeLog("All accounts shut down successfully", "maintenance");
 	}
 
-	//wait for e verything to stop
+	/**
+	 * Sets the scrapers' shutdownRequest to true and waits for the content snatch to finish.
+	 * WARNING DOES NOT UNSET shutdownRequest
+	 */
+	public static void safeShutDownScrapers() {
+
+		Maintenance.writeLog("Shutting down scrapers", "maintenance");
+
+		RedditScraper.shutdownRequest = true;
+		while (RedditScraper.isSnatching) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Maintenance.writeLog("Something fucked up in safeShutDownScrapers\n" +
+						Maintenance.getStackTrace(e), "maintenance", -1);
+			}
+		}
+
+		Maintenance.writeLog("All scrapers shut down successfully", "maintenance");
+		deleteResidualPics();
+	}
+
+
+	//wait for everything to stop and exit
 	public static void safeShutdownSystem() {
 		try {
 
@@ -98,18 +120,37 @@ public class Maintenance {
 				Thread.sleep(1000);
 			}
 
+			//shutdown 
 			safeShutDownAccounts();
+			safeShutDownScrapers();
 
 			Maintenance.writeLog("Exiting program", "maintenance");
 			System.exit(0);
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway\n"+Maintenance.writeStackTrace(e),
-					"maintenance");
+			Maintenance.writeLog("Safe shutdown sequence fucked up. YOLO shutting down anyway\n" + 
+					Maintenance.getStackTrace(e), "maintenance", -1);
 			System.exit(0);
 		}
 	}
 
+	/**
+	 * Deletes any pics in the pics/ directory if any exist
+	 */
+	private static void deleteResidualPics() {
+
+		Maintenance.writeLog("deleting residual pics if any exist", "maintenance");
+		File picsDir = new File("pics/");
+		for(File f : picsDir.listFiles()) {
+			f.delete(); 
+		} 
+	}
+
+	/**
+	 * Perform daily maintenance
+	 * 
+	 * @throws Exception
+	 */
 	public static void performMaintenance() throws Exception {
 		try{
 
@@ -117,8 +158,8 @@ public class Maintenance {
 			TimerFactory.globalTimer.purge();
 
 			if (flagSet) {
-				Maintenance.writeLog("WARNING: Cannot perform maintenance while maintenance is already"
-						+ " running (flagSet was true). Exiting performMaintenance", "maintenance");
+				Maintenance.writeLog("Cannot perform maintenance while maintenance is already"
+						+ " running (flagSet was true). Exiting performMaintenance", "maintenance", 1);
 				return;
 			}
 
@@ -127,6 +168,7 @@ public class Maintenance {
 
 			//Sets maintenance flag to true
 			safeShutDownAccounts();
+			safeShutDownScrapers();
 
 			Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
 					+ " ms for all the timers to die", "maintenance");
@@ -146,17 +188,16 @@ public class Maintenance {
 			try {
 				cleanToFollows();
 			} catch (UnknownHostException | FuckinUpKPException e) {
-				Maintenance.writeLog("***ERROR*** failed to clean ToFollows ***ERROR***\n"+Maintenance.writeStackTrace(e), "maintenance");
-				e.printStackTrace();
+				Maintenance.writeLog("failed to clean ToFollows\n" +
+						Maintenance.getStackTrace(e), "maintenance", -1);
 			}
 
 			//resets bigAccountHarvestIndexes to 0
 			try {
 				resetBigAccountHarvestIndexes();
 			} catch (UnknownHostException e) {
-				Maintenance.writeLog("***ERROR*** failed to reset bigAccountHarvestIndexes ***ERROR***\n"+Maintenance.writeStackTrace(e),
-						"maintenance");
-				e.printStackTrace();
+				Maintenance.writeLog("failed to reset bigAccountHarvestIndexes\n" +
+						Maintenance.getStackTrace(e), "maintenance", -1);
 			}
 
 			Maintenance.writeLog("It took " + (new Date().getTime() - nonAPIstartTime)
@@ -184,6 +225,7 @@ public class Maintenance {
 
 			//start all the timers because they all suicide when they see maintenance flag is set
 			TimerFactory.scheduleAllSchwergsyTimers();
+
 			new Thread(new RedditScraper()).start();
 
 			Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
@@ -194,7 +236,8 @@ public class Maintenance {
 					(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 		}
 		catch(Exception e){
-			Maintenance.writeLog("***ERROR*** Something unexpected happened in performMaintenance ***ERROR***\n"+Maintenance.writeStackTrace(e), "KP");
+			Maintenance.writeLog("Something unexpected happened in performMaintenance\n" +
+					Maintenance.getStackTrace(e), "maintenance", -1);
 		}
 	}
 
@@ -202,15 +245,41 @@ public class Maintenance {
 	 * Prints the message to console and writes it to the appropriate log
 	 * 
 	 * @param message the message to print
-	 * @param subDir The directory within the logs folder that this log will be put in/written to
+	 * @param subDir The directory within the logs folder that this log will be put in/written to\
+	 * @param errorStatus indicates the error status of the message to be printed; -1 indicates error,
+	 * 1 indicates warning, 0 indicates that its a regular message (not error or warning)
 	 */
-	public static void writeLog(String message, String subDir) {
+	public static void writeLog(String message, String subDir, int errorStatus) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		Date now = new Date();
 		String strDate = sdf.format(now);
-		String output = strDate + " ----- " + message;
-		System.out.println(output);
+
+		String errorString;
+		switch (errorStatus) {
+		case -1 :
+			errorString = " ***ERROR*** ";
+			//also write all errors to the KP directory
+			writeLog(errorString + message + errorString, "KP");
+			break;
+		case 0 :
+			errorString = " ";
+			break;
+		case 1 :
+			errorString = " ***WARNING*** ";
+			break;
+		default :
+			System.out.println("***ERROR*** Unexpected argument for errorStatus ***ERROR***");
+			return;
+		}
+
+		String output = strDate + " -----" + errorString + message + errorString;
+
+		//only write to console if not an error (because it will write to console in the case statement
+		//above when it recursively called writeLog)
+		if (errorStatus != -1) {
+			System.out.println(output);
+		}
 
 		if (subDir == null) {
 			subDir = "default"; 
@@ -240,7 +309,6 @@ public class Maintenance {
 			fw2.write(output + "\n");
 			fw2.close();
 		} catch (IOException e) {
-			
 			System.out.println("***ERROR*** Failed to write to log file ***ERROR***");
 			e.printStackTrace();
 			return;
@@ -249,17 +317,30 @@ public class Maintenance {
 
 	/**
 	 * @param index The index of the schwergsy account
+	 * @param errorStatus the error status of the message
 	 */
-	public static void writeLog(String message, int index) { 
+	public static void writeLog(String message, int index, int errorStatus) { 
 		String name = (String) DataBaseHandler.getSchwergsyAccount(index).get("name");
-		writeLog(message, name);
+		writeLog(message, name, errorStatus);
 	}
 
-	public static void writeLog(String message) { writeLog(message, null); }
+	//default error staus is 0 (normal message, not error or warning)
+	public static void writeLog(String message, String subDir) {
+		writeLog(message, subDir, 0);
+	}
 
-	public static void writeLog() { writeLog(""); }
-	
-	public static String writeStackTrace(Exception e){
+	/**
+	 * @param index The index of the schwergsy account
+	 */
+	public static void writeLog(String message, int index) { 
+		writeLog(message, index, 0);
+	}
+
+	public static void writeLog(String message) {
+		writeLog(message, null);
+	}
+
+	public static String getStackTrace(Exception e){
 		String error = e.toString() + "\n";
 		for(StackTraceElement elem : e.getStackTrace()){
 			error += elem.toString();

@@ -8,6 +8,7 @@ public class FuckinUpKPException extends Exception {
 	//the string to print when thrown
 	public FuckinUpKPException(String message) {
 		super(message);
+		Maintenance.writeLog("***KP***" + message + "***KP***", "KP");
 	}
 	
 }

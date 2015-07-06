@@ -30,7 +30,7 @@ public class FollowRunnable implements Runnable{
 	 * @param OAuthAccessTokenSecret
 	 */
 	public FollowRunnable(Twitter twitter, int index){
-		Maintenance.writeLog("New FollowRunnable created");
+		Maintenance.writeLog("New FollowRunnable created", index);
 		this.index = index;
 		bird = twitter;
 		Maintenance.runStatus.put(index+"follow", true);	
@@ -48,9 +48,10 @@ public class FollowRunnable implements Runnable{
 			Paging paging = new Paging();
 			paging.setCount(50);
 			
-			ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird, id, paging, index);
+			ArrayList<ResponseList<Status>> ListTweets =
+					TwitterHandler.getUserTimeline(bird, id, paging, index);
 			if(ListTweets.isEmpty()){
-				Maintenance.writeLog("***ERROR*** Could not run getUserTimeline in FollowRunnable", index);
+				Maintenance.writeLog("Could not run getUserTimeline in FollowRunnable", index, 1);
 				return;
 			}
 			else{
@@ -78,7 +79,8 @@ public class FollowRunnable implements Runnable{
 	public void unfollowUsers() throws UnknownHostException, TwitterException{
 		int sizeFollowers = DataBaseHandler.getFollowersSize(index);
 		int sizeFollowing = DataBaseHandler.getFollowingSize(index);
-		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index, GlobalStuff.getNumToUnfollow(sizeFollowers, sizeFollowing));
+		ArrayList<Long> unfollowArr = DataBaseHandler.popMultipleFollowing(index,
+				GlobalStuff.getNumToUnfollow(sizeFollowers, sizeFollowing));
 		for(Long id : unfollowArr){
 			TwitterHandler.unfollow(bird,id, index);
 		}
@@ -89,15 +91,14 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
-		Maintenance.writeLog("run method called for FollowRunnable");
+		Maintenance.writeLog("run method called for FollowRunnable", index);
 
 		try {
 			followAndFavoriteUsers();
 			unfollowUsers();
 		} catch (Exception e) {
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), index);
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n"+Maintenance.writeStackTrace(e), "KP");
-
+			Maintenance.writeLog("FollowRunnable fucked up somewhere\n" + Maintenance.getStackTrace(e),
+					index, -1);
 		}
 		Maintenance.runStatus.put(index+"follow", false);
 	}

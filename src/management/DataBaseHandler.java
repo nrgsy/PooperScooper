@@ -186,8 +186,8 @@ public class DataBaseHandler{
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
 		if (collection == null || collection.count() == 0) {
-			Maintenance.writeLog("***ERROR*** cannot pull global vars. "
-					+ "Collection GlobalVariables does not exist ***ERROR***");
+			Maintenance.writeLog("cannot pull global vars. "
+					+ "Collection GlobalVariables does not exist", -1);
 		}
 		else if (collection.count() == 1) {
 			MongoCursor<Document> globalVarsCursor = collection.find().iterator();
@@ -195,8 +195,8 @@ public class DataBaseHandler{
 			GlobalStuff.setGlobalVars(globalVars);
 		}
 		else {
-			Maintenance.writeLog("***ERROR*** GlobalVariables had " + collection.count() + " entries. "
-					+ "It should only ever have one entry, or not exist at all ***ERROR***");
+			Maintenance.writeLog("GlobalVariables had " + collection.count() + " entries. "
+					+ "It should only ever have one entry, or not exist at all", -1);
 		}
 	}
 
@@ -287,8 +287,8 @@ public class DataBaseHandler{
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					Maintenance.writeLog("***ERROR*** thread snooze interrupted ***ERRROR***", "gui");
-					e.printStackTrace();
+					Maintenance.writeLog("thread snooze interrupted" + Maintenance.getStackTrace(e),
+							"gui", -1);
 				}
 				now = new Date().getTime();
 				creationTimeCheck = new Document("_id", now);
@@ -323,7 +323,7 @@ public class DataBaseHandler{
 				schwagCollection.insertOne(newContent);
 				Maintenance.writeLog("Successfully added new content of type " + type, "content");
 				break;
-			default: Maintenance.writeLog("***ERROR*** invalid content type***ERROR***", "content");
+			default: Maintenance.writeLog("invalid content type", "content", -1);
 			}
 		}
 		else {
@@ -409,7 +409,8 @@ public class DataBaseHandler{
 				new Document("_id", index),
 				new Document("$set", new Document("isIncubated", false)));
 
-		Maintenance.writeLog("congratulations, SchwergsyAccount #"+index+" has graduated from incubation");
+		Maintenance.writeLog("congratulations, SchwergsyAccount #" + index + 
+				" has graduated from incubation", index);
 	}
 
 	public static void incubate (int index){
@@ -449,8 +450,8 @@ public class DataBaseHandler{
 
 		}
 		else {
-			Maintenance.writeLog();
-			throw new FuckinUpKPException("method addElementToSchwergsArray is not a trash can.\nYou can't just be throwin' whatever you please in.");
+			throw new FuckinUpKPException("method addElementToSchwergsArray is not a trash can.\n"
+					+ "You can't just be throwin' whatever you please in.");
 		}
 
 		dbCollection.findOneAndUpdate(query, ele);
@@ -523,12 +524,18 @@ public class DataBaseHandler{
 	 * @param index The id of the Schwergsy account
 	 * @throws Exception 
 	 */
-	public static  void updateFollowers(int index) throws Exception {
+	public static void updateFollowers(int index) throws Exception {
 
 		//get the current set of followers from twitter
 		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
 		Twitter twitter = TwitterHandler.getTwitter(authInfo);		
 		HashSet<Long> freshFollowerSet = TwitterHandler.getFollowers(twitter, index);
+		
+		if (freshFollowerSet == null) {
+			Maintenance.writeLog("Failed to update followers, something went wrong trying to "
+					+ "get the the current set of followers from twitter", index, 1);
+			return;
+		}
 
 		if(freshFollowerSet.size()>=2000){
 			finishedIncubation(index);
@@ -724,7 +731,8 @@ public class DataBaseHandler{
 			bigAccountHarvestIndex = (int)cursor.next().get("bigAccountHarvestIndex");
 		}
 		else{
-			Maintenance.writeLog("***ERROR*** bigAccountHarvestIndex could not be found while running getBigAccountHarvestIndex", index);
+			Maintenance.writeLog("bigAccountHarvestIndex could not be found while running "
+					+ "getBigAccountHarvestIndex", index, -1);
 		}
 		cursor.close();
 		return bigAccountHarvestIndex;
@@ -967,10 +975,8 @@ public class DataBaseHandler{
 			doc = cursor.next();
 		}
 		catch (NoSuchElementException e) {
-			Maintenance.writeLog("***ERROR*** Schwergsy Account with _id: " + index +
-					" not found. ***ERROR***\n"+Maintenance.writeStackTrace(e));
-
-
+			Maintenance.writeLog("Schwergsy Account with _id: " + index +
+					" not found.\n" + Maintenance.getStackTrace(e), -1);
 			return null;
 		}
 		cursor.close();
@@ -995,8 +1001,8 @@ public class DataBaseHandler{
 			doc = cursor.next();
 		}
 		catch (NoSuchElementException e) {
-			Maintenance.writeLog("***ERROR*** Schwergsy Account with name: " + name +
-					" not found. ***ERROR***\n"+Maintenance.writeStackTrace(e));
+			Maintenance.writeLog("Schwergsy Account with name: " + name +
+					" not found.\n" + Maintenance.getStackTrace(e), -1);
 			return null;
 		}
 		cursor.close();
@@ -1174,8 +1180,8 @@ public class DataBaseHandler{
 		//check if this schwergsy account already exists in the database
 		Document uniqueCheck = new Document("authorizationKey", authorizationKey);
 		if (dbCollection.find(uniqueCheck).limit(1).first() != null) {
-			Maintenance.writeLog("WARNING: Schwergsy account already exists in the database, "
-					+ "will not add duplicate");
+			Maintenance.writeLog("Schwergsy account already exists in the database, "
+					+ "will not add duplicate", 1);
 			return false;
 		}
 		else {
@@ -1216,8 +1222,8 @@ public class DataBaseHandler{
 				updateFollowers(_id);
 			}
 			catch (Exception e) {
-				Maintenance.writeLog("WARNING: Schwergsy account failed to authenticate,"
-						+ " removing from db\n"+Maintenance.writeStackTrace(e));	
+				Maintenance.writeLog("Schwergsy account failed to authenticate,"
+						+ " removing from db\n" + Maintenance.getStackTrace(e), 1);	
 				//Can remove without the need to remap id's because we know this schwergsy account was
 				//the last to be added, so the ids of the others with still be in order without the
 				//need to remap.
@@ -1475,8 +1481,7 @@ public class DataBaseHandler{
 					+ "---------------------------------------------------------------------------\n");
 		} 		
 		catch (Exception e) {
-			Maintenance.writeLog("***ERROR*** Error printing ***ERROR***\n"+Maintenance.writeStackTrace(e));
-			e.printStackTrace();
+			Maintenance.writeLog("Error printing\n" + Maintenance.getStackTrace(e), -1);
 		}
 
 		finally{

@@ -32,7 +32,7 @@ public class bigAccRunnable implements Runnable {
 	 * @param OAuthAccessTokenSecret
 	 */
 	public bigAccRunnable(Twitter twitter, int index, int bigAccountIndex){
-		Maintenance.writeLog("New bigAccRunnable created");
+		Maintenance.writeLog("New bigAccRunnable created", index);
 		this.index = index;
 		this.bigAccountIndex = bigAccountIndex;
 		bird = twitter;
@@ -52,7 +52,8 @@ public class bigAccRunnable implements Runnable {
 			
 			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 			if(ListOwnTweets.isEmpty()){
-				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable.findBigAccounts",
+						index, 1);
 				return;
 			}
 			else{
@@ -106,7 +107,7 @@ public class bigAccRunnable implements Runnable {
 				
 				ArrayList<ResponseList<Status>> ListPotentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
 				if(ListPotentialBigAccs.isEmpty()){
-					Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+					Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
 					break;
 				}
 				else{
@@ -156,7 +157,7 @@ public class bigAccRunnable implements Runnable {
 			ResponseList<Status> timeline = null;
 			ArrayList<ResponseList<Status>> ListTimeline = TwitterHandler.getUserTimeline(bird,id, query , index);
 			if(ListTimeline.isEmpty()){
-				Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
 				return;
 			}
 			else{
@@ -219,7 +220,7 @@ public class bigAccRunnable implements Runnable {
 		ResponseList<Status> tweets = null;
 		ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
 		if(ListTweets.isEmpty()){
-			Maintenance.writeLog("***ERROR*** Could not run getUserTimelime in bigAccRunnable", index);
+			Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
 			return;
 		}
 		else{
@@ -293,7 +294,7 @@ public class bigAccRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		Maintenance.writeLog("run method called for bigAccRunnable");
+		Maintenance.writeLog("run method called for bigAccRunnable", index);
 		try {
 			if(((DataBaseHandler.getToFollowSize(index) > 3000) && 
 					(DataBaseHandler.getBigAccountsSize(index) < 30||DataBaseHandler.getFollowersSize(index) > 100))
@@ -305,10 +306,8 @@ public class bigAccRunnable implements Runnable {
 				harvestBigAccounts();
 			}
 		} catch (Exception e) {
-			Maintenance.writeLog("***ERROR*** Something fucked up in bigAccRunnable ***ERROR***"
-					+ "\n"+Maintenance.writeStackTrace(e), index);
-			Maintenance.writeLog("***ERROR*** Something fucked up in bigAccRunnable ***ERROR***"
-					+ "\n"+Maintenance.writeStackTrace(e), "KP");
+			Maintenance.writeLog("Something fucked up in bigAccRunnable"
+					+ "\n" + Maintenance.getStackTrace(e), index, -1);
 		}
 		Maintenance.runStatus.put(index+"bigAcc", false);
 	}

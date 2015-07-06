@@ -44,6 +44,8 @@ public class TwitterHandler {
 	 * @param init
 	 * @throws TwitterException
 	 * @throws UnknownHostException 
+	 * 
+	 * NOTICE can return null if something goes wrong
 	 */
 	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
 		if(!isAtRateLimit(bird, "/followers/ids", index)){
@@ -69,11 +71,11 @@ public class TwitterHandler {
 				return followers;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return new HashSet<Long>();
+				return null;
 			}
 		}
-		else{
-			return new HashSet<Long>();
+		else {
+			return null;
 		}
 	}
 
@@ -109,13 +111,13 @@ public class TwitterHandler {
 	}
 
 	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
-		
+
 		try {
 			twitter.updateStatus(status);
 		} catch (TwitterException e) {
 			errorHandling(e,index);
 		}
-		
+
 	}
 
 	public static void follow(Twitter twitter, long id, int index){
@@ -161,13 +163,13 @@ public class TwitterHandler {
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, Paging query, int index){
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
-		try {
-			ListWrapper.add(twitter.getUserTimeline(id, query));
-			return ListWrapper;
-		} catch (TwitterException e) {
-			errorHandling(e,index);
-			return ListWrapper;
-		}
+			try {
+				ListWrapper.add(twitter.getUserTimeline(id, query));
+				return ListWrapper;
+			} catch (TwitterException e) {
+				errorHandling(e,index);
+				return ListWrapper;
+			}
 		}
 		else{
 			return ListWrapper;
@@ -237,30 +239,34 @@ public class TwitterHandler {
 	}
 
 	private static void errorHandling(TwitterException e, int index){
-		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERRROR***\n"+Maintenance.writeStackTrace(e), "KP");
-		Maintenance.writeLog("***ERROR*** Something fucked up in TwitterHandler ***ERROR***\n"+Maintenance.writeStackTrace(e),index);
-		switch(e.getErrorCode()){
+
+		switch(e.getErrorCode()) {		
 		case 64:
-			Maintenance.writeLog("***ERROR*** This account has been suspended", index);
+			Maintenance.writeLog("Shit, this account has been suspended", index, -1);
 			DataBaseHandler.suspendSchwergsyAccount(index);
 			break;
 		case 88:
-			Maintenance.writeLog("***WARNING*** Rate limit has been exceeded", index);
+			Maintenance.writeLog("Rate limit has been exceeded", index, 1);
 			break;
 		case 130:
-			Maintenance.writeLog("***WARNING*** Twitter is over capacity to fulfill this request",index);
+			Maintenance.writeLog("Twitter is over capacity to fulfill this request", index, 1);
 			break;
 		case 131:
-			Maintenance.writeLog("***WARNING*** Twitter internal error",index);
+			Maintenance.writeLog("Twitter internal error", index, 1);
 			break;
 		case 161:
-			Maintenance.writeLog("***WARNING*** Unable to follow more people at this time", index );
+			Maintenance.writeLog("Unable to follow more people at this time", index, 1);
 			break;
 		case 226:
-			Maintenance.writeLog("***WARNING*** Twitter thinks this request was automated", index);
+			Maintenance.writeLog("Twitter thinks this request was automated", index, 1);
+			break;
+		case -1:
+			Maintenance.writeLog("The interwebs are probably fuckin up, "
+					+ "TwitterHandler threw this error: " + e.toString(), index, 1);
 			break;
 		default:
-			Maintenance.writeLog("***WARNING*** "+e.getErrorMessage(), index);
+			Maintenance.writeLog("Something fucked up in Twitter handling/n" +
+					Maintenance.getStackTrace(e), index, -1);
 			break;
 		}
 	}

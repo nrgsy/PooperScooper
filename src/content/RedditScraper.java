@@ -26,34 +26,49 @@ import org.jsoup.select.Elements;
 
 public class RedditScraper implements Runnable{
 
+	//when set to true, content snatch will return on the next iteration of its main loop
+	public static boolean shutdownRequest;
+
+	//indicator that the contentSnatch is running
+	public static boolean isSnatching;
+
 	public RedditScraper() {
-		Maintenance.writeLog("New Reddit scraper created");
+		Maintenance.writeLog("New Reddit scraper created", "content");
 	}
 
 	/**
 	 * @param init
 	 * @throws FuckinUpKPException
 	 * @throws InterruptedException 
+	 * 
+	 * ***NOTICE*** if you change this method, be sure isSnatching is set to false when the method exits
 	 */
-	public void contentSnatch() throws FuckinUpKPException, InterruptedException {
+	public void contentSnatch() throws FuckinUpKPException {
 
+		isSnatching = true;		
 		int pages = 35;
-
 		ArrayList<String> redditLinks;
 
 		for(Entry<String, Object> entry : ContentDirectory.contentDirectory.entrySet()) {
+
+			if (shutdownRequest) {
+				isSnatching = false;
+				return;
+			}
+
 			org.bson.Document sites = (org.bson.Document) entry.getValue();
 			redditLinks = (ArrayList<String>) sites.get("reddit");
 
 			if (redditLinks == null) {
-				Maintenance.writeLog("***ERROR*** Tears, couldn't find reddit links ***ERROR***", "KP");
+				Maintenance.writeLog("Tears, couldn't find reddit links", "content", -1);
+				isSnatching = false;
 				return;
 			}
 
 			for (String url : redditLinks) {
 
 				HashMap<String, String> content = new HashMap<>();
-				
+
 				//Loop through reddit and gathers title + image link
 				for(int j = 0; j<pages; j++) {
 					Document document = null;
@@ -61,18 +76,23 @@ public class RedditScraper implements Runnable{
 					try {
 						document = Jsoup.connect(url).userAgent("Mozilla").get();
 					} 
-					catch(IllegalArgumentException e) {
-						//do nothing
-						Maintenance.writeLog("Found invalid url, skipping.", "content");
+					catch(IllegalArgumentException | SocketTimeoutException e) {
+						//skip to next iteration of the loop
+						Maintenance.writeLog("Failed to get url, skipping.", "content");
 						continue;	
 					}
-					catch (SocketTimeoutException e) {
-						//do nothing
-						continue;
+					catch (UnknownHostException e) {
+						//skip to next iteration of the loop
+						Maintenance.writeLog("The internet connection is probably fuckin up, "
+								+ "can't snatch content", "content", 1);
+						isSnatching = false;
+						return;
 					}
 					catch (Exception e) {
-						e.printStackTrace();
-						throw new FuckinUpKPException("can't get to reddit.com");
+						Maintenance.writeLog("Something fucked up in contentSnatch" + 
+								Maintenance.getStackTrace(e), "content", -1);
+						isSnatching = false;
+						return;
 					}
 
 					if (document == null) {
@@ -103,21 +123,22 @@ public class RedditScraper implements Runnable{
 					DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(), 
 							"pending" + entry.getKey(), null);
 				}
-
 			}
 		}
+		isSnatching = false;
 	}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Runnable#run()
-		 */
-		@Override
-		public void run() {
-			Maintenance.writeLog("run method called for RedditScraper");
-			try {
-				contentSnatch();
-			} catch (FuckinUpKPException | InterruptedException e) {
-				Maintenance.writeLog("***ERROR*** Something fucked up in RedditScraper ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
-			}
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+		Maintenance.writeLog("run method called for RedditScraper", "content");
+		try {
+			contentSnatch();
+		} catch (FuckinUpKPException e) {
+			Maintenance.writeLog("Something fucked up in RedditScraper\n" + 
+					Maintenance.getStackTrace(e), "content", -1);
 		}
 	}
+}

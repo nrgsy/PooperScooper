@@ -68,7 +68,8 @@ public class ImageManipulator {
 			}
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
+			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" + 
+					Maintenance.getStackTrace(e), "content", -1);
 		}
 		finally{
 			while(count>=0){
@@ -93,7 +94,7 @@ public class ImageManipulator {
 	}
 
 	/**
-	 * Gets image link, saves image, returns image location OR NULL IF THE URL IS BAD
+	 * Gets image link, saves image, returns image location OR NULL IF THE URL IS BAD/UNABLE TO DOWNLOAD
 	 * 
 	 * @param imgsrc
 	 * @return
@@ -122,13 +123,15 @@ public class ImageManipulator {
 			//The receiver must delete the file after posting to Twitter
 		}
 		catch (IIOException e) {
-			Maintenance.writeLog("Bad URL found when trying to fetch an image, returning null. It's"
-					+ "probably whatever, but here's the error anyway" + e.toString(), "content");
+			Maintenance.writeLog("There was a problem with the interwebs or URL was bad when "
+					+ "trying to fetch an image.\nIt's probably whatever, "
+					+ "but here's the error anyway" + e.toString(), "content", 1);
 			return null;
 		}
 		catch (IOException e) {
-			Maintenance.writeLog("***ERROR*** Something fucked up in ImageMainpulator ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
-			throw new FuckinUpKPException("ERROR: Did not get image file with string"+imgsrc);
+			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" + 
+					Maintenance.getStackTrace(e), "content", -1);
+			throw new FuckinUpKPException("Did not get image file with string" + imgsrc);
 		}
 	}
 

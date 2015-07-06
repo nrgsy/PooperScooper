@@ -20,6 +20,7 @@ public class GlobalStuff{
 	//sets the values of these to match those.
 	//The default values can be found in the main method of Director. They are used to initialize the
 	//GlobalVariables collection when it does not exist	
+	
 	//NOTICE****************************************NOTICE***************************************NOTICE
 	//IF YOU ARE ADDING A VOLATILE GLOBAL VARIABLE YOU MUST:
 	//1: Edit GlobalStuff's setGlobalVars method (for updating its value from the db)
@@ -55,6 +56,8 @@ public class GlobalStuff{
 	//the minimum amount of time Maintenance should ever take before starting the API calling section
 	//(to ensure that rate limits cannot be exceeded)
 	public static long MAINTENANCE_SNOOZE_TIME;
+	//the number of tries uploadPic in TwitterRunnable has before giving up 
+	public static long UPLOAD_PIC_ATTEMPT_LIMIT;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -81,8 +84,8 @@ public class GlobalStuff{
 			numToUnfollow = 0;
 		}
 		else{
-			Maintenance.writeLog("***ERROR*** We have negative followers or following or "
-					+ "Jon is an idiot ***ERROR***");
+			Maintenance.writeLog("We have negative followers or following or "
+					+ "Jon is an idiot", -1);
 		}
 		return numToUnfollow >= 0 ? numToUnfollow : 0;
 	}
@@ -110,6 +113,7 @@ public class GlobalStuff{
 		LOG_DIRECTORY = globalVars.getString("LOG_DIRECTORY");
 		TIMER_TASK_FIRE_RATE = globalVars.getLong("TIMER_TASK_FIRE_RATE");
 		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
+		UPLOAD_PIC_ATTEMPT_LIMIT = globalVars.getLong("UPLOAD_PIC_ATTEMPT_LIMIT");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -144,6 +148,7 @@ public class GlobalStuff{
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
 		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
+		globalVars.put("UPLOAD_PIC_ATTEMPT_LIMIT", 10L);
 
 		return globalVars;
 	}

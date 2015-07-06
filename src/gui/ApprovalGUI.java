@@ -15,6 +15,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.DatabaseMetaData;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.xml.crypto.Data;
@@ -149,8 +151,8 @@ public class ApprovalGUI {
 		try {
 			ApprovalGUI.loadNext();
 		} catch (IOException e1) {
-			e1.printStackTrace();
-			Maintenance.writeLog("***ERROR*** addContent fucked up ***ERRROR***", "gui");
+			Maintenance.writeLog("addContent fucked up" + Maintenance.getStackTrace(e1),
+					"gui", -1);
 		}	
 	}
 
@@ -162,8 +164,8 @@ public class ApprovalGUI {
 			try {
 				ApprovalGUI.loadNext();
 			} catch (IOException e1) {
-				e1.printStackTrace();
-				Maintenance.writeLog("***ERROR*** trash button fucked up ***ERRROR***", "gui");
+				Maintenance.writeLog("trash button fucked up" + Maintenance.getStackTrace(e1),
+						"gui", -1);
 			}
 		}
 	}
@@ -281,8 +283,8 @@ public class ApprovalGUI {
 				isSuspended = getAccountBoolean("isSuspended");
 				isIncubated = getAccountBoolean("isIncubated");
 			} catch (FuckinUpKPException e2) {
-				Maintenance.writeLog("***ERROR*** add account button fucked up ***ERRROR***", "gui");
-				e2.printStackTrace();
+				Maintenance.writeLog("add account button fucked up" + 
+						Maintenance.getStackTrace(e2), "gui", -1);
 				return;
 			}
 
@@ -297,8 +299,9 @@ public class ApprovalGUI {
 					return;
 				}
 			} catch (TwitterException e1) {
-				Maintenance.writeLog("***ERROR*** add account button fucked up ***ERRROR***", "gui");
-				e1.printStackTrace();
+				Maintenance.writeLog("add account button fucked up" + 
+						Maintenance.getStackTrace(e1), "gui", -1);
+				return;
 			}
 
 			//SchwergsyAccount is already added at this point, so you must - 1 to get index
@@ -367,8 +370,8 @@ public class ApprovalGUI {
 							"isSuspended");
 				}
 			} catch (FuckinUpKPException e2) {
-				Maintenance.writeLog("***ERROR*** replace button fucked up ***ERRROR***", "gui");
-				e2.printStackTrace();
+				Maintenance.writeLog("replace button fucked up" + 
+						Maintenance.getStackTrace(e2), "gui", -1);
 				return;
 			}
 		}
@@ -393,7 +396,7 @@ public class ApprovalGUI {
 			textField = suspendedField;
 		}
 		else {
-			Maintenance.writeLog("***ERROR*** bad field string passed in ***ERROR***", "gui");
+			Maintenance.writeLog("bad field string passed in", "gui", -1);
 			throw new FuckinUpKPException("");
 		}
 
@@ -402,7 +405,7 @@ public class ApprovalGUI {
 		} else if (textField.getText().toLowerCase().equals("false")) {
 			parsedBoolean = false;
 		} else {
-			Maintenance.writeLog("***ERROR*** Cannot parse boolean text field ***ERROR***", "gui");
+			Maintenance.writeLog("Cannot parse boolean text field", "gui", -1);
 			throw new FuckinUpKPException("");
 		}	
 
@@ -434,8 +437,8 @@ public class ApprovalGUI {
 				DataBaseHandler.addBigAccount(DataBaseHandler.getSchwergsyAccountIndex(name),
 						seed, 0, 0, -1);
 			} catch (FuckinUpKPException e) {
-				Maintenance.writeLog("***ERROR*** Could not add big account ***ERROR***", "gui");
-				e.printStackTrace();
+				Maintenance.writeLog("Could not add big account" + Maintenance.getStackTrace(e), 
+						"gui", -1);				
 			}			
 		}
 	}
@@ -453,7 +456,7 @@ public class ApprovalGUI {
 					stacktrace += stack.toString();
 					stacktrace += "\n";
 				}
-				Maintenance.writeLog("***ERROR*** Could not perform maintenance ***ERROR***\n" + stacktrace, "maintenance");
+				Maintenance.writeLog("Could not perform maintenance\n" + stacktrace, "maintenance", -1);
 
 			}
 		}
@@ -469,8 +472,8 @@ public class ApprovalGUI {
 			try {
 				i = (int) DataBaseHandler.getCollectionSize("SchwergsyAccounts") - 1;
 			} catch (Exception e2) {
-				Maintenance.writeLog("***ERROR*** stats button fucked up ***ERRROR***", "gui");
-				e2.printStackTrace();
+				Maintenance.writeLog("stats button fucked up" + Maintenance.getStackTrace(e2),
+						"gui", -1);
 			}
 
 			while (i >= 0) {
@@ -563,9 +566,11 @@ public class ApprovalGUI {
 			picPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			try {
 				picPanel.add(getNextPicLabel());
-			} catch (IOException e1) {
-				Maintenance.writeLog("***ERROR*** Unknown Exception ***ERROR***");
-				e1.printStackTrace();
+			} catch (IOException e) {
+				Maintenance.writeLog("Failed to build content reviewer. Internet connection might"
+						+ " be fuckin up. Here's the error if you're interested: " + e.toString(),
+						"gui", 1);
+				return;
 			}
 			picPanel.setBackground(Color.GRAY);
 

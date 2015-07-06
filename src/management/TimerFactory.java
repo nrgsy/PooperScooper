@@ -24,7 +24,7 @@ public class TimerFactory {
 	 */
 	private static TimerTask createTwitterRunnableTimerTask(final Twitter bird, final int index){
 
-		Maintenance.writeLog("creating TwitterRunnableTimerTask");
+		Maintenance.writeLog("creating TwitterRunnableTimerTask", index);
 
 		return new TimerTask() {
 			@Override
@@ -57,7 +57,7 @@ public class TimerFactory {
 			final int index,
 			final long followTime) {
 
-		Maintenance.writeLog("creating FollowRunnableTimerTask");
+		Maintenance.writeLog("creating FollowRunnableTimerTask", index);
 
 		return new TimerTask() {
 			@Override
@@ -89,7 +89,7 @@ public class TimerFactory {
 	 */
 	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index) {
 
-		Maintenance.writeLog("creating BigAccRunnableTimerTask");
+		Maintenance.writeLog("creating BigAccRunnableTimerTask", index);
 
 		return new TimerTask() {					
 			@Override
@@ -124,7 +124,7 @@ public class TimerFactory {
 
 	public static TimerTask createMaintenanceTimerTask() {
 
-		Maintenance.writeLog("creating MaintenanceTimerTask");
+		Maintenance.writeLog("creating MaintenanceTimerTask", "maintenance");
 
 		return new TimerTask() {
 			@Override
@@ -133,7 +133,8 @@ public class TimerFactory {
 				try {
 					Maintenance.performMaintenance();
 				} catch (Exception e) {
-					Maintenance.writeLog("***ERROR*** Something fucked up in TimerFactory ***ERRROR*** \n"+Maintenance.writeStackTrace(e), "KP");
+					Maintenance.writeLog("Something fucked up in TimerFactory\n" + 
+							Maintenance.getStackTrace(e), -1);
 				}
 			}};
 	}
@@ -156,8 +157,8 @@ public class TimerFactory {
 				scheduleTimers(id);
 			}
 			else{
-				Maintenance.writeLog("***WARNING*** Timers not created for index: " +
-						id +" due to suspension.");
+				Maintenance.writeLog("Timers not created for index: " +
+						id +" due to suspension.", id, 1);
 			}
 		}
 	}
@@ -170,16 +171,15 @@ public class TimerFactory {
 	 */
 	public static void scheduleTimers(int id) {
 
-		Maintenance.writeLog("Creating timers for account with id: " + id);
+		Maintenance.writeLog("Creating timers for this account", id);
 
 		Document info;
 		try {
 			info = DataBaseHandler.getAuthorizationInfo(id);
 		} catch (Exception e) {
-			Maintenance.writeLog("***ERROR*** Failed to pull authorization info for account with "
-					+ "id: " + id + " from the database. Timers cannot be created for this account"
-							+ ". ***ERROR***\n"+Maintenance.writeStackTrace(e),"KP");
-			e.printStackTrace();
+			Maintenance.writeLog("Failed to pull authorization info from the database. "
+					+ "Timers cannot be created for this account.\n" + Maintenance.getStackTrace(e),
+					id, -1);
 			return;
 		}		
 

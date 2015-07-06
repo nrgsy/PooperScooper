@@ -19,7 +19,7 @@ import content.RedditScraper;
  *
  */
 public class Director {
-	
+
 	/**
 	 * @param base
 	 * @param hourOfDay
@@ -46,27 +46,28 @@ public class Director {
 	 */
 	public static void runDirector() throws Exception {
 
-			//Initialize all the shit
-			DataBaseHandler.initGlobalVars();
-			DataBaseHandler.findAndSetGlobalVars();
-			Maintenance.writeLog("Starting Director");
-			ContentDirectory.init();
-			DataBaseHandler.mongoClient = new MongoClient();
-			GlobalStuff.lastPostTimeMap = new HashMap<>();
-			Maintenance.runStatus = new HashMap<>();
-			GlobalStuff.numberOfRuns = new HashMap<>();
-			TimerFactory.globalTimer = new Timer();
-			Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
-			//The timer who's task fires once a day to do the maintenance tasks
-			new Timer().scheduleAtFixedRate(
-					TimerFactory.createMaintenanceTimerTask(),
-					nextOccurrenceOf3am,
-					GlobalStuff.DAY_IN_MILLISECONDS);
+		//Initialize all the shit
+		DataBaseHandler.initGlobalVars();
+		DataBaseHandler.findAndSetGlobalVars();
+		Maintenance.writeLog("Starting Director");
+		ContentDirectory.init();
+		DataBaseHandler.mongoClient = new MongoClient();
+		Maintenance.runStatus = new HashMap<>();
+		Maintenance.flagSet = false;
+		GlobalStuff.lastPostTimeMap = new HashMap<>();
+		GlobalStuff.numberOfRuns = new HashMap<>();
+		TimerFactory.globalTimer = new Timer();
+		RedditScraper.isSnatching = false;
+		RedditScraper.shutdownRequest = false;
+		Date nextOccurrenceOf3am = getNextTime(new Date(), 3);
+		//The timer who's task fires once a day to do the maintenance tasks
+		new Timer().scheduleAtFixedRate(
+				TimerFactory.createMaintenanceTimerTask(),
+				nextOccurrenceOf3am,
+				GlobalStuff.DAY_IN_MILLISECONDS);
 
-			//create the initial timers
-			TimerFactory.scheduleAllSchwergsyTimers();
-			new Thread(new RedditScraper()).start();
-
+		//create the initial timers
+		TimerFactory.scheduleAllSchwergsyTimers();
+		new Thread(new RedditScraper()).start();
 	}
-	
 }

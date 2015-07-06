@@ -33,7 +33,7 @@ public class TwitterRunnable implements Runnable {
 	 */
 	public TwitterRunnable (Twitter twitter, int index){
 		super();
-		Maintenance.writeLog("New TwitterRunnable created");
+		Maintenance.writeLog("New TwitterRunnable created", index);
 		this.index = index;
 		bird = twitter;
 		Maintenance.runStatus.put(index+"twitter", true);
@@ -56,8 +56,16 @@ public class TwitterRunnable implements Runnable {
 
 	/**
 	 * 	handles downloading image, updating db, and deleting image after upload
+	 * 
+	 * @param attemptNumber the number of times it has been called recursively, exits when this exceeds
+	 * the uploadPicAttemptLimit in global variables
 	 */
-	public void uploadPic(){
+	private void uploadPic(int attemptNumber) {
+		
+		if (attemptNumber > GlobalStuff.UPLOAD_PIC_ATTEMPT_LIMIT) {
+			Maintenance.writeLog("Exceeded UPLOAD_PIC_ATTEMPT_LIMIT in TwitterRunnable", index, 1);
+			return;
+		}
 
 		Maintenance.writeLog("uploading pic for account with index: " + index, index);
 
@@ -75,23 +83,25 @@ public class TwitterRunnable implements Runnable {
 			Document content = DataBaseHandler.getRandomContent(contentType, index);
 			if(content == null) {
 				Maintenance.writeLog("Tried to post, but could not pull content from db."
-						+ "This is not necessarily an error", index);
+						+ " This is not necessarily an error, the db may have run out of content or"
+						+ " the selection could have been unlucky and chosen all content that was "
+						+ "posted recently. Attempting to uploadPic again...", index, 1);
+				uploadPic(attemptNumber + 1);
 				return;
 			}	
 
 			String caption = content.getString("caption");
 			String link = content.getString("imglink");
-			
+
 			if(link!=null){
 				if(caption==null){
 					caption = "";
 				}
-				String location = imgman.getImageFile(link);
 				
+				String location = imgman.getImageFile(link);
 				if (location == null) {
-					Maintenance.writeLog("Tried to upload but link was bad, calling "
-							+ "uploadPic again", index);
-					uploadPic();
+					Maintenance.writeLog("Attempting uploadPic again", index, 1);
+					uploadPic(attemptNumber + 1);
 					return;
 				}	
 				//creates temp image and puts file location in "image"
@@ -100,19 +110,19 @@ public class TwitterRunnable implements Runnable {
 				//calls uploadPicTwitter to upload to twitter and deletes locally saved image
 				uploadPicTwitter(image, caption);
 			}
-			else if(caption!=null){
+			else if(caption != null) {
 				//TODO new method which posts only caption
 			}
-			else{
+			else {
 				//both caption and link were null for some reason
-				uploadPic();
+				uploadPic(attemptNumber + 1);
 			}
 
-			
+
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("Temp download of pic failed " + image + "\n" +Maintenance.writeStackTrace(e), index);
-			e.printStackTrace();
+			Maintenance.writeLog("Temp download of pic failed " + image + "\n" + 
+					Maintenance.getStackTrace(e), index, 1);
 		}
 		finally{
 			if (image != null) {
@@ -120,13 +130,18 @@ public class TwitterRunnable implements Runnable {
 			}
 		}
 	}
+	
+	//default number of attempts is 0
+	private void uploadPic() {
+		uploadPic(0);
+	}	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
 	public void run() {
-		Maintenance.writeLog("run method called for TwitterRunnable");
+		Maintenance.writeLog("run method called for TwitterRunnable", index);
 		try{
 			long now = new Date().getTime();
 			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);
@@ -143,8 +158,8 @@ public class TwitterRunnable implements Runnable {
 			}
 		}
 		catch(Exception e){
-			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+Maintenance.writeStackTrace(e), index);
-			Maintenance.writeLog("Something fucked up in TwitterRunnable\n"+Maintenance.writeStackTrace(e), "KP");
+			Maintenance.writeLog("Something fucked up in TwitterRunnable\n" +
+					Maintenance.getStackTrace(e), index, -1);
 		}
 
 		Maintenance.runStatus.put(index+"twitter", false);
