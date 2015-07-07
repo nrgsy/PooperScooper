@@ -120,8 +120,9 @@ public class Maintenance {
 				Thread.sleep(1000);
 			}
 
-			//shutdown 
+			//shutdown (leaves maintenance flag as true)
 			safeShutDownAccounts();
+			//leaves shutdown request as true
 			safeShutDownScrapers();
 
 			Maintenance.writeLog("Exiting program", "maintenance");
@@ -147,12 +148,58 @@ public class Maintenance {
 	}
 
 	/**
-	 * Perform daily maintenance
+	 * Attempt maintenance, stop it if too much time passes
 	 * 
 	 * @throws Exception
 	 */
-	public static void performMaintenance() throws Exception {
-		try{
+	public static void attemptMaintenance() {
+
+		//run maintenance on a separate thread so it can be cancelled if it takes too long
+		Thread maintenanceThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Maintenance.performMaintenance();
+				} catch (Exception e) {
+					Maintenance.writeLog("Something fucked up in the performMaintenance\n" + 
+							Maintenance.getStackTrace(e), -1);
+				}
+			}
+		});
+
+		long endTimeMillis = System.currentTimeMillis() + GlobalStuff.MAX_MAINTENANCE_RUN_TIME;
+
+		maintenanceThread.start();
+
+		//monitor it and shut it down if it takes too long. Sets Maintenance scrapers flags to
+		//false just in case perform maintenance hasn't gotten to it yet.
+		while (maintenanceThread.isAlive()) {
+
+			if (System.currentTimeMillis() > endTimeMillis) {
+
+				Maintenance.writeLog("Maintenance attempt unsuccessful. maintenanceThread was alive "
+						+ "for too long. Interrupting maintenanceThread.", "maintenance", -1);
+				maintenanceThread.interrupt();
+				return;
+			}
+			//so that we're not checking constantly, just once a second
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Maintenance.writeLog("Sleep interrupted for some reason", "maintenance", -1);
+			}
+		}
+		Maintenance.writeLog("Maintenance Attempt Successful", "maintenance");
+	}
+
+	/**
+	 * Do the maintenance, usually runs daily. This can be interrupted if it takes too long
+	 * 
+	 * @throws Exception
+	 */
+	public static void performMaintenance() {
+
+		try {
 
 			TimerFactory.globalTimer.cancel();
 			TimerFactory.globalTimer.purge();
@@ -166,8 +213,9 @@ public class Maintenance {
 			Maintenance.writeLog("Maintenance Started", "maintenance");
 			long ogStartTime = new Date().getTime();
 
-			//Sets maintenance flag to true
+			//shutdown (leaves maintenance flag as true)
 			safeShutDownAccounts();
+			//leaves shutdown request as true
 			safeShutDownScrapers();
 
 			Maintenance.writeLog("It took " + (new Date().getTime() - ogStartTime)
@@ -181,7 +229,6 @@ public class Maintenance {
 			DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
 
 			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
-
 			DataBaseHandler.findAndSetGlobalVars();
 
 			//cleans up and syncs toFollow with whiteList
@@ -221,11 +268,12 @@ public class Maintenance {
 				DataBaseHandler.updateFollowers(i);
 			}
 
+			//unset maintenance and scraper flags
+			RedditScraper.shutdownRequest = false;
 			flagSet = false;
 
 			//start all the timers because they all suicide when they see maintenance flag is set
 			TimerFactory.scheduleAllSchwergsyTimers();
-
 			new Thread(new RedditScraper()).start();
 
 			Maintenance.writeLog("It took " + (new Date().getTime() - APIstartTime)
@@ -235,7 +283,25 @@ public class Maintenance {
 			Maintenance.writeLog("Maintenance Complete, total time elapsed = " +
 					(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 		}
-		catch(Exception e){
+		catch(InterruptedException e) {
+			//Here we recover nice from an interruption trigger when perform maintence takes too long
+			Maintenance.writeLog("performMaintenance was interrupted. Recovering safely"
+					+ " and restarting scrapers and schwergsy timers", "maintenance", 1);
+			
+			TimerFactory.globalTimer.cancel();
+			TimerFactory.globalTimer.purge();
+			
+			//shutdown everything just in case
+			safeShutDownAccounts();	//leaves maintenance flag as true
+			safeShutDownScrapers(); //leaves shutdown request as true
+			//unset maintenance and scraper flags
+			RedditScraper.shutdownRequest = false;
+			Maintenance.flagSet = false;
+			
+			TimerFactory.scheduleAllSchwergsyTimers();
+			new Thread(new RedditScraper()).start();
+		}
+		catch(Exception e) {
 			Maintenance.writeLog("Something unexpected happened in performMaintenance\n" +
 					Maintenance.getStackTrace(e), "maintenance", -1);
 		}

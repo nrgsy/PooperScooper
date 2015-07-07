@@ -7,6 +7,7 @@ import java.util.TimerTask;
 
 import org.bson.Document;
 
+import content.RedditScraper;
 import twitter4j.GeoLocation;
 import twitter4j.Twitter;
 import twitterRunnables.FollowRunnable;
@@ -129,23 +130,23 @@ public class TimerFactory {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				Maintenance.writeLog("MaintenanceTimerTask fired");
+				Maintenance.writeLog("MaintenanceTimerTask fired", "maintenance");
 				try {
-					Maintenance.performMaintenance();
+					Maintenance.attemptMaintenance();
 				} catch (Exception e) {
 					Maintenance.writeLog("Something fucked up in TimerFactory\n" + 
 							Maintenance.getStackTrace(e), -1);
 				}
 			}};
 	}
-
+	
 	/**
 	 * Creates the Timers for all Schwergsy accounts
 	 * 
 	 * @throws UnknownHostException
 	 * @throws Exception
 	 */
-	public static void scheduleAllSchwergsyTimers() throws UnknownHostException, Exception {
+	public static void scheduleAllSchwergsyTimers() {
 		Maintenance.writeLog("Initializing globalTimer");
 
 		globalTimer = new Timer();

@@ -262,7 +262,7 @@ public class TwitterHandler {
 			break;
 		case -1:
 			Maintenance.writeLog("The interwebs are probably fuckin up, "
-					+ "TwitterHandler threw this error: " + e.toString(), index, 1);
+					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
 			break;
 		default:
 			Maintenance.writeLog("Something fucked up in Twitter handling/n" +

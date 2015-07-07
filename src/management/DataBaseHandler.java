@@ -1221,6 +1221,8 @@ public class DataBaseHandler{
 				initUpdateFollowing(bird,_id);
 				updateFollowers(_id);
 			}
+			//TODO make sure that the try above throws an exception (instead of handling it in the 
+			//methods it calls) so it can be caught below
 			catch (Exception e) {
 				Maintenance.writeLog("Schwergsy account failed to authenticate,"
 						+ " removing from db\n" + Maintenance.getStackTrace(e), 1);	

@@ -83,9 +83,10 @@ public class TwitterRunnable implements Runnable {
 			Document content = DataBaseHandler.getRandomContent(contentType, index);
 			if(content == null) {
 				Maintenance.writeLog("Tried to post, but could not pull content from db."
-						+ " This is not necessarily an error, the db may have run out of content or"
-						+ " the selection could have been unlucky and chosen all content that was "
-						+ "posted recently. Attempting to uploadPic again...", index, 1);
+						+ " This is not necessarily an error, some possible causes are that the db"
+						+ " may have run out of content or the selection could have been unlucky"
+						+ " and chosen only content that was posted recently."
+						+ " Attempting uploadPic again...", index, 1);
 				uploadPic(attemptNumber + 1);
 				return;
 			}	

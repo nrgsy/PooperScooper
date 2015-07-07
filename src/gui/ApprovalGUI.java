@@ -449,14 +449,10 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 
 			try {
-				Maintenance.performMaintenance();
+				Maintenance.attemptMaintenance();
 			} catch (Exception e1) {
-				String stacktrace = "";
-				for (StackTraceElement stack : e1.getStackTrace()) {
-					stacktrace += stack.toString();
-					stacktrace += "\n";
-				}
-				Maintenance.writeLog("Could not perform maintenance\n" + stacktrace, "maintenance", -1);
+				Maintenance.writeLog("Could not perform maintenance\n" + Maintenance.getStackTrace(e1),
+						"maintenance", -1);
 
 			}
 		}

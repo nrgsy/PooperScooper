@@ -10,6 +10,7 @@ public class GlobalStuff{
 	//Non-volatile globals
 	//these do not get updated by the set globals function 
 	public static final long MINUTE_IN_MILLISECONDS = 60000L;
+	public static final long HOUR_IN_MILLISECONDS = 3600000L;
 	public static final long DAY_IN_MILLISECONDS = 86400000L;
 	public static final long WEEK_IN_MILLISECONDS = 604800000L;
 	public static final String DOPEST_MAN_ALIVE = "BO JANG";
@@ -58,6 +59,8 @@ public class GlobalStuff{
 	public static long MAINTENANCE_SNOOZE_TIME;
 	//the number of tries uploadPic in TwitterRunnable has before giving up 
 	public static long UPLOAD_PIC_ATTEMPT_LIMIT;
+	//the number of milliseconds the maintenance thread can run for before being cut off and erroring
+	public static long MAX_MAINTENANCE_RUN_TIME;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -114,6 +117,7 @@ public class GlobalStuff{
 		TIMER_TASK_FIRE_RATE = globalVars.getLong("TIMER_TASK_FIRE_RATE");
 		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
 		UPLOAD_PIC_ATTEMPT_LIMIT = globalVars.getLong("UPLOAD_PIC_ATTEMPT_LIMIT");
+		MAX_MAINTENANCE_RUN_TIME = globalVars.getLong("MAX_MAINTENANCE_RUN_TIME");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -147,8 +151,10 @@ public class GlobalStuff{
 		//Maintenance waits 15 min before twitter api calling section for rate limits to reset
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
-		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15);
+		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);
 		globalVars.put("UPLOAD_PIC_ATTEMPT_LIMIT", 10L);
+		//default max run time for maintenance is 4 hours
+		globalVars.put("MAX_MAINTENANCE_RUN_TIME", GlobalStuff.HOUR_IN_MILLISECONDS * 4L);		
 
 		return globalVars;
 	}
