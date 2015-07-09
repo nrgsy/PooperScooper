@@ -48,6 +48,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
 import content.ContentDirectory;
+import content.ImageManipulator;
 
 public class ApprovalGUI {
 
@@ -656,7 +657,7 @@ public class ApprovalGUI {
 	 */
 	public static JLabel getNextPicLabel() throws IOException {
 		URL url = new URL(currentContent.get("imglink").toString());
-		BufferedImage bufferedImage = ImageIO.read(url);
+		BufferedImage bufferedImage = ImageManipulator.getImageFromURL(url);
 		double newHeight = (double) GlobalStuff.MAX_IMAGE_DIMENSION;
 		double ratio = newHeight / ((double) bufferedImage.getHeight());
 		double newWidth = ((double) bufferedImage.getWidth()) * ratio;

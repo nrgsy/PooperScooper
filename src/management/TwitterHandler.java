@@ -47,7 +47,8 @@ public class TwitterHandler {
 	 * 
 	 * NOTICE can return null if something goes wrong
 	 */
-	public static HashSet<Long> getFollowers(Twitter bird, int index) throws UnknownHostException{
+	public static HashSet<Long> getFollowers(Twitter bird, int index)
+			throws TwitterException{
 		if(!isAtRateLimit(bird, "/followers/ids", index)){
 			int ratecount = 0;
 			IDs blah;
@@ -71,7 +72,8 @@ public class TwitterHandler {
 				return followers;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return null;
+				//don't return if we have an error
+				throw e;
 			}
 		}
 		else {
@@ -79,7 +81,7 @@ public class TwitterHandler {
 		}
 	}
 
-	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index){
+	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index) throws TwitterException{
 
 		if(!isAtRateLimit(twitter, "/friends/ids", index)){
 			try {
@@ -102,7 +104,8 @@ public class TwitterHandler {
 				return following;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
-				return new HashSet<Long>();
+				//throw the error because we don't want to return if there was an exception
+				throw e;
 			}
 		}
 		else{
@@ -110,7 +113,8 @@ public class TwitterHandler {
 		}
 	}
 
-	public static void updateStatus(Twitter twitter, StatusUpdate status, int index){
+	public static void updateStatus(Twitter twitter, StatusUpdate status, int index)
+			throws TwitterException{
 
 		try {
 			twitter.updateStatus(status);
@@ -120,7 +124,7 @@ public class TwitterHandler {
 
 	}
 
-	public static void follow(Twitter twitter, long id, int index){
+	public static void follow(Twitter twitter, long id, int index) throws TwitterException{
 
 		try {
 			twitter.createFriendship(id);
@@ -133,7 +137,7 @@ public class TwitterHandler {
 
 	}
 
-	public static void unfollow(Twitter twitter, long id, int index){
+	public static void unfollow(Twitter twitter, long id, int index) throws TwitterException{
 
 		try {
 			twitter.destroyFriendship(id);
@@ -143,7 +147,8 @@ public class TwitterHandler {
 
 	}
 
-	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, int index){
+	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, int index)
+			throws TwitterException{
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
@@ -160,7 +165,8 @@ public class TwitterHandler {
 
 	}
 
-	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, Paging query, int index){
+	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id,
+			Paging query, int index) throws TwitterException{
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
 			try {
@@ -176,7 +182,8 @@ public class TwitterHandler {
 		}
 	}
 
-	public static ArrayList<Long> getRetweeterIds(Twitter twitter, long id, int number, long sinceStatus, int index){
+	public static ArrayList<Long> getRetweeterIds(Twitter twitter, long id, int number,
+			long sinceStatus, int index) throws TwitterException{
 		if(!TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
 			try {
 				long[] rtids = twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
@@ -195,7 +202,8 @@ public class TwitterHandler {
 		}
 	}
 
-	public static ArrayList<ResponseList<User>> getUserSuggestions(Twitter twitter, int index){
+	public static ArrayList<ResponseList<User>> getUserSuggestions(Twitter twitter, int index)
+			throws TwitterException{
 		ArrayList<ResponseList<User>> returnval = new ArrayList<ResponseList<User>>();
 
 
@@ -209,7 +217,7 @@ public class TwitterHandler {
 
 	}
 
-	public static void favorite(Twitter twitter, long id, int index){
+	public static void favorite(Twitter twitter, long id, int index) throws TwitterException{
 
 		try{
 			twitter.createFavorite(id);
@@ -219,7 +227,8 @@ public class TwitterHandler {
 
 	}
 
-	public static boolean isAtRateLimit(Twitter twitter, String endpoint, int index){
+	public static boolean isAtRateLimit(Twitter twitter, String endpoint, int index) 
+			throws TwitterException{
 
 		Map<String, RateLimitStatus> rateLimitStatus;
 		try {
@@ -233,13 +242,14 @@ public class TwitterHandler {
 			}
 		} catch (TwitterException e) {
 			errorHandling(e,index);
-			return true;
+			//we want the error to be handled higher up so throw here
+			throw e;
 		}
 
 	}
 
-	private static void errorHandling(TwitterException e, int index){
-
+	private static void errorHandling(TwitterException e, int index) throws TwitterException{
+		
 		switch(e.getErrorCode()) {		
 		case 64:
 			Maintenance.writeLog("Shit, this account has been suspended", index, -1);
@@ -264,10 +274,18 @@ public class TwitterHandler {
 			Maintenance.writeLog("The interwebs are probably fuckin up, "
 					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
 			break;
+		case 89:
+			Maintenance.writeLog("Failed to validate some authorization info, "
+					+ "TwitterHandler threw this error:\n" + e.toString(), null, 1);
+			throw e;
+		case 32:
+			Maintenance.writeLog("Failed to validate some authorization info, "
+					+ "TwitterHandler threw this error:\n" + e.toString(), null, 1);
+			throw e;
 		default:
 			Maintenance.writeLog("Something fucked up in Twitter handling/n" +
 					Maintenance.getStackTrace(e), index, -1);
-			break;
+			throw e;
 		}
 	}
 }

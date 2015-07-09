@@ -202,7 +202,7 @@ public class bigAccRunnable implements Runnable {
 		DataBaseHandler.addBigAccounts(index, bigAccounts);
 	}
 
-	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException{
+	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException, TwitterException{
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
 		int bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 == bigAccountIndex ? 0 : bigAccountIndex + 1;

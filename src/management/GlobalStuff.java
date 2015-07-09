@@ -59,8 +59,12 @@ public class GlobalStuff{
 	public static long MAINTENANCE_SNOOZE_TIME;
 	//the number of tries uploadPic in TwitterRunnable has before giving up 
 	public static long UPLOAD_PIC_ATTEMPT_LIMIT;
-	//the number of milliseconds the maintenance thread can run for before being cut off and erroring
+	//the max number of milliseconds the maintenance thread can run for before being cut off and erroring
 	public static long MAX_MAINTENANCE_RUN_TIME;
+	//the number of milliseconds the imaging getting thread can run for before failing/returning null
+	public static long MAX_IMAGE_FETCH_TIME;
+	//the directory where images are stored
+	public static String PICS_DIR;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -88,7 +92,7 @@ public class GlobalStuff{
 		}
 		else{
 			Maintenance.writeLog("We have negative followers or following or "
-					+ "Jon is an idiot", -1);
+					+ "Jon is an idiot", null, -1);
 		}
 		return numToUnfollow >= 0 ? numToUnfollow : 0;
 	}
@@ -118,6 +122,8 @@ public class GlobalStuff{
 		MAINTENANCE_SNOOZE_TIME = globalVars.getLong("MAINTENANCE_SNOOZE_TIME");
 		UPLOAD_PIC_ATTEMPT_LIMIT = globalVars.getLong("UPLOAD_PIC_ATTEMPT_LIMIT");
 		MAX_MAINTENANCE_RUN_TIME = globalVars.getLong("MAX_MAINTENANCE_RUN_TIME");
+		MAX_IMAGE_FETCH_TIME = globalVars.getLong("MAX_IMAGE_FETCH_TIME");
+		PICS_DIR = globalVars.getString("PICS_DIR");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -154,7 +160,10 @@ public class GlobalStuff{
 		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);
 		globalVars.put("UPLOAD_PIC_ATTEMPT_LIMIT", 10L);
 		//default max run time for maintenance is 4 hours
-		globalVars.put("MAX_MAINTENANCE_RUN_TIME", GlobalStuff.HOUR_IN_MILLISECONDS * 4L);		
+		globalVars.put("MAX_MAINTENANCE_RUN_TIME", GlobalStuff.HOUR_IN_MILLISECONDS * 4L);
+		//scooping an image should not take more than 20 seconds
+		globalVars.put("MAX_IMAGE_FETCH_TIME", 20000L);	
+		globalVars.put("PICS_DIR", "pics/");	
 
 		return globalVars;
 	}

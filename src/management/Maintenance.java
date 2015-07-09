@@ -78,7 +78,7 @@ public class Maintenance {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					Maintenance.writeLog("Something fucked up in safeShutDownAccounts\n" + 
-							Maintenance.getStackTrace(e), -1);
+							Maintenance.getStackTrace(e), null, -1);
 				}
 			}
 		}
@@ -136,12 +136,13 @@ public class Maintenance {
 	}
 
 	/**
-	 * Deletes any pics in the pics/ directory if any exist
+	 * Deletes any pics in the GlobalStuff.PICS_DIR directory if any exist
 	 */
-	private static void deleteResidualPics() {
+	public static void deleteResidualPics() {
 
-		Maintenance.writeLog("deleting residual pics if any exist", "maintenance");
-		File picsDir = new File("pics/");
+		Maintenance.writeLog("Deleting all pics from " + GlobalStuff.PICS_DIR + " if any exist",
+				"maintenance");
+		File picsDir = new File(GlobalStuff.PICS_DIR);
 		for(File f : picsDir.listFiles()) {
 			f.delete(); 
 		} 
@@ -339,7 +340,7 @@ public class Maintenance {
 			return;
 		}
 
-		String output = strDate + " -----" + errorString + message + errorString;
+		String output = strDate + " --" + errorString + message + errorString;
 
 		//only write to console if not an error (because it will write to console in the case statement
 		//above when it recursively called writeLog)

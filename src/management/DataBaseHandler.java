@@ -187,7 +187,7 @@ public class DataBaseHandler{
 		MongoCollection<Document> collection = db.getCollection("GlobalVariables");
 		if (collection == null || collection.count() == 0) {
 			Maintenance.writeLog("cannot pull global vars. "
-					+ "Collection GlobalVariables does not exist", -1);
+					+ "Collection GlobalVariables does not exist", null, -1);
 		}
 		else if (collection.count() == 1) {
 			MongoCursor<Document> globalVarsCursor = collection.find().iterator();
@@ -431,7 +431,7 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	private static  void addElementToSchwergsArray(int index, Object element, String column) throws FuckinUpKPException{
+	private static  void addElementToSchwergsArray(int index, Object element, String column) {
 
 		MongoDatabase db = mongoClient.getDatabase("Schwergsy");
 		MongoCollection<Document> dbCollection = db.getCollection("SchwergsyAccounts");
@@ -450,8 +450,8 @@ public class DataBaseHandler{
 
 		}
 		else {
-			throw new FuckinUpKPException("method addElementToSchwergsArray is not a trash can.\n"
-					+ "You can't just be throwin' whatever you please in.");
+			Maintenance.writeLog("method addElementToSchwergsArray is not a trash can.\n"
+					+ "You can't just be throwin' whatever you please in.", index, -1);
 		}
 
 		dbCollection.findOneAndUpdate(query, ele);
@@ -495,7 +495,7 @@ public class DataBaseHandler{
 	 * @param totalFollowers 
 	 * @throws FuckinUpKPException 
 	 */
-	public static  void addNewStatistic(int index, int unfollows, int newFollows, int retainedFollowers, int totalFollowers) throws FuckinUpKPException {
+	public static  void addNewStatistic(int index, int unfollows, int newFollows, int retainedFollowers, int totalFollowers) {
 
 		Maintenance.writeLog("Adding statistic",index);
 		long now = new Date().getTime();
@@ -522,9 +522,10 @@ public class DataBaseHandler{
 	/**TODO Bojang Test
 	 * This should be called once a day for each Schwergsy account and on startup
 	 * @param index The id of the Schwergsy account
+	 * @throws TwitterException 
 	 * @throws Exception 
 	 */
-	public static void updateFollowers(int index) throws Exception {
+	public static void updateFollowers(int index) throws TwitterException {
 
 		//get the current set of followers from twitter
 		Document authInfo = DataBaseHandler.getAuthorizationInfo(index);	
@@ -549,6 +550,7 @@ public class DataBaseHandler{
 
 		HashSet<Long> storedFollowerSet = new HashSet<>();
 
+		@SuppressWarnings("unchecked")
 		ArrayList<Long> tmpList = getSchwergsyAccountArray(index, "followers");
 
 		for(Long id : tmpList) {
@@ -976,7 +978,7 @@ public class DataBaseHandler{
 		}
 		catch (NoSuchElementException e) {
 			Maintenance.writeLog("Schwergsy Account with _id: " + index +
-					" not found.\n" + Maintenance.getStackTrace(e), -1);
+					" not found.\n" + Maintenance.getStackTrace(e), null, -1);
 			return null;
 		}
 		cursor.close();
@@ -1002,7 +1004,7 @@ public class DataBaseHandler{
 		}
 		catch (NoSuchElementException e) {
 			Maintenance.writeLog("Schwergsy Account with name: " + name +
-					" not found.\n" + Maintenance.getStackTrace(e), -1);
+					" not found.\n" + Maintenance.getStackTrace(e), null, -1);
 			return null;
 		}
 		cursor.close();
@@ -1181,14 +1183,14 @@ public class DataBaseHandler{
 		Document uniqueCheck = new Document("authorizationKey", authorizationKey);
 		if (dbCollection.find(uniqueCheck).limit(1).first() != null) {
 			Maintenance.writeLog("Schwergsy account already exists in the database, "
-					+ "will not add duplicate", 1);
+					+ "will not add duplicate", null, 1);
 			return false;
 		}
 		else {
 			Maintenance.writeLog("inserting a new Schwergsy Account");
 
 			int _id = (int) getCollectionSize("SchwergsyAccounts");
-
+			
 			Document basicBitch = new Document("_id", _id)
 			.append("name", name)
 			.append("customerSecret", customerSecret)
@@ -1207,25 +1209,27 @@ public class DataBaseHandler{
 			.append("bigAccounts", bigAccounts)
 			.append("statistics", statistics)
 			.append("bigAccountHarvestIndex", 0);
-
+			
+			
+			//TODO check if an account by the same name already exists in the db
 			dbCollection.insertOne(basicBitch);
 
 			try {
+
 				Twitter bird = (new TwitterFactory(new ConfigurationBuilder()
 				.setDebugEnabled(true)
 				.setOAuthConsumerKey(customerKey)
 				.setOAuthConsumerSecret(customerSecret)
 				.setOAuthAccessToken(authorizationKey)
 				.setOAuthAccessTokenSecret(authorizationSecret).build()).getInstance());
+								
 				//Makes sure that the account's following is synced in the database.
 				initUpdateFollowing(bird,_id);
 				updateFollowers(_id);
 			}
-			//TODO make sure that the try above throws an exception (instead of handling it in the 
-			//methods it calls) so it can be caught below
-			catch (Exception e) {
-				Maintenance.writeLog("Schwergsy account failed to authenticate,"
-						+ " removing from db\n" + Maintenance.getStackTrace(e), 1);	
+			catch (TwitterException e) {
+				Maintenance.writeLog("Schwergsy account failed to authenticate with the following,"
+						+ " error, removing from db\n" + Maintenance.getStackTrace(e), null, 1);	
 				//Can remove without the need to remap id's because we know this schwergsy account was
 				//the last to be added, so the ids of the others with still be in order without the
 				//need to remap.
@@ -1333,7 +1337,7 @@ public class DataBaseHandler{
 	 * 
 	 * Tested and given the Bojangles Seal of Approval
 	 */
-	public static  Document getAuthorizationInfo(int index) throws Exception {
+	public static  Document getAuthorizationInfo(int index) {
 
 		Maintenance.writeLog("scooping authInfo at index " + index, index);
 		Document schwergsyAccount = getSchwergsyAccount(index);
@@ -1362,7 +1366,7 @@ public class DataBaseHandler{
 	 * @param index
 	 * @throws TwitterException
 	 */
-	public static void initUpdateFollowing(Twitter bird, int index) {
+	public static void initUpdateFollowing(Twitter bird, int index) throws TwitterException {
 
 		addFollowing(index, new ArrayList<Long>(TwitterHandler.initUpdateFollowing(bird, index)));
 
@@ -1483,7 +1487,7 @@ public class DataBaseHandler{
 					+ "---------------------------------------------------------------------------\n");
 		} 		
 		catch (Exception e) {
-			Maintenance.writeLog("Error printing\n" + Maintenance.getStackTrace(e), -1);
+			Maintenance.writeLog("Error printing\n" + Maintenance.getStackTrace(e), null, -1);
 		}
 
 		finally{

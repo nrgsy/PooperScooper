@@ -1,6 +1,7 @@
 package content;
 
 
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class RedditScraper implements Runnable{
 	 * 
 	 * ***NOTICE*** if you change this method, be sure isSnatching is set to false when the method exits
 	 */
+	@SuppressWarnings("unchecked")
 	public void contentSnatch() throws FuckinUpKPException {
 
 		isSnatching = true;		
@@ -60,7 +62,8 @@ public class RedditScraper implements Runnable{
 			redditLinks = (ArrayList<String>) sites.get("reddit");
 
 			if (redditLinks == null) {
-				Maintenance.writeLog("Tears, couldn't find reddit links", "content", -1);
+				Maintenance.writeLog("Tears, couldn't find reddit links in " + entry.getKey() + 
+						"category", "content", -1);
 				isSnatching = false;
 				return;
 			}
@@ -71,31 +74,40 @@ public class RedditScraper implements Runnable{
 
 				//Loop through reddit and gathers title + image link
 				for(int j = 0; j<pages; j++) {
+
 					Document document = null;
 
 					try {
 						document = Jsoup.connect(url).userAgent("Mozilla").get();
 					} 
-					catch(IllegalArgumentException | SocketTimeoutException e) {
+					catch(SocketTimeoutException e) {
+						//give up on this reddit link
+						Maintenance.writeLog("Failed to get url, skipping to the next reddit link. "
+								+ "Got the following error:\n" + e.toString(), "content", 1);
+						break;
+					}
+					catch(IllegalArgumentException e) {
 						//skip to next iteration of the loop
-						Maintenance.writeLog("Failed to get url, skipping.", "content");
+						Maintenance.writeLog("Failed to get url, skipping to the next page. "
+								+ "Got the following error:\n" + e.toString(), "content", 1);
 						continue;	
 					}
-					catch (UnknownHostException e) {
+					catch (UnknownHostException | ConnectException e) {
 						//skip to next iteration of the loop
 						Maintenance.writeLog("The internet connection is probably fuckin up, "
-								+ "can't snatch content", "content", 1);
+								+ "can't snatch content right now", "content", 1);
 						isSnatching = false;
 						return;
 					}
 					catch (Exception e) {
-						Maintenance.writeLog("Something fucked up in contentSnatch" + 
+						Maintenance.writeLog("Something fucked up in contentSnatch " + 
 								Maintenance.getStackTrace(e), "content", -1);
 						isSnatching = false;
 						return;
 					}
 
 					if (document == null) {
+						Maintenance.writeLog("Scraped document was null, skipping", "content");
 						continue;
 					}
 
@@ -120,12 +132,14 @@ public class RedditScraper implements Runnable{
 				ImageManipulator reviewer = new ImageManipulator();
 				content = reviewer.validateContent(content);
 				for (Entry<String,String> contentEntry : content.entrySet()) {
+
 					DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(), 
 							"pending" + entry.getKey(), null);
 				}
 			}
 		}
 		isSnatching = false;
+		Maintenance.writeLog("Content snatch complete", "content");
 	}
 
 	/* (non-Javadoc)

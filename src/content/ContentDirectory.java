@@ -18,10 +18,10 @@ import org.bson.Document;
  */
 public class ContentDirectory {
 
-	//the list of documents
-	//each document is a content type (ass, weed, workout, etc) mapped a list of documents
-	//each of those documents is a scraper site (reddit, imgur, etc) mapped to a list of links
-	//So the link groups are specific a scraper site and a content type
+	//contentDirectory is a document with many documents appended
+	//each document is a content type (ass, weed, workout, etc) mapped a document with one or more
+	//documents appended to it. Each of those documents is a scraper site (reddit, imgur, etc)
+	//mapped to a list of links. So the link groups are specific to a scraper site and a content type
 	public static Document contentDirectory;
 
 	/**
@@ -40,6 +40,8 @@ public class ContentDirectory {
 		Document redditAssDoc = new Document();
 		redditAssDoc.append("reddit", redditAssLinks);
 
+		//could also append this when imgur implementation is ready: 
+		//contentDirectory.append("ass", imgurAssDoc);
 		contentDirectory.append("ass", redditAssDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
 

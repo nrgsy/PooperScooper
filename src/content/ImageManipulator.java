@@ -14,6 +14,7 @@ import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 import management.FuckinUpKPException;
+import management.GlobalStuff;
 import management.Maintenance;
 
 
@@ -28,19 +29,21 @@ public class ImageManipulator {
 	 * @return
 	 * @throws FuckinUpKPException
 	 */
-	public HashMap<String,String> validateContent(HashMap<String,String> content) throws FuckinUpKPException{
+	public HashMap<String,String> validateContent(HashMap<String,String> content) {
 		Image image = null;
 		int count = 0;
-		String dir = "pics/";
+		String dir = GlobalStuff.PICS_DIR;
 		File img = null;
 		HashMap<String,String> retVal = new HashMap<String,String>();
 
 		try {
 			for(Entry<String,String> entry : content.entrySet()) {
+
 				String URI = entry.getKey();
 				URL url = new URL(URI);
-				try {	
-					image = ImageIO.read(url);
+				try {
+					
+					image = getImageFromURL(url);
 
 					BufferedImage bi = (BufferedImage) image;
 
@@ -59,12 +62,12 @@ public class ImageManipulator {
 					else {
 						Maintenance.writeLog("Image size for " + URI + " is larger than 3MB", "content");
 					}
+
 				}
 				catch (Exception e) {
-					Maintenance.writeLog("Skipped a bad url, when validating content", "content");
+					Maintenance.writeLog("Skipped a url when validating content", "content");
 					continue;
 				}
-
 			}
 		}
 		catch (Exception e) {
@@ -72,14 +75,44 @@ public class ImageManipulator {
 					Maintenance.getStackTrace(e), "content", -1);
 		}
 		finally{
-			while(count>=0){
-				img = new File(dir + count + ".jpg");
-				img.delete();
-				--count;
+			Maintenance.deleteResidualPics();
+		}
+		return retVal;
+	}
+
+	/**
+	 * call this instead of ImageIO.read(url); because ImageIO.read can hang when internet
+	 * fucks up, so we need it to run on a separate thread and give up (return null)
+	 * if it's taking too long
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public static BufferedImage getImageFromURL(final URL url) {
+
+		//create a runnable that attempts to get the image from the url
+		ImageGetterRunnable imageGetterRunnable = new ImageGetterRunnable(url);
+
+		Thread imageGetterThread = new Thread(imageGetterRunnable);
+		long endTimeMillis = System.currentTimeMillis() + GlobalStuff.MAX_IMAGE_FETCH_TIME;
+		imageGetterThread.start();
+
+		//monitor the theread and shut it down if it takes too long trying to get the image from the url
+		while (imageGetterThread.isAlive()) {
+			if (System.currentTimeMillis() > endTimeMillis) {
+				Maintenance.writeLog("Could not get Image for from URL. imageGetterThread was alive "
+						+ "for too long. Interrupting imageGetterThread.", "content", 1);
+				imageGetterThread.interrupt();
+				return null;
+			}
+			//so that we're not checking constantly, only ten times a second
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				Maintenance.writeLog("Sleep interrupted for some reason", "maintenance", -1);
 			}
 		}
-
-		return retVal;
+		return imageGetterRunnable.getImage();
 	}
 
 	//Converts weird-ass png to plain-ass jpg
@@ -106,7 +139,7 @@ public class ImageManipulator {
 
 		try {
 			URL url = new URL(imgsrc);
-			image = ImageIO.read(url);
+			image = getImageFromURL(url);
 			BufferedImage bi = (BufferedImage) image;
 
 			//If not jpg, then colorconvert to avoid red tint
@@ -115,10 +148,10 @@ public class ImageManipulator {
 			}
 			long unique = new Date().getTime();
 			//makes file name and saves it, returns file location
-			File f = new File("pics/"+unique+".jpg");
+			File f = new File(GlobalStuff.PICS_DIR + unique + ".jpg");
 
 			ImageIO.write(bi, "jpg", f);
-			imgsrc = "pics/"+unique+".jpg";
+			imgsrc = GlobalStuff.PICS_DIR + unique + ".jpg";
 			return imgsrc;
 			//The receiver must delete the file after posting to Twitter
 		}

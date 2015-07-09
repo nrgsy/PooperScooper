@@ -135,7 +135,7 @@ public class TimerFactory {
 					Maintenance.attemptMaintenance();
 				} catch (Exception e) {
 					Maintenance.writeLog("Something fucked up in TimerFactory\n" + 
-							Maintenance.getStackTrace(e), -1);
+							Maintenance.getStackTrace(e), null, -1);
 				}
 			}};
 	}
