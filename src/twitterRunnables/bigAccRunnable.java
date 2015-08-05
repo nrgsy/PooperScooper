@@ -287,7 +287,7 @@ public class bigAccRunnable implements Runnable {
 			DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
 			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
 		}
-		bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 == bigAccountIndex ? 0 : bigAccountIndex + 1;
+		bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 >= bigAccountIndex ? 0 : bigAccountIndex + 1;
 		DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
 		Maintenance.writeLog("done harvesting", index);
 	}
