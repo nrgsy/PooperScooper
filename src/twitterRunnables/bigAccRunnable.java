@@ -267,6 +267,7 @@ public class bigAccRunnable implements Runnable {
 				if(DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_OUTS_FOR_REMOVAL){
 					//if it gets however many outs, it's removed from bigAccounts
 					DataBaseHandler.deleteBigAccount(index, bigAccountIndex);
+					bigAccountIndex--;
 				}
 				else{
 					//if it gets however many strikes, move it to the end of bigAccounts and reset strikes
@@ -287,7 +288,7 @@ public class bigAccRunnable implements Runnable {
 			DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
 			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
 		}
-		bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 >= bigAccountIndex ? 0 : bigAccountIndex + 1;
+		bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 <= bigAccountIndex ? 0 : bigAccountIndex + 1;
 		DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
 		Maintenance.writeLog("done harvesting", index);
 	}
