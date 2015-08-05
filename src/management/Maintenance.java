@@ -125,7 +125,7 @@ public class Maintenance {
 			//leaves shutdown request as true
 			safeShutDownScrapers();
 
-			Maintenance.writeLog("Exiting program", "maintenance");
+			Maintenance.writeLog("Shutdown Complete", "maintenance");
 			System.exit(0);
 		}
 		catch (Exception e) {
