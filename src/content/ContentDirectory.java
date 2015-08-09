@@ -35,8 +35,13 @@ public class ContentDirectory {
 		//////////////////////////////////////////////////////////////////////////////////////////
 		//list of links to places (on reddit for example) to scrape from
 		ArrayList<String> redditAssLinks = new ArrayList<>();
-		redditAssLinks.add("http://www.reddit.com/r/blackpeopletwitter"); //add sites here
+		redditAssLinks.add("http://www.reddit.com/r/fffffffuuuuuuuuuuuu"); //add sites here
+		
 		redditAssLinks.add("http://www.reddit.com/r/memes");
+		redditAssLinks.add("https://www.reddit.com/r/funnymeme/");
+		redditAssLinks.add("https://www.reddit.com/r/adviceanimals");
+		redditAssLinks.add("https://www.reddit.com/r/vertical");
+		redditAssLinks.add("https://www.reddit.com/r/firstworldproblems");
 		Document redditAssDoc = new Document();
 		redditAssDoc.append("reddit", redditAssLinks);
 
@@ -67,6 +72,7 @@ public class ContentDirectory {
 		contentDirectory.append("minecraft", redditMinecraftDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
+		
 		//for minecraft
 		//////////////////////////////////////////////////////////////////////////////////////////
 		ArrayList<String> redditKSPLinks = new ArrayList<>();
@@ -79,6 +85,30 @@ public class ContentDirectory {
 
 		contentDirectory.append("KSP", redditKSPDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
+		
+		//for weed
+		//////////////////////////////////////////////////////////////////////////////////////////
+		ArrayList<String> redditWeedLinks = new ArrayList<>();
+		redditWeedLinks.add("https://www.reddit.com/r/treecomics/");
+		redditWeedLinks.add("https://www.reddit.com/r/weed/");
+		redditWeedLinks.add("https://www.reddit.com/r/trees/");
+		Document redditWeedDoc = new Document();
+		redditWeedDoc.append("reddit", redditWeedLinks);
+
+		contentDirectory.append("weed", redditWeedDoc);
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+		//for cute animals
+		//////////////////////////////////////////////////////////////////////////////////////////
+		ArrayList<String> redditCanimalLinks = new ArrayList<>();
+		redditCanimalLinks.add("https://www.reddit.com/r/Catfort");
+		redditCanimalLinks.add("https://www.reddit.com/r/dogfort");
+		Document reddiCanimalDoc = new Document();
+		reddiCanimalDoc.append("reddit", redditCanimalLinks);
+
+		contentDirectory.append("canimal", reddiCanimalDoc);
+		//////////////////////////////////////////////////////////////////////////////////////////
+				
 
 	}
 
