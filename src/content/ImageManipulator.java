@@ -56,11 +56,11 @@ public class ImageManipulator {
 					count++;
 					//Checks to see img size is less than ~3MB
 					if(img.length() < 3000000) {
-						Maintenance.writeLog("Image size: "+img.length()+" | Image Link: "+URI+" scooped.", "content");
+						Maintenance.writeLog("Image size: "+img.length()+" | Image Link: "+URI+" scooped. url=" + url, "content");
 						retVal.put(entry.getKey(), entry.getValue());
 					}
 					else {
-						Maintenance.writeLog("Image size for " + URI + " is larger than 3MB", "content");
+						Maintenance.writeLog("Image size for " + URI + " is larger than 3MB. url=" + url, "content");
 					}
 
 				}
