@@ -101,8 +101,10 @@ public class ContentDirectory {
 		//for cute animals
 		//////////////////////////////////////////////////////////////////////////////////////////
 		ArrayList<String> redditCanimalLinks = new ArrayList<>();
-		redditCanimalLinks.add("https://www.reddit.com/r/Catfort");
-		redditCanimalLinks.add("https://www.reddit.com/r/dogfort");
+		redditCanimalLinks.add("https://www.reddit.com/r/aww/");
+		redditCanimalLinks.add("http://www.reddit.com/r/cats/");
+		redditCanimalLinks.add("https://www.reddit.com/r/babyanimals/");
+		redditCanimalLinks.add("https://www.reddit.com/r/AnimalsBeingBros");
 		Document reddiCanimalDoc = new Document();
 		reddiCanimalDoc.append("reddit", redditCanimalLinks);
 
