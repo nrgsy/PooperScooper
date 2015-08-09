@@ -111,7 +111,14 @@ public class RedditScraper implements Runnable{
 						continue;
 					}
 
-					document.select("link[title=applied_subreddit_stylesheet]").first().remove();
+
+					try {
+						document.select("link[title=applied_subreddit_stylesheet]").first().remove();
+					}
+					catch(NullPointerException e) {
+						Maintenance.writeLog("A page from " + url + " fucked up, skipping to next page", "content", 1);
+						continue;
+					}
 
 					//Must end with jpg or png
 					Elements titles = document.select("a.title[href$=.jpg]");
