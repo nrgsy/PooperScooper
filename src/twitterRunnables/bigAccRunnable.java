@@ -41,7 +41,7 @@ public class bigAccRunnable implements Runnable {
 
 	//This method does not put rejected candidates into the whitelist because they have the potential
 	//to become bigAccounts later on.
-	public synchronized void findBigAccounts() throws TwitterException, InterruptedException, UnknownHostException, FuckinUpKPException{
+	public synchronized void findBigAccounts() throws IllegalStateException, TwitterException, FuckinUpKPException {
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		ArrayList<Long> bigAccounts = new ArrayList<Long>();
 		int maxCandidates = 300;
@@ -49,7 +49,7 @@ public class bigAccRunnable implements Runnable {
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
 			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
-			
+
 			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 			if(ListOwnTweets.isEmpty()){
 				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable.findBigAccounts",
@@ -59,7 +59,7 @@ public class bigAccRunnable implements Runnable {
 			else{
 				OwnTweets = ListOwnTweets.get(0);
 			}
-			
+
 			if(OwnTweets.size()>30){
 				//sorts by most retweets and cuts out tweets with little retweets
 				Collections.sort(OwnTweets, new Comparator<Status>() {
@@ -89,7 +89,7 @@ public class bigAccRunnable implements Runnable {
 					}
 				}
 			}
-			
+
 			if(AllRTerIDs.size()==0){
 				AllRTerIDs = DataBaseHandler.getToFollowList(index);
 			}
@@ -104,7 +104,7 @@ public class bigAccRunnable implements Runnable {
 				Paging querySettings = new Paging();
 				querySettings.setCount(50);
 				ResponseList<Status> potentialBigAccs = null;
-				
+
 				ArrayList<ResponseList<Status>> ListPotentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
 				if(ListPotentialBigAccs.isEmpty()){
 					Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
@@ -113,7 +113,7 @@ public class bigAccRunnable implements Runnable {
 				else{
 					potentialBigAccs = ListPotentialBigAccs.get(0);
 				}
-				
+
 				for(Status tweet: potentialBigAccs){
 					if(AllCandidates.size() == maxCandidates){
 						break;
@@ -136,7 +136,7 @@ public class bigAccRunnable implements Runnable {
 
 			AllCandidates.addAll((ArrayList<Long>)DataBaseHandler.getSchwergsyAccountArray(index, "bigAccountsWhiteList"));
 			DataBaseHandler.replaceSchwergsyArray(index, new HashSet<Long>(), "bigAccountsWhiteList");
-			
+
 		}
 
 		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
@@ -145,7 +145,14 @@ public class bigAccRunnable implements Runnable {
 				i.remove();
 			}
 		}
-		
+
+
+		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
+			if(AllCandidates.size()>100){
+				i.remove();
+			}
+		}	
+
 		for(long id : AllCandidates){
 
 			if(DataBaseHandler.isBigAccWhiteListed(index, id)){
@@ -163,7 +170,7 @@ public class bigAccRunnable implements Runnable {
 			else{
 				timeline = ListTimeline.get(0);
 			}
-			
+
 			ArrayList<Status> noRTTimeline = new ArrayList<Status>();
 			int count = 0;
 			int totalRTs = 0;
@@ -202,7 +209,7 @@ public class bigAccRunnable implements Runnable {
 		DataBaseHandler.addBigAccounts(index, bigAccounts);
 	}
 
-	public void harvestBigAccounts() throws UnknownHostException, InterruptedException, FuckinUpKPException, TwitterException{
+	public void harvestBigAccounts() throws TwitterException, FuckinUpKPException {
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
 		int bigAccountHarvestIndex; 
@@ -226,7 +233,7 @@ public class bigAccRunnable implements Runnable {
 		else{
 			tweets = ListTweets.get(0);
 		}
-		
+
 		ArrayList<Status> NoRTTweets = new ArrayList<Status>();
 
 		//Makes sure the tweet is original to the bigAccount candidate
@@ -296,19 +303,26 @@ public class bigAccRunnable implements Runnable {
 	@Override
 	public void run() {
 		Maintenance.writeLog("run method called for bigAccRunnable", index);
-		try {
-			if(((DataBaseHandler.getToFollowSize(index) > 3000) && 
-					(DataBaseHandler.getBigAccountsSize(index) < 30||DataBaseHandler.getFollowersSize(index) > 100))
-					 ||DataBaseHandler.getBigAccountsSize(index) == 0){
+		if(((DataBaseHandler.getToFollowSize(index) > 3000) && 
+				(DataBaseHandler.getBigAccountsSize(index) < 30||DataBaseHandler.getFollowersSize(index) > 100))
+				||DataBaseHandler.getBigAccountsSize(index) == 0){
+			try {
 				findBigAccounts();
-				
+			} catch (Exception e) {
+				Maintenance.writeLog("Something fucked up in bigAccRunnable's findBigAccounts"
+						+ "\n" + Maintenance.getStackTrace(e), index, -1);
+				e.printStackTrace();
 			}
-			else{
+
+		}
+		else{
+			try {
 				harvestBigAccounts();
+			} catch (Exception e) {
+				Maintenance.writeLog("Something fucked up in bigAccRunnable's harvestBigAccounts"
+						+ "\n" + Maintenance.getStackTrace(e), index, -1);
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			Maintenance.writeLog("Something fucked up in bigAccRunnable"
-					+ "\n" + Maintenance.getStackTrace(e), index, -1);
 		}
 		Maintenance.runStatus.put(index+"bigAcc", false);
 	}
