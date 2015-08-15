@@ -65,6 +65,8 @@ public class GlobalStuff{
 	public static long MAX_IMAGE_FETCH_TIME;
 	//the directory where images are stored
 	public static String PICS_DIR;
+	//number of milliseconds between rate limit updates 
+	public static long RATE_LIMIT_UPDATE_TIME;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -124,6 +126,7 @@ public class GlobalStuff{
 		MAX_MAINTENANCE_RUN_TIME = globalVars.getLong("MAX_MAINTENANCE_RUN_TIME");
 		MAX_IMAGE_FETCH_TIME = globalVars.getLong("MAX_IMAGE_FETCH_TIME");
 		PICS_DIR = globalVars.getString("PICS_DIR");
+		RATE_LIMIT_UPDATE_TIME = globalVars.getLong("RATE_LIMIT_UPDATE_TIME");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -164,6 +167,8 @@ public class GlobalStuff{
 		//scooping an image should not take more than 20 seconds
 		globalVars.put("MAX_IMAGE_FETCH_TIME", 20000L);	
 		globalVars.put("PICS_DIR", "pics/");	
+		//should match twitter's rate limit reset time
+		globalVars.put("RATE_LIMIT_UPDATE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);	
 
 		return globalVars;
 	}

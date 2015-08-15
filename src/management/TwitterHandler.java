@@ -5,10 +5,15 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import twitter4j.IDs;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.Document;
 
@@ -24,6 +29,11 @@ import twitter4j.User;
 import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterHandler {
+
+	//This maps the index of each Schwergsy Account with it's rate limit map.
+	//each account's rate limit map maps each endpoint with the number of remaining api calls
+	//for that endpoint
+	public static ConcurrentHashMap<Integer, ConcurrentHashMap<String, Integer>> remainingCallsMapMap;
 
 	/**
 	 * @param info the authorization info from the account in the schwergsyAccounts collection
@@ -47,9 +57,11 @@ public class TwitterHandler {
 	 * 
 	 * NOTICE can return null if something goes wrong
 	 */
-	public static HashSet<Long> getFollowers(Twitter bird, int index)
-			throws TwitterException{
-		if(!isAtRateLimit(bird, "/followers/ids", index)){
+	public static HashSet<Long> getFollowers(Twitter bird, int index)throws TwitterException{
+		
+		String endPoint = "/followers/ids";	
+		if(!isAtRateLimit(bird, endPoint, index)){
+			
 			int ratecount = 0;
 			IDs blah;
 			try {
@@ -75,6 +87,9 @@ public class TwitterHandler {
 				//don't return if we have an error
 				throw e;
 			}
+			finally {
+				decrementRemainingCalls(index, endPoint, ratecount);		
+			}
 		}
 		else {
 			return null;
@@ -83,9 +98,10 @@ public class TwitterHandler {
 
 	public static HashSet<Long> initUpdateFollowing(Twitter twitter, int index) throws TwitterException{
 
-		if(!isAtRateLimit(twitter, "/friends/ids", index)){
+		String endPoint = "/friends/ids";
+		if(!isAtRateLimit(twitter, endPoint, index)){
+			int ratecount = 0;
 			try {
-				int ratecount = 0;
 				IDs IDCollection;
 				IDCollection = twitter.getFriendsIDs(-1);
 				HashSet<Long> following = new HashSet<Long>();
@@ -106,6 +122,9 @@ public class TwitterHandler {
 				errorHandling(e,index);
 				//throw the error because we don't want to return if there was an exception
 				throw e;
+			}
+			finally {
+				decrementRemainingCalls(index, endPoint, ratecount);		
 			}
 		}
 		else{
@@ -150,13 +169,17 @@ public class TwitterHandler {
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id, int index)
 			throws TwitterException{
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
-		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
+		String endPoint = "/statuses/user_timeline";
+		if(!isAtRateLimit(twitter, endPoint, index)){
 			try {
 				ListWrapper.add(twitter.getUserTimeline(id));
 				return ListWrapper;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
 				return ListWrapper;
+			}
+			finally {
+				decrementRemainingCalls(index, endPoint, 1);		
 			}
 		}
 		else{
@@ -168,13 +191,17 @@ public class TwitterHandler {
 	public static ArrayList<ResponseList<Status>> getUserTimeline(Twitter twitter, long id,
 			Paging query, int index) throws TwitterException{
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
-		if(!isAtRateLimit(twitter, "/statuses/user_timeline", index)){
+		String endPoint = "/statuses/user_timeline";
+		if(!isAtRateLimit(twitter, endPoint, index)){
 			try {
 				ListWrapper.add(twitter.getUserTimeline(id, query));
 				return ListWrapper;
 			} catch (TwitterException e) {
 				errorHandling(e,index);
 				return ListWrapper;
+			}
+			finally {
+				decrementRemainingCalls(index, endPoint, 1);		
 			}
 		}
 		else{
@@ -184,7 +211,8 @@ public class TwitterHandler {
 
 	public static ArrayList<Long> getRetweeterIds(Twitter twitter, long id, int number,
 			long sinceStatus, int index) throws TwitterException{
-		if(!TwitterHandler.isAtRateLimit(twitter,"/statuses/retweeters/ids", index)){
+		String endPoint = "/statuses/retweeters/ids";
+		if(!TwitterHandler.isAtRateLimit(twitter, endPoint, index)){
 			try {
 				long[] rtids = twitter.getRetweeterIds(id, number, sinceStatus).getIDs();
 				ArrayList<Long> returnValue = new ArrayList<Long>();
@@ -196,6 +224,9 @@ public class TwitterHandler {
 				errorHandling(e,index);
 				return new ArrayList<Long>();
 			}
+			finally {
+				decrementRemainingCalls(index, endPoint, 1);		
+			}
 		}
 		else{
 			return new ArrayList<Long>();
@@ -205,7 +236,6 @@ public class TwitterHandler {
 	public static ArrayList<ResponseList<User>> getUserSuggestions(Twitter twitter, int index)
 			throws TwitterException{
 		ArrayList<ResponseList<User>> returnval = new ArrayList<ResponseList<User>>();
-
 
 		try{
 			returnval.add(twitter.getUserSuggestions("entertainment"));
@@ -230,15 +260,13 @@ public class TwitterHandler {
 	public static boolean isAtRateLimit(Twitter twitter, String endpoint, int index) 
 			throws TwitterException{
 
-		Map<String, RateLimitStatus> rateLimitStatus;
+		ConcurrentHashMap<String, Integer> remainingCallsMap = remainingCallsMapMap.get(index);
+
 		try {
-			rateLimitStatus = twitter.getRateLimitStatus();
-			RateLimitStatus status = rateLimitStatus.get(endpoint);
-			if (status.getRemaining() == 0){
-				return true;
-			}
-			else {
-				return false;
+			//init if not initialized
+			if (remainingCallsMap == null) {
+				remainingCallsMap = TwitterHandler.getRemainingCallsMap(twitter.getRateLimitStatus());			
+				remainingCallsMapMap.put(index, remainingCallsMap);
 			}
 		} catch (TwitterException e) {
 			errorHandling(e,index);
@@ -246,10 +274,67 @@ public class TwitterHandler {
 			throw e;
 		}
 
+		Integer remainingCalls = remainingCallsMap.get(endpoint);
+		if (remainingCalls <= 0){
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
+	 * 
+	 * Get a map of endpoints mapped to the number of remaining calls for the endpoints
+	 * 
+	 * @param twitterRateLimitStatusMap
+	 * @return
+	 */
+	public static ConcurrentHashMap<String, Integer> getRemainingCallsMap(
+			Map<String, RateLimitStatus> twitterRateLimitStatusMap) {
+
+		ConcurrentHashMap<String, Integer> rateLimitStatusMap = new ConcurrentHashMap<>();
+		
+		Set<Entry<String, RateLimitStatus>> entrySet = twitterRateLimitStatusMap.entrySet();	
+		for (Entry<String, RateLimitStatus> entry : entrySet) {
+			rateLimitStatusMap.put(entry.getKey(), entry.getValue().getRemaining());
+		}	
+		return rateLimitStatusMap;
+	}
+	
+	/**
+	 * Also re-increments the remaining calls after 15 minutes
+	 * 
+	 * @param index
+	 * @param endPoint
+	 * @param numCalls Number of calls to decrement by
+	 */
+	private static void decrementRemainingCalls(final int index, final String endPoint,
+			final int numCalls) {
+		
+		int decrementedNumOfRemainingCalls = remainingCallsMapMap.get(index).get(endPoint) - numCalls;
+		
+		if (decrementedNumOfRemainingCalls < 0) {
+			Maintenance.writeLog("Number of calls used exceeded the recorded rate limit!",
+					"maintenance", -1);
+		}
+		
+		remainingCallsMapMap.get(index).put(endPoint, decrementedNumOfRemainingCalls);
+		
+		//re-increment the number of calls after enough time (GlobalStuff.RATE_LIMIT_UPDATE_TIME ms)
+		//has passed
+		new Timer().schedule(new TimerTask() {
+			@Override
+	        public void run() {
+				int incrementedNumOfRemainingCalls =
+						remainingCallsMapMap.get(index).get(endPoint) + numCalls;
+				remainingCallsMapMap.get(index).put(endPoint, incrementedNumOfRemainingCalls);
+	        }	
+		}, GlobalStuff.RATE_LIMIT_UPDATE_TIME);		
 	}
 
 	private static void errorHandling(TwitterException e, int index) throws TwitterException{
-		
+
 		switch(e.getErrorCode()) {		
 		case 64:
 			Maintenance.writeLog("Shit, this account has been suspended", index, -1);

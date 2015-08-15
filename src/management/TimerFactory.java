@@ -4,12 +4,15 @@ import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.Document;
 
 import content.RedditScraper;
 import twitter4j.GeoLocation;
+import twitter4j.RateLimitStatus;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitterRunnables.FollowRunnable;
 import twitterRunnables.TwitterRunnable;
 import twitterRunnables.bigAccRunnable;
@@ -82,7 +85,6 @@ public class TimerFactory {
 		};
 	}
 
-
 	/**
 	 * @param Twitter created by Director
 	 * @param int of SchwergsAccount index
@@ -116,13 +118,80 @@ public class TimerFactory {
 			}
 		};
 	}
+	
+	
+	/**
+	 * @param updateTime the 
+	 * @return
+	 */
+	public static TimerTask createRateLimitUpdateTimerTask(final long updateTime) {
+
+		Maintenance.writeLog("creating RateLimitUpdateTimerTask", "maintenance");
+
+		return new TimerTask() {
+			@Override
+			public void run() {
+				String TimerTaskID = "rateLimitUpdater";
+				if (!Maintenance.flagSet) {
+					updateRuns(TimerTaskID);
+					//the number of runs before firing = the update interval / the fire rate 
+					if(GlobalStuff.numberOfRuns.get(TimerTaskID) >=
+							updateTime/GlobalStuff.TIMER_TASK_FIRE_RATE) {
+
+						//Get the actual rate limits from twitter and sync them with what is
+						//in rateLimitMapMap
+						for(int id = 0;
+								id < DataBaseHandler.getCollectionSize("SchwergsyAccounts");
+								id++) {
+							if(!DataBaseHandler.isSuspended(id)){
+								Document info;
+								try {
+									info = DataBaseHandler.getAuthorizationInfo(id);
+								} catch (Exception e) {
+									Maintenance.writeLog("Failed to pull authorization info from the"
+											+ " database. Cannot refresh rate limits for this "
+											+ "account.\n" + Maintenance.getStackTrace(e),
+											id, -1);
+									return;
+								}	
+								
+								Twitter twitter = TwitterHandler.getTwitter(info);	
+								ConcurrentHashMap<String, Integer> remainingCallsMap;
+								try {
+									remainingCallsMap = TwitterHandler.getRemainingCallsMap(
+													twitter.getRateLimitStatus());			
+								} catch (TwitterException e) {
+									Maintenance.writeLog("Failed to update rate limit for account with"
+											+ " index: " + id + "\n"
+											+ Maintenance.getStackTrace(e), id, -1);
+									return;
+								}
+								TwitterHandler.remainingCallsMapMap.put(id, remainingCallsMap);
+							}
+							else{
+								Maintenance.writeLog("rate limits not updated for index: " +
+										id + " due to suspension.", id, 1);
+							}
+						}
+						//reset number of runs for rateLimitUpdater
+						GlobalStuff.numberOfRuns.put("rateLimitUpdater", 0);
+					}
+				}
+				else {
+					Maintenance.writeLog("Rate limit update because maintenance "
+							+ "flag is set, cancelling this timertask");
+					this.cancel();
+				}		
+			}};
+	}
 
 	private static void updateRuns(String TimerTaskID){
 		GlobalStuff.numberOfRuns.put(TimerTaskID, 
-				GlobalStuff.numberOfRuns.get(TimerTaskID)==null ? 0 : (GlobalStuff.numberOfRuns.get(TimerTaskID) + 1)
+				GlobalStuff.numberOfRuns.get(TimerTaskID) == null ? 0 :
+					(GlobalStuff.numberOfRuns.get(TimerTaskID) + 1)
 				);
 	}
-
+	
 	public static TimerTask createMaintenanceTimerTask() {
 
 		Maintenance.writeLog("creating MaintenanceTimerTask", "maintenance");
@@ -147,6 +216,10 @@ public class TimerFactory {
 	 * @throws Exception
 	 */
 	public static void scheduleAllSchwergsyTimers() {
+		
+		//reset ratLimitMapMap because we're starting fresh
+		TwitterHandler.remainingCallsMapMap = new ConcurrentHashMap<>();
+		
 		Maintenance.writeLog("Initializing globalTimer");
 
 		globalTimer = new Timer();
@@ -162,6 +235,10 @@ public class TimerFactory {
 						id +" due to suspension.", id, 1);
 			}
 		}
+		
+		globalTimer.scheduleAtFixedRate(
+				createRateLimitUpdateTimerTask(GlobalStuff.RATE_LIMIT_UPDATE_TIME),
+				0L, GlobalStuff.TIMER_TASK_FIRE_RATE);	
 	}
 
 	/**
