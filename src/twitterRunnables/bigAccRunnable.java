@@ -145,14 +145,7 @@ public class bigAccRunnable implements Runnable {
 				i.remove();
 			}
 		}
-
-
-//		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
-//			if(AllCandidates.size()>100) {
-//				i.next();
-//				i.remove();
-//			}
-//		}	
+	
 
 		for(long id : AllCandidates){
 
