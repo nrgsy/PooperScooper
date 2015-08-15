@@ -47,7 +47,6 @@ public class bigAccRunnable implements Runnable {
 		int maxCandidates = 300;
 
 		if(DataBaseHandler.getBigAccountsSize(index)!=0 && DataBaseHandler.getFollowersSize(index) > 100){
-			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			ResponseList<Status> OwnTweets = null;
 
 			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
@@ -80,6 +79,7 @@ public class bigAccRunnable implements Runnable {
 				}
 			}
 
+			ArrayList<Long> AllRTerIDs = new ArrayList<Long>();
 			for(Status tweet : OwnTweets){
 				//gathers all retweeters' ids from tweets
 				if(tweet.getRetweetCount()!=0){
@@ -96,7 +96,7 @@ public class bigAccRunnable implements Runnable {
 
 			while(AllRTerIDs.size()>50){
 				//limits to only 50 retweeters
-				AllRTerIDs = (ArrayList<Long>) AllRTerIDs.subList(0, 50);
+				AllRTerIDs.remove(AllRTerIDs.size() - 1);
 			}
 
 			for(long id : AllRTerIDs){
@@ -147,11 +147,12 @@ public class bigAccRunnable implements Runnable {
 		}
 
 
-		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
-			if(AllCandidates.size()>100){
-				i.remove();
-			}
-		}	
+//		for (Iterator<Long> i = AllCandidates.iterator(); i.hasNext();) {
+//			if(AllCandidates.size()>100) {
+//				i.next();
+//				i.remove();
+//			}
+//		}	
 
 		for(long id : AllCandidates){
 

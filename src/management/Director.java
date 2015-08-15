@@ -68,6 +68,6 @@ public class Director {
 
 		//create the initial timers
 		TimerFactory.scheduleAllSchwergsyTimers();
-		new Thread(new RedditScraper()).start();
+		//new Thread(new RedditScraper()).start();
 	}
 }
