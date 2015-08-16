@@ -193,6 +193,24 @@ public class TwitterHandler {
 		ArrayList<ResponseList<Status>> ListWrapper = new ArrayList<ResponseList<Status>>();
 		String endPoint = "/statuses/user_timeline";
 		if(!isAtRateLimit(twitter, endPoint, index)){
+			
+			
+			
+			
+			
+			
+			
+//System.out.println("Recorded rate limit is: " + remainingCallsMapMap.get(index).get(endPoint) + "********************************");
+//Map<String, RateLimitStatus> twitterMap = twitter.getRateLimitStatus();
+//System.out.println("TwitterMap rate limit is: " + twitterMap.get(endPoint).getRemaining()+ "********************************");
+//System.out.println("custom map rate limit is: " + TwitterHandler.getRemainingCallsMap(twitterMap).get(endPoint)
+//		+ "********************************");
+			
+			
+
+
+
+			
 			try {
 				ListWrapper.add(twitter.getUserTimeline(id, query));
 				return ListWrapper;
@@ -303,7 +321,6 @@ public class TwitterHandler {
 	}
 	
 	/**
-	 * Also re-increments the remaining calls after 15 minutes
 	 * 
 	 * @param index
 	 * @param endPoint
@@ -317,20 +334,11 @@ public class TwitterHandler {
 		if (decrementedNumOfRemainingCalls < 0) {
 			Maintenance.writeLog("Number of calls used exceeded the recorded rate limit!",
 					"maintenance", -1);
+			return;
 		}
 		
 		remainingCallsMapMap.get(index).put(endPoint, decrementedNumOfRemainingCalls);
-		
-		//re-increment the number of calls after enough time (GlobalStuff.RATE_LIMIT_UPDATE_TIME ms)
-		//has passed
-		new Timer().schedule(new TimerTask() {
-			@Override
-	        public void run() {
-				int incrementedNumOfRemainingCalls =
-						remainingCallsMapMap.get(index).get(endPoint) + numCalls;
-				remainingCallsMapMap.get(index).put(endPoint, incrementedNumOfRemainingCalls);
-	        }	
-		}, GlobalStuff.RATE_LIMIT_UPDATE_TIME);		
+		//The rate limit refresh timer will reincrement the rate limit for us every 15 minutes
 	}
 
 	private static void errorHandling(TwitterException e, int index) throws TwitterException{
@@ -341,7 +349,7 @@ public class TwitterHandler {
 			DataBaseHandler.suspendSchwergsyAccount(index);
 			break;
 		case 88:
-			Maintenance.writeLog("Rate limit has been exceeded", index, 1);
+			Maintenance.writeLog("Rate limit has been exceeded" + Maintenance.getStackTrace(e), index, -1);
 			break;
 		case 130:
 			Maintenance.writeLog("Twitter is over capacity to fulfill this request", index, 1);

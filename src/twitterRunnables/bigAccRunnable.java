@@ -41,6 +41,7 @@ public class bigAccRunnable implements Runnable {
 
 	//This method does not put rejected candidates into the whitelist because they have the potential
 	//to become bigAccounts later on.
+	@SuppressWarnings("unchecked")
 	public synchronized void findBigAccounts() throws IllegalStateException, TwitterException, FuckinUpKPException {
 		HashSet<Long> AllCandidates = new HashSet<Long>(); 
 		ArrayList<Long> bigAccounts = new ArrayList<Long>();
@@ -51,7 +52,7 @@ public class bigAccRunnable implements Runnable {
 
 			ArrayList<ResponseList<Status>> ListOwnTweets = TwitterHandler.getUserTimeline(bird,bird.getId(), index);
 			if(ListOwnTweets.isEmpty()){
-				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable.findBigAccounts",
+				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable.findBigAccounts1",
 						index, 1);
 				return;
 			}
@@ -107,7 +108,7 @@ public class bigAccRunnable implements Runnable {
 
 				ArrayList<ResponseList<Status>> ListPotentialBigAccs = TwitterHandler.getUserTimeline(bird, id, querySettings, index);
 				if(ListPotentialBigAccs.isEmpty()){
-					Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
+					Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable2", index, 1);
 					break;
 				}
 				else{
@@ -158,7 +159,7 @@ public class bigAccRunnable implements Runnable {
 			ResponseList<Status> timeline = null;
 			ArrayList<ResponseList<Status>> ListTimeline = TwitterHandler.getUserTimeline(bird,id, query , index);
 			if(ListTimeline.isEmpty()){
-				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
+				Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable3", index, 1);
 				return;
 			}
 			else{
@@ -221,7 +222,7 @@ public class bigAccRunnable implements Runnable {
 		ResponseList<Status> tweets = null;
 		ArrayList<ResponseList<Status>> ListTweets = TwitterHandler.getUserTimeline(bird,DataBaseHandler.getBigAccount(index, bigAccountIndex), querySettings, index);
 		if(ListTweets.isEmpty()){
-			Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable", index, 1);
+			Maintenance.writeLog("Could not run getUserTimelime in bigAccRunnable4", index, 1);
 			return;
 		}
 		else{
