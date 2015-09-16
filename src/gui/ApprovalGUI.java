@@ -337,7 +337,6 @@ public class ApprovalGUI {
 			String authorizationSecret = authSecField.getText();
 			String authorizationKey = authKeyField.getText();
 			String accountType = accountTypeField.getText();
-			double assRatio = Double.parseDouble(assRatioField.getText());
 			String incubatedString = incubatedField.getText();
 			String suspendedString = suspendedField.getText();			
 
@@ -356,11 +355,11 @@ public class ApprovalGUI {
 				if (!authorizationKey.equals("")) {
 					DataBaseHandler.replaceSchwergsyField(index, authorizationKey, "authorizationKey");
 				}
-				if (!authorizationKey.equals("")) {
+				if (!accountType.equals("")) {
 					DataBaseHandler.replaceSchwergsyField(index, accountType, "accountType");
 				}
-				if (!authorizationKey.equals("")) {
-					DataBaseHandler.replaceSchwergsyField(index, assRatio, "assRatio");
+				if (!assRatioField.getText().equals("")) {
+					DataBaseHandler.replaceSchwergsyField(index, Double.parseDouble(assRatioField.getText()), "assRatio");
 				}
 				if (!incubatedString.equals("")) {
 					DataBaseHandler.replaceSchwergsyField(index, getAccountBoolean("isIncubated"),
