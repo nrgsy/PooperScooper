@@ -18,36 +18,8 @@ import twitterRunnables.TwitterRunnable;
 
 public class MongoFuckAround {
 
-	public static ConcurrentHashMap<Integer, Integer> map = new ConcurrentHashMap<>();
-
 	public static void main(String[]args) throws Exception{
 
-
-		final int numCalls = 5;
-		
-		map.put(1, 100);
-
-		Integer x = map.get(1);
-		
-		System.out.println(x);
-
-		
-		new Timer().schedule(new TimerTask() {
-			@Override
-	        public void run() {
-				int incrementedNumOfRemainingCalls =
-						map.get(1) + numCalls;
-				map.put(1, incrementedNumOfRemainingCalls);
-	        }	
-		}, 2000); 
-		
-		map.put(1, 50);
-
-		System.out.println(map.get(1));
-		
-		Thread.sleep(3000);
-
-		System.out.println(map.get(1));
 
 
 
