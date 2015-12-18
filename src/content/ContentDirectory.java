@@ -89,7 +89,6 @@ public class ContentDirectory {
 		//for weed
 		//////////////////////////////////////////////////////////////////////////////////////////
 		ArrayList<String> redditWeedLinks = new ArrayList<>();
-		redditWeedLinks.add("https://www.reddit.com/r/treecomics/");
 		redditWeedLinks.add("https://www.reddit.com/r/weed/");
 		redditWeedLinks.add("https://www.reddit.com/r/trees/");
 		Document redditWeedDoc = new Document();
