@@ -91,10 +91,29 @@ public class ContentDirectory {
 		ArrayList<String> redditWeedLinks = new ArrayList<>();
 		redditWeedLinks.add("https://www.reddit.com/r/weed/");
 		redditWeedLinks.add("https://www.reddit.com/r/trees/");
+		redditWeedLinks.add("https://www.reddit.com/r/Picturesoftrees/");
+		redditWeedLinks.add("https://www.reddit.com/r/bakedart/");
+		redditWeedLinks.add("https://www.reddit.com/r/treecomics/");
+		redditWeedLinks.add("https://www.reddit.com/r/nugs/");
+		redditWeedLinks.add("https://www.reddit.com/r/nugporn/");			
 		Document redditWeedDoc = new Document();
 		redditWeedDoc.append("reddit", redditWeedLinks);
 
 		contentDirectory.append("weed", redditWeedDoc);
+		//////////////////////////////////////////////////////////////////////////////////////////
+
+		//for drug
+		//////////////////////////////////////////////////////////////////////////////////////////
+		ArrayList<String> redditDrugLinks = new ArrayList<>();
+		redditDrugLinks.add("https://www.reddit.com/r/DrugArt/");
+		redditDrugLinks.add("https://www.reddit.com/r/trippy/");
+		redditDrugLinks.add("https://www.reddit.com/r/drugmemes/");
+		redditDrugLinks.add("https://www.reddit.com/r/drugstashes/");
+		redditDrugLinks.add("https://www.reddit.com/r/drugsarebeautiful/");			
+		Document redditDrugDoc = new Document();
+		redditDrugDoc.append("reddit", redditDrugLinks);
+
+		contentDirectory.append("drug", redditDrugDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
 		//for cute animals
