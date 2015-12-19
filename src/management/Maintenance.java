@@ -227,9 +227,20 @@ public class Maintenance {
 			///////////////////////////////////////////////////////////////////////////////////////////////
 			long nonAPIstartTime = new Date().getTime();
 
+			
+			
+			
+			
+			//TODO rewrite this so setting 
 			//remove any accounts flagged for deletion and remap all ids
-			DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
+			//DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
 
+			
+			
+			
+			
+			
+			
 			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 			DataBaseHandler.findAndSetGlobalVars();
 

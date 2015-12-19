@@ -160,7 +160,7 @@ public class GlobalStuff{
 		//Maintenance waits 15 min before twitter api calling section for rate limits to reset
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
-		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);
+		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L); //TODOOOOOOO change to 15!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		globalVars.put("UPLOAD_PIC_ATTEMPT_LIMIT", 10L);
 		//default max run time for maintenance is 4 hours
 		globalVars.put("MAX_MAINTENANCE_RUN_TIME", GlobalStuff.HOUR_IN_MILLISECONDS * 4L);

@@ -152,6 +152,8 @@ public class TimerFactory {
 											+ " database. Cannot refresh rate limits for this "
 											+ "account.\n" + Maintenance.getStackTrace(e),
 											id, -1);
+									//reset number of runs for rateLimitUpdater
+									GlobalStuff.numberOfRuns.put("rateLimitUpdater", 0);
 									return;
 								}	
 								
@@ -164,6 +166,8 @@ public class TimerFactory {
 									Maintenance.writeLog("Failed to update rate limit for account with"
 											+ " index: " + id + "\n"
 											+ Maintenance.getStackTrace(e), id, -1);
+									//reset number of runs for rateLimitUpdater
+									GlobalStuff.numberOfRuns.put("rateLimitUpdater", 0);
 									return;
 								}
 								TwitterHandler.remainingCallsMapMap.put(id, remainingCallsMap);
