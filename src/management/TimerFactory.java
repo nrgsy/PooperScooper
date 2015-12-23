@@ -28,7 +28,7 @@ public class TimerFactory {
 	 */
 	private static TimerTask createTwitterRunnableTimerTask(final Twitter bird, final int index){
 
-		Maintenance.writeLog("creating TwitterRunnableTimerTask", index);
+		Maintenance.writeLog("creating TwitterRunnableTimerTask for account " + index, index);
 
 		return new TimerTask() {
 			@Override
@@ -61,7 +61,7 @@ public class TimerFactory {
 			final int index,
 			final long followTime) {
 
-		Maintenance.writeLog("creating FollowRunnableTimerTask", index);
+		Maintenance.writeLog("creating FollowRunnableTimerTask for account " + index, index);
 
 		return new TimerTask() {
 			@Override
@@ -92,7 +92,7 @@ public class TimerFactory {
 	 */
 	private static TimerTask createBigAccRunnableTimerTask(final Twitter bird, final int index) {
 
-		Maintenance.writeLog("creating BigAccRunnableTimerTask", index);
+		Maintenance.writeLog("creating BigAccRunnableTimerTask for account " + index, index);
 
 		return new TimerTask() {					
 			@Override

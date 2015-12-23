@@ -67,6 +67,8 @@ public class GlobalStuff{
 	public static String PICS_DIR;
 	//number of milliseconds between rate limit updates 
 	public static long RATE_LIMIT_UPDATE_TIME;
+	//Big accounts will not be removed if there are this many or less for that account
+	public static long MIN_NUMBER_OF_BIG_ACCOUNTS;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -127,16 +129,17 @@ public class GlobalStuff{
 		MAX_IMAGE_FETCH_TIME = globalVars.getLong("MAX_IMAGE_FETCH_TIME");
 		PICS_DIR = globalVars.getString("PICS_DIR");
 		RATE_LIMIT_UPDATE_TIME = globalVars.getLong("RATE_LIMIT_UPDATE_TIME");
+		MIN_NUMBER_OF_BIG_ACCOUNTS = globalVars.getLong("MIN_NUMBER_OF_BIG_ACCOUNTS");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
 		HashMap<String, Object> globalVars = new HashMap<String, Object>();
 		//to prevent exceeding the limit of following more than 1000 people per day, make sure that
 		//FOLLOW_TIME_MIN never goes below 1.44 minutes (86400 ms)
-		globalVars.put("FOLLOW_TIME_MIN", 86400L);
-		globalVars.put("FOLLOW_TIME_MAX", 123430L);
-		globalVars.put("FOLLOW_TIME_INCUBATED_MIN", GlobalStuff.MINUTE_IN_MILLISECONDS * 3);
-		globalVars.put("FOLLOW_TIME_INCUBATED_MAX", GlobalStuff.MINUTE_IN_MILLISECONDS * 4);
+		globalVars.put("FOLLOW_TIME_MIN", GlobalStuff.MINUTE_IN_MILLISECONDS * 5);
+		globalVars.put("FOLLOW_TIME_MAX", GlobalStuff.MINUTE_IN_MILLISECONDS * 7);
+		globalVars.put("FOLLOW_TIME_INCUBATED_MIN", GlobalStuff.MINUTE_IN_MILLISECONDS * 10);
+		globalVars.put("FOLLOW_TIME_INCUBATED_MAX", GlobalStuff.MINUTE_IN_MILLISECONDS * 12);
 		//This is an arbitrary time a little over 15 minutes to prevent rate limit problems
 		globalVars.put("BIG_ACCOUNT_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 16);
 		globalVars.put("BIG_ACCOUNT_STRIKES_FOR_OUT", 3);
@@ -160,7 +163,7 @@ public class GlobalStuff{
 		//Maintenance waits 15 min before twitter api calling section for rate limits to reset
 		//BEWARE DO NOT EVER MAKE THIS LESS THAN TIMER_TASK_FIRE_RATE OR DUPLICATE RUNNABLES MAY OCCUR
 		//IN THE CREATE RUNNABLES METHODS OF TIMERFACTORY
-		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L); //TODOOOOOOO change to 15!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		globalVars.put("MAINTENANCE_SNOOZE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L); //TODOOOOOOO change back to to 15L!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		globalVars.put("UPLOAD_PIC_ATTEMPT_LIMIT", 10L);
 		//default max run time for maintenance is 4 hours
 		globalVars.put("MAX_MAINTENANCE_RUN_TIME", GlobalStuff.HOUR_IN_MILLISECONDS * 4L);
@@ -169,6 +172,7 @@ public class GlobalStuff{
 		globalVars.put("PICS_DIR", "pics/");	
 		//should match twitter's rate limit reset time
 		globalVars.put("RATE_LIMIT_UPDATE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);	
+		globalVars.put("MIN_NUMBER_OF_BIG_ACCOUNTS", 5L);	
 
 		return globalVars;
 	}

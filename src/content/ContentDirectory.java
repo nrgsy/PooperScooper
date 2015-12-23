@@ -108,8 +108,6 @@ public class ContentDirectory {
 		redditDrugLinks.add("https://www.reddit.com/r/DrugArt/");
 		redditDrugLinks.add("https://www.reddit.com/r/trippy/");
 		redditDrugLinks.add("https://www.reddit.com/r/drugmemes/");
-		redditDrugLinks.add("https://www.reddit.com/r/drugstashes/");
-		redditDrugLinks.add("https://www.reddit.com/r/drugsarebeautiful/");			
 		Document redditDrugDoc = new Document();
 		redditDrugDoc.append("reddit", redditDrugLinks);
 

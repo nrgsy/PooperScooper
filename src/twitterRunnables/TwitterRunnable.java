@@ -142,7 +142,7 @@ public class TwitterRunnable implements Runnable {
 	 */
 	@Override
 	public void run() {
-		Maintenance.writeLog("run method called for TwitterRunnable", index);
+		Maintenance.writeLog("TwitterRunnable run for account " + index, index);
 		try{
 			long now = new Date().getTime();
 			Long lastPostTime = GlobalStuff.lastPostTimeMap.get(index);

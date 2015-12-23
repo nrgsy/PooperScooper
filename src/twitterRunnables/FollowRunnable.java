@@ -51,7 +51,8 @@ public class FollowRunnable implements Runnable{
 			ArrayList<ResponseList<Status>> ListTweets =
 					TwitterHandler.getUserTimeline(bird, id, paging, index);
 			if(ListTweets.isEmpty()){
-				Maintenance.writeLog("Could not run getUserTimeline in FollowRunnable", index, 1);
+				Maintenance.writeLog("Could not run getUserTimeline in FollowRunnable for account " + index,
+						index, 1);
 				return;
 			}
 			else{
@@ -91,14 +92,14 @@ public class FollowRunnable implements Runnable{
 	 */
 	@Override
 	public void run() {
-		Maintenance.writeLog("run method called for FollowRunnable", index);
+		Maintenance.writeLog("FollowRunnable run for account " + index, index);
 
 		try {
 			followAndFavoriteUsers();
 			unfollowUsers();
 		} catch (Exception e) {
-			Maintenance.writeLog("FollowRunnable fucked up somewhere\n" + Maintenance.getStackTrace(e),
-					index, -1);
+			Maintenance.writeLog("FollowRunnable fucked up somewhere for account: " + index + "\n" +
+		Maintenance.getStackTrace(e), index, -1);
 		}
 		Maintenance.runStatus.put(index+"follow", false);
 	}

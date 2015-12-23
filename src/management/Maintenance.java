@@ -191,7 +191,7 @@ public class Maintenance {
 				Maintenance.writeLog("Sleep interrupted for some reason", "maintenance", -1);
 			}
 		}
-		Maintenance.writeLog("Maintenance Attempt Successful", "maintenance");
+		Maintenance.writeLog("Maintenance Attempt Complete", "maintenance");
 	}
 
 	/**
@@ -278,7 +278,9 @@ public class Maintenance {
 			//update followers for each schwergsy account
 			long size = DataBaseHandler.getCollectionSize("SchwergsyAccounts");
 			for (int i = 0; i < size; i++) {
-				DataBaseHandler.updateFollowers(i);
+				if (!DataBaseHandler.isSuspended(i)) {
+					DataBaseHandler.updateFollowers(i);
+				}
 			}
 
 			//unset maintenance and scraper flags

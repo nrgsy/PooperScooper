@@ -267,9 +267,16 @@ public class bigAccRunnable implements Runnable {
 		if(toFollowSet.size()==0){
 			if(DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_STRIKES_FOR_OUT){
 				if(DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_OUTS_FOR_REMOVAL){
-					//if it gets however many outs, it's removed from bigAccounts
-					DataBaseHandler.deleteBigAccount(index, bigAccountIndex);
-					bigAccountIndex--;
+
+					if (DataBaseHandler.getBigAccountsSize(index) > GlobalStuff.MIN_NUMBER_OF_BIG_ACCOUNTS) {
+						//if it gets however many outs, it's removed from bigAccounts
+						DataBaseHandler.deleteBigAccount(index, bigAccountIndex);
+						bigAccountIndex--;
+					}
+					else {
+						Maintenance.writeLog("Big account struck out, but not removed "
+								+ "because there are too few remaining for account " + index, index, 1);
+					}
 				}
 				else{
 					//if it gets however many strikes, move it to the end of bigAccounts and reset strikes

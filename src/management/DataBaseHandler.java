@@ -363,8 +363,8 @@ public class DataBaseHandler{
 
 		dbCollection.updateOne(query, new Document("$addToSet", new Document(column,arr)));
 
-		Maintenance.writeLog("successfully added an array of size " +
-				StringArr.size() + " to " + column, index);		
+		Maintenance.writeLog("successfully added " +
+				StringArr.size() + " items to " + column + " for account " + index, index);		
 	}
 
 	/**

@@ -369,14 +369,18 @@ public class TwitterHandler {
 			break;
 		case 89:
 			Maintenance.writeLog("Failed to validate some authorization info, "
-					+ "TwitterHandler threw this error:\n" + e.toString(), null, 1);
+					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
 			throw e;
 		case 32:
 			Maintenance.writeLog("Failed to validate some authorization info, "
-					+ "TwitterHandler threw this error:\n" + e.toString(), null, 1);
+					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
+			throw e;
+		case 186:
+			Maintenance.writeLog("Status too long, exceeded 140 char maximum, "
+					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
 			throw e;
 		default:
-			Maintenance.writeLog("Something fucked up in Twitter handling/n" +
+			Maintenance.writeLog("Something fucked up in Twitter handling\n" +
 					Maintenance.getStackTrace(e), index, -1);
 			throw e;
 		}
