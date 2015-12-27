@@ -32,8 +32,8 @@ public class DataBaseHandler{
 	public static MongoClient mongoClient = new MongoClient();
 
 	/**TODO BOJANG TEST
-	 * @param type The type of content, types are "ass", "pendingass", "workout", "weed"
-	 * @param index The index of the Schwergs account that wants the content
+	 * @param type The type of content
+	 * @param index The index of the Schwergsy account that wants the content
 	 * @return a Document that is the random content, OR NULL IF NONE FOUND
 	 */
 	public static Document getRandomContent(String type, long index) {
@@ -72,10 +72,13 @@ public class DataBaseHandler{
 			}
 		}
 
-		//determine which content in the sample was posted least recently
+		//determine which content in the sample is best to post
 		Object[] contentArray = contentSample.toArray();
 		Document bestContent = null;
 		long minTimesAccessed = Long.MAX_VALUE;
+		//number of times timesAccessed <= minTimesAccessed, used to add randomization to posting between
+		//different accounts
+		int numValidSoFar = 0;
 		for (int i = 0; i < contentArray.length; i++) {
 			Document candidateContent = (Document)contentArray[i];		
 			ArrayList<BasicDBObject> list = (ArrayList<BasicDBObject>) candidateContent.get("accessInfo");
@@ -86,12 +89,25 @@ public class DataBaseHandler{
 				if ((long) info.get("index") == index) {
 					foundMatch = true;
 					long timesAccessed = (long) info.get("timesAccessed");
-					long lastAccess = (long) info.get("lastAccess");
+					long lastAccess = (long) info.get("lastAccess");	
+					
 					//restrict 
-					if (timesAccessed < minTimesAccessed &&
-							lastAccess < (new Date().getTime()) - GlobalStuff.WEEK_IN_MILLISECONDS) {
-						minTimesAccessed = timesAccessed;
-						bestContent = candidateContent;
+					if (lastAccess < (new Date().getTime()) - GlobalStuff.WEEK_IN_MILLISECONDS) {
+						if (timesAccessed < minTimesAccessed) {
+							minTimesAccessed = timesAccessed;
+							bestContent = candidateContent;
+							numValidSoFar = 1;
+						}
+						else if (timesAccessed == minTimesAccessed) {
+							numValidSoFar++;
+							//with probability 1/numValidSoFar make this the ideal content
+							//This adds in randomization in a way that tapers off as more valid content 
+							//is found
+							if (Math.random() < 1/numValidSoFar) {
+								minTimesAccessed = timesAccessed;
+								bestContent = candidateContent;	
+							}
+						}
 					}
 					break;
 				}
