@@ -55,6 +55,8 @@ public class ContentDirectory {
 		ArrayList<String> redditWorkoutLinks = new ArrayList<>();
 		redditWorkoutLinks.add("http://www.reddit.com/r/gymfails");
 		redditWorkoutLinks.add("http://www.reddit.com/r/gymmemes");
+		redditWorkoutLinks.add("https://www.reddit.com/r/bodybuilding/");
+		redditWorkoutLinks.add("https://www.reddit.com/r/weightlifting");
 		Document redditWorkoutDoc = new Document();
 		redditWorkoutDoc.append("reddit", redditWorkoutLinks);
 
