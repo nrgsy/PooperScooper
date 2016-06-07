@@ -97,7 +97,9 @@ public class ContentDirectory {
 		redditWeedLinks.add("https://www.reddit.com/r/bakedart/");
 		redditWeedLinks.add("https://www.reddit.com/r/treecomics/");
 		redditWeedLinks.add("https://www.reddit.com/r/nugs/");
-		redditWeedLinks.add("https://www.reddit.com/r/nugporn/");			
+		redditWeedLinks.add("https://www.reddit.com/r/nugporn/");
+		redditWeedLinks.add("https://www.reddit.com/r/TokeSpot/");
+
 		Document redditWeedDoc = new Document();
 		redditWeedDoc.append("reddit", redditWeedLinks);
 
@@ -123,6 +125,7 @@ public class ContentDirectory {
 		redditCanimalLinks.add("http://www.reddit.com/r/cats/");
 		redditCanimalLinks.add("https://www.reddit.com/r/babyanimals/");
 		redditCanimalLinks.add("https://www.reddit.com/r/AnimalsBeingBros");
+		redditCanimalLinks.add("https://www.reddit.com/r/woof_irl/");
 		Document reddiCanimalDoc = new Document();
 		reddiCanimalDoc.append("reddit", redditCanimalLinks);
 
