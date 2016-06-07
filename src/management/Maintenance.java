@@ -227,20 +227,20 @@ public class Maintenance {
 			///////////////////////////////////////////////////////////////////////////////////////////////
 			long nonAPIstartTime = new Date().getTime();
 
-			
-			
-			
-			
+
+
+
+
 			//TODO rewrite this so setting 
 			//remove any accounts flagged for deletion and remap all ids
 			//DataBaseHandler.removeSchwergsyAccountsAndRemapIDs();
 
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
 			//get the global variables from the GlobalVariables collection to set the ones in GlobalStuff
 			DataBaseHandler.findAndSetGlobalVars();
 
@@ -299,26 +299,41 @@ public class Maintenance {
 					(new Date().getTime() - ogStartTime) + " ms", "maintenance");
 		}
 		catch(InterruptedException e) {
-			//Here we recover nice from an interruption trigger when perform maintence takes too long
+			//Here we recover nice from an interruption trigger when perform maintenance takes too long
 			Maintenance.writeLog("performMaintenance was interrupted. Recovering safely"
 					+ " and restarting scrapers and schwergsy timers", "maintenance", 1);
-			
+
 			TimerFactory.globalTimer.cancel();
 			TimerFactory.globalTimer.purge();
-			
+
 			//shutdown everything just in case
 			safeShutDownAccounts();	//leaves maintenance flag as true
 			safeShutDownScrapers(); //leaves shutdown request as true
 			//unset maintenance and scraper flags
 			RedditScraper.shutdownRequest = false;
 			Maintenance.flagSet = false;
-			
+
 			TimerFactory.scheduleAllSchwergsyTimers();
 			new Thread(new RedditScraper()).start();
 		}
 		catch(Exception e) {
+			//Do the same as the above catch block, but print that's its an error
+			
 			Maintenance.writeLog("Something unexpected happened in performMaintenance\n" +
 					Maintenance.getStackTrace(e), "maintenance", -1);
+
+			TimerFactory.globalTimer.cancel();
+			TimerFactory.globalTimer.purge();
+
+			//shutdown everything just in case
+			safeShutDownAccounts();	//leaves maintenance flag as true
+			safeShutDownScrapers(); //leaves shutdown request as true
+			//unset maintenance and scraper flags
+			RedditScraper.shutdownRequest = false;
+			Maintenance.flagSet = false;
+
+			TimerFactory.scheduleAllSchwergsyTimers();
+			new Thread(new RedditScraper()).start();
 		}
 	}
 
