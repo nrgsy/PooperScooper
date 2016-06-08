@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 
+@Id
 private int id;
 private String name;
 private String customerSecret;

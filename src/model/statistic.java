@@ -1,5 +1,6 @@
 package model;
 
+@Id
 private long creationDate;
 private long timeSinceLastState;
 private int unFollows;
