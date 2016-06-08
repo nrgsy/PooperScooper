@@ -204,7 +204,7 @@ public class bigAccRunnable implements Runnable {
 		DataBaseHandler.addBigAccounts(index, bigAccounts);
 	}
 
-	public void harvestBigAccounts() throws TwitterException, FuckinUpKPException {
+	public void harvestBigAccounts(int numRecursions) throws TwitterException, FuckinUpKPException {
 		HashSet<Long> toFollowSet = new HashSet<Long>();
 		Long lastTweet = DataBaseHandler.getBigAccountLatestTweet(index,bigAccountIndex);
 		int bigAccountHarvestIndex; 
@@ -263,8 +263,11 @@ public class bigAccRunnable implements Runnable {
 				i.remove();
 			}
 		}
+		
+		boolean failedToGetToFollows = false;
 
 		if(toFollowSet.size()==0){
+						
 			if(DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_STRIKES_FOR_OUT){
 				if(DataBaseHandler.getBigAccountOuts(index, bigAccountIndex)+1 >= GlobalStuff.BIG_ACCOUNT_OUTS_FOR_REMOVAL){
 
@@ -292,14 +295,26 @@ public class bigAccRunnable implements Runnable {
 				DataBaseHandler.editBigAccountStrikes(index, bigAccountIndex, 
 						DataBaseHandler.getBigAccountStrikes(index, bigAccountIndex) + 1);
 			}
+			failedToGetToFollows = true;
 		}
 		else{
+			Maintenance.writeLog("Account " + index + " got " + toFollowSet.size() +
+					" new tofollows on this harvest :D", index);
 			DataBaseHandler.addToFollow(index, new ArrayList<Long>(toFollowSet));
 			DataBaseHandler.addWhitelist(index, new ArrayList<Long>(toFollowSet));
 		}
 		bigAccountHarvestIndex = DataBaseHandler.getBigAccountsSize(index)-1 <= bigAccountIndex ? 0 : bigAccountIndex + 1;
 		DataBaseHandler.editBigAccountHarvestIndex(index, bigAccountHarvestIndex);
-		Maintenance.writeLog("done harvesting", index);
+		
+		if(numRecursions >= GlobalStuff.MAX_NUMBER_HARVEST_ATTEMPTS) {
+			Maintenance.writeLog("done harvesting, account " + index + " failed to get tofollows on this harvest :(", index);
+		}
+		else if (failedToGetToFollows) {
+			harvestBigAccounts(numRecursions+1);
+		}
+		else {
+			Maintenance.writeLog("done harvesting", index);			
+		}
 	}
 
 	@Override
@@ -319,7 +334,7 @@ public class bigAccRunnable implements Runnable {
 		}
 		else{
 			try {
-				harvestBigAccounts();
+				harvestBigAccounts(0);
 			} catch (Exception e) {
 				Maintenance.writeLog("Something fucked up in bigAccRunnable's harvestBigAccounts"
 						+ "\n" + Maintenance.getStackTrace(e), index, -1);

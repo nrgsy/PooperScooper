@@ -69,6 +69,8 @@ public class GlobalStuff{
 	public static long RATE_LIMIT_UPDATE_TIME;
 	//Big accounts will not be removed if there are this many or less for that account
 	public static long MIN_NUMBER_OF_BIG_ACCOUNTS;
+	//the max number of tries to get new toFollows from different big accounts
+	public static long MAX_NUMBER_HARVEST_ATTEMPTS;
 
 	//NOTICE****************************************NOTICE***************************************NOTICE
 
@@ -130,6 +132,7 @@ public class GlobalStuff{
 		PICS_DIR = globalVars.getString("PICS_DIR");
 		RATE_LIMIT_UPDATE_TIME = globalVars.getLong("RATE_LIMIT_UPDATE_TIME");
 		MIN_NUMBER_OF_BIG_ACCOUNTS = globalVars.getLong("MIN_NUMBER_OF_BIG_ACCOUNTS");
+		MAX_NUMBER_HARVEST_ATTEMPTS = globalVars.getLong("MAX_NUMBER_HARVEST_ATTEMPTS");
 	}
 
 	public static HashMap<String,Object> getDefaultGlobalVars(){
@@ -172,7 +175,8 @@ public class GlobalStuff{
 		globalVars.put("PICS_DIR", "pics/");	
 		//should match twitter's rate limit reset time
 		globalVars.put("RATE_LIMIT_UPDATE_TIME", GlobalStuff.MINUTE_IN_MILLISECONDS * 15L);	
-		globalVars.put("MIN_NUMBER_OF_BIG_ACCOUNTS", 5L);	
+		globalVars.put("MIN_NUMBER_OF_BIG_ACCOUNTS", 10L);	
+		globalVars.put("MAX_NUMBER_HARVEST_ATTEMPTS", 15L);
 
 		return globalVars;
 	}
