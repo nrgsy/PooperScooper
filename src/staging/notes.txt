@@ -1,0 +1,36 @@
+TODOs
+-content review system
+-account management
+
+later TODOs
+-rewrite DataBaseHandler to use spring Data
+-make endpoints to handle data with DataBaseHandler
+
+
+SchwergsyAccount{
+_id int
+name string
+customerSecret string
+customerKey string
+authorizationSecret string
+authorizationKey string
+accountType string
+assRatio double? ratio?
+isIncubated boolean
+isSuspended boolean
+isFlaggedForDeletion boolean
+followers long[]
+following long[]
+toFollow long[]
+whiteList long[]
+bigAccounts long[]
+statistics json[]
+  {creationDate long
+   timeSinceLastStat long
+   unFollows int
+   newFollows int
+   retainedFollowers int
+   totalFollowers int}
+bigAccountHarvestIndex int
+bigAccountsWhiteList long[]
+}

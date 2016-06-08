@@ -1,0 +1,32 @@
+#title{
+  white-space: normal;
+  width: 500px;
+  height: 125px;
+}
+.content{
+  display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-danger{
+  float:left;
+}
+.btn-success{
+  float:right;
+}
+.btn{
+  margin:15px;
+}
+.buttons{
+  height: 65px;
+  text-align: center;
+}
+.selecter{
+  display: inline-block;;
+    justify-content: center;
+    align-items: center;
+    margin-left:150px;
+}
+textarea {
+    resize: none;
+}
