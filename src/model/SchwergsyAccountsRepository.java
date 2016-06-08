@@ -2,6 +2,7 @@ package model;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+@Repository
 public interface SchwergsyAccountsRepository extends MongoRepository<SchwergsyAccounts, String> {
 
   //TODO rewrite these methods based on what is searchable in DBH
