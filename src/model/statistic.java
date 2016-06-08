@@ -20,8 +20,8 @@ public class statistic{
 	/**
 	* Default statistic constructor
 	*/
-	public statistic(long creationDate, long timeSinceLastState, int unFollows, int newFollows,
-  int retainedFollowers, int totalFollowers) {
+	public statistic(long creationDate, long timeSinceLastState, int unFollows,
+	int newFollows, int retainedFollowers, int totalFollowers) {
 		this.creationDate = creationDate;
 		this.timeSinceLastState = timeSinceLastState;
 		this.unFollows = unFollows;

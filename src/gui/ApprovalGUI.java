@@ -141,7 +141,7 @@ public class ApprovalGUI {
 
 	/**
 	 * adds the current content to the given map
-	 * 
+	 *
 	 * @param approvedTimeLessContent the hashmap to add it to
 	 */
 	private static void addContent(HashMap<String, String> map) {
@@ -154,7 +154,7 @@ public class ApprovalGUI {
 		} catch (IOException e1) {
 			Maintenance.writeLog("addContent fucked up" + Maintenance.getStackTrace(e1),
 					"gui", -1);
-		}	
+		}
 	}
 
 	private static class TrashListener implements ActionListener {
@@ -194,7 +194,7 @@ public class ApprovalGUI {
 		public void actionPerformed(ActionEvent e) {
 			for (Entry<String, String> entry : approvedNormalContent.entrySet()) {
 				DataBaseHandler.removeContent("pending" + type, entry.getKey());
-				DataBaseHandler.newContent(entry.getValue(), entry.getKey(), type, false);	
+				DataBaseHandler.newContent(entry.getValue(), entry.getKey(), type, false);
 			}
 			for (Entry<String, String> entry : approvedTimeLessContent.entrySet()) {
 				DataBaseHandler.removeContent("pending" + type, entry.getKey());
@@ -210,7 +210,7 @@ public class ApprovalGUI {
 	}
 
 	/**
-	 * Creates the interface for 
+	 * Creates the interface for
 	 *
 	 */
 	private static class SchwergsListener implements ActionListener {
@@ -284,7 +284,7 @@ public class ApprovalGUI {
 				isSuspended = getAccountBoolean("isSuspended");
 				isIncubated = getAccountBoolean("isIncubated");
 			} catch (FuckinUpKPException e2) {
-				Maintenance.writeLog("add account button fucked up" + 
+				Maintenance.writeLog("add account button fucked up" +
 						Maintenance.getStackTrace(e2), "gui", -1);
 				return;
 			}
@@ -300,7 +300,7 @@ public class ApprovalGUI {
 					return;
 				}
 			} catch (TwitterException e1) {
-				Maintenance.writeLog("add account button fucked up" + 
+				Maintenance.writeLog("add account button fucked up" +
 						Maintenance.getStackTrace(e1), "gui", -1);
 				return;
 			}
@@ -338,7 +338,7 @@ public class ApprovalGUI {
 			String authorizationKey = authKeyField.getText();
 			String accountType = accountTypeField.getText();
 			String incubatedString = incubatedField.getText();
-			String suspendedString = suspendedField.getText();			
+			String suspendedString = suspendedField.getText();
 
 			try {
 
@@ -370,7 +370,7 @@ public class ApprovalGUI {
 							"isSuspended");
 				}
 			} catch (FuckinUpKPException e2) {
-				Maintenance.writeLog("replace button fucked up" + 
+				Maintenance.writeLog("replace button fucked up" +
 						Maintenance.getStackTrace(e2), "gui", -1);
 				return;
 			}
@@ -379,10 +379,10 @@ public class ApprovalGUI {
 
 	/**
 	 * attempts to get a boolean from the Schwergsy Account interface in the gui
-	 * 
+	 *
 	 * @param fieldType the boolean to get, so "isIncubated or isSuspended"
 	 * @return
-	 * @throws FuckinUpKPException 
+	 * @throws FuckinUpKPException
 	 */
 	public static boolean getAccountBoolean (String fieldType) throws FuckinUpKPException {
 
@@ -407,7 +407,7 @@ public class ApprovalGUI {
 		} else {
 			Maintenance.writeLog("Cannot parse boolean text field", "gui", -1);
 			throw new FuckinUpKPException("");
-		}	
+		}
 
 		return parsedBoolean;
 	}
@@ -423,7 +423,7 @@ public class ApprovalGUI {
 	/**
 	 * This looks at the seed and name text fields and adds the seed if anything was entered.
 	 * Does nothing if seed field is empty
-	 * 
+	 *
 	 */
 	private static void addSeedToSchwergsyAccount() {
 
@@ -437,9 +437,9 @@ public class ApprovalGUI {
 				DataBaseHandler.addBigAccount(DataBaseHandler.getSchwergsyAccountIndex(name),
 						seed, 0, 0, -1);
 			} catch (FuckinUpKPException e) {
-				Maintenance.writeLog("Could not add big account" + Maintenance.getStackTrace(e), 
-						"gui", -1);				
-			}			
+				Maintenance.writeLog("Could not add big account" + Maintenance.getStackTrace(e),
+						"gui", -1);
+			}
 		}
 	}
 
@@ -535,7 +535,7 @@ public class ApprovalGUI {
 
 	/**
 	 * The method that actually draws the content reviewer section of the GUI from scratch
-	 * 
+	 *
 	 * @param contentType The type of content to review
 	 */
 	public static void buildContentReviewer(String contentType) {

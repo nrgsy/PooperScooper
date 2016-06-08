@@ -1,6 +1,3 @@
-/**
- * 
- */
 package content;
 
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ public class ContentDirectory {
 		//list of links to places (on reddit for example) to scrape from
 		ArrayList<String> redditAssLinks = new ArrayList<>();
 		redditAssLinks.add("http://www.reddit.com/r/fffffffuuuuuuuuuuuu"); //add sites here
-		
+
 		redditAssLinks.add("http://www.reddit.com/r/memes");
 		redditAssLinks.add("https://www.reddit.com/r/funnymeme/");
 		redditAssLinks.add("https://www.reddit.com/r/adviceanimals");
@@ -45,7 +42,7 @@ public class ContentDirectory {
 		Document redditAssDoc = new Document();
 		redditAssDoc.append("reddit", redditAssLinks);
 
-		//could also append this when imgur implementation is ready: 
+		//could also append this when imgur implementation is ready:
 		//contentDirectory.append("ass", imgurAssDoc);
 		contentDirectory.append("ass", redditAssDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +71,7 @@ public class ContentDirectory {
 		contentDirectory.append("minecraft", redditMinecraftDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
 
-		
+
 		//for minecraft
 		//////////////////////////////////////////////////////////////////////////////////////////
 		ArrayList<String> redditKSPLinks = new ArrayList<>();
@@ -87,7 +84,7 @@ public class ContentDirectory {
 
 		contentDirectory.append("KSP", redditKSPDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
-		
+
 		//for weed
 		//////////////////////////////////////////////////////////////////////////////////////////
 		ArrayList<String> redditWeedLinks = new ArrayList<>();
@@ -131,13 +128,13 @@ public class ContentDirectory {
 
 		contentDirectory.append("canimal", reddiCanimalDoc);
 		//////////////////////////////////////////////////////////////////////////////////////////
-				
+
 
 	}
 
-	public static ArrayList<String> getContentTypes() {	
-		ArrayList<String> contentTypes = new ArrayList<>();	
-		for (String type: contentDirectory.keySet()) {		
+	public static ArrayList<String> getContentTypes() {
+		ArrayList<String> contentTypes = new ArrayList<>();
+		for (String type: contentDirectory.keySet()) {
 			//adds the content String to the list, e.g. "ass" or "workout"
 			contentTypes.add(type);
 		}

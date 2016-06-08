@@ -29,12 +29,12 @@ public class ImageGetterRunnable implements Runnable {
 	@Override
 	public void run() {
 		try {
-			image = ImageIO.read(url);			
+			image = ImageIO.read(url);
 		} catch (IIOException e) {
 			Maintenance.writeLog("ImageGetterRunnable could not get image from URL, internet's"
 					+ " probably fuckin up", "content", 1);
 		} catch (Exception e) {
-			Maintenance.writeLog("Something fucked up in the ImageGetterRunnable\n" + 
+			Maintenance.writeLog("Something fucked up in the ImageGetterRunnable\n" +
 					Maintenance.getStackTrace(e), "content", -1);
 		}
 	}

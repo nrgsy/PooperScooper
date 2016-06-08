@@ -42,7 +42,7 @@ public class ImageManipulator {
 				String URI = entry.getKey();
 				URL url = new URL(URI);
 				try {
-					
+
 					image = getImageFromURL(url);
 
 					BufferedImage bi = (BufferedImage) image;
@@ -71,7 +71,7 @@ public class ImageManipulator {
 			}
 		}
 		catch (Exception e) {
-			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" + 
+			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" +
 					Maintenance.getStackTrace(e), "content", -1);
 		}
 		finally{
@@ -84,7 +84,7 @@ public class ImageManipulator {
 	 * call this instead of ImageIO.read(url); because ImageIO.read can hang when internet
 	 * fucks up, so we need it to run on a separate thread and give up (return null)
 	 * if it's taking too long
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -128,7 +128,7 @@ public class ImageManipulator {
 
 	/**
 	 * Gets image link, saves image, returns image location OR NULL IF THE URL IS BAD/UNABLE TO DOWNLOAD
-	 * 
+	 *
 	 * @param imgsrc
 	 * @return
 	 * @throws FuckinUpKPException
@@ -162,7 +162,7 @@ public class ImageManipulator {
 			return null;
 		}
 		catch (IOException e) {
-			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" + 
+			Maintenance.writeLog("Something fucked up in ImageMainpulator\n" +
 					Maintenance.getStackTrace(e), "content", -1);
 			throw new FuckinUpKPException("Did not get image file with string" + imgsrc);
 		}

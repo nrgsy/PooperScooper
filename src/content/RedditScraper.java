@@ -40,14 +40,14 @@ public class RedditScraper implements Runnable{
 	/**
 	 * @param init
 	 * @throws FuckinUpKPException
-	 * @throws InterruptedException 
-	 * 
+	 * @throws InterruptedException
+	 *
 	 * ***NOTICE*** if you change this method, be sure isSnatching is set to false when the method exits
 	 */
 	@SuppressWarnings("unchecked")
 	public void contentSnatch() throws FuckinUpKPException {
 
-		isSnatching = true;		
+		isSnatching = true;
 		int pages = 35;
 		ArrayList<String> redditLinks;
 
@@ -62,7 +62,7 @@ public class RedditScraper implements Runnable{
 			redditLinks = (ArrayList<String>) sites.get("reddit");
 
 			if (redditLinks == null) {
-				Maintenance.writeLog("Tears, couldn't find reddit links in " + entry.getKey() + 
+				Maintenance.writeLog("Tears, couldn't find reddit links in " + entry.getKey() +
 						"category", "content", -1);
 				isSnatching = false;
 				return;
@@ -79,7 +79,7 @@ public class RedditScraper implements Runnable{
 
 					try {
 						document = Jsoup.connect(url).userAgent("Mozilla").get();
-					} 
+					}
 					catch(SocketTimeoutException e) {
 						//give up on this reddit link
 						Maintenance.writeLog("Failed to get url, skipping to the next reddit link. "
@@ -90,7 +90,7 @@ public class RedditScraper implements Runnable{
 						//skip to next iteration of the loop
 						Maintenance.writeLog("Failed to get url, skipping to the next page. "
 								+ "Got the following error:\n" + e.toString(), "content", 1);
-						continue;	
+						continue;
 					}
 					catch (UnknownHostException | ConnectException e) {
 						//skip to next iteration of the loop
@@ -100,7 +100,7 @@ public class RedditScraper implements Runnable{
 						return;
 					}
 					catch (Exception e) {
-						Maintenance.writeLog("Something fucked up in contentSnatch " + 
+						Maintenance.writeLog("Something fucked up in contentSnatch " +
 								Maintenance.getStackTrace(e), "content", -1);
 						isSnatching = false;
 						return;
@@ -140,7 +140,7 @@ public class RedditScraper implements Runnable{
 				content = reviewer.validateContent(content);
 				for (Entry<String,String> contentEntry : content.entrySet()) {
 
-					DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(), 
+					DataBaseHandler.newContent(contentEntry.getValue(),contentEntry.getKey(),
 							"pending" + entry.getKey(), null);
 				}
 			}
@@ -158,7 +158,7 @@ public class RedditScraper implements Runnable{
 		try {
 			contentSnatch();
 		} catch (FuckinUpKPException e) {
-			Maintenance.writeLog("Something fucked up in RedditScraper\n" + 
+			Maintenance.writeLog("Something fucked up in RedditScraper\n" +
 					Maintenance.getStackTrace(e), "content", -1);
 		}
 	}
