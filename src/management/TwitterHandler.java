@@ -379,6 +379,10 @@ public class TwitterHandler {
 			Maintenance.writeLog("Status too long, exceeded 140 char maximum, "
 					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
 			throw e;
+		case 34:
+			Maintenance.writeLog("Some page does not exist, "
+					+ "TwitterHandler threw this error:\n" + e.toString(), index, 1);
+			throw e;
 		default:
 			Maintenance.writeLog("Something fucked up in Twitter handling\n" +
 					Maintenance.getStackTrace(e), index, -1);
